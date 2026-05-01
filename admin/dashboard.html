@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala Admin | Dashboard</title>
+
+    <link rel="icon" type="image/png" href="../favicon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item.active img { filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%); }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .stat-card-shadow { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
+    </style>
+	<script src="../assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
+        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="px-11 mb-10 w-full flex justify-center">
+            <img src="../assets/images/header.png" alt="Springwala Admin Logo" class="h-[40px] w-auto">
+        </div>
+
+        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
+            <a href="dashboard.html" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0" style="filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%);">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229]">Dashboard</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]">Products</span>
+                    </div>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
+                    <a href="products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
+                    <a href="products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <!-- Banners Dropdown -->
+            <div class="w-full flex flex-col group relative">
+                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
+                    </div>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="banners/homepage.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Homepage</a>
+                    <a href="banners/category.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Category</a>
+                    <a href="banners/promotional.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Promotional</a>
+                    <a href="banners/features.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Features</a>
+                    <a href="banners/advertisement.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Advertisement</a>
+                    <a href="banners/section.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Section</a>
+                    <a href="banners/informational.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Informational</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
+            </a>
+        
+            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
+
+            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
+                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex-col min-w-0 pb-[100px] relative">
+        <!-- Persistent Top Bar (Mobile Sticky / Desktop Single Row) -->
+        <div class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-4 flex-1">
+                <button id="open-sidebar" class="md:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center admin-name">Admin</h2>
+
+                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink">
+                    <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                    <input id="desktop-search-input" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent">
+                </div>
+            </div>
+
+            <!-- Desktop Action Buttons (Visible md+) -->
+            <div class="hidden md:flex items-center gap-3">
+                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
+
+        <!-- Mobile Action Buttons Section -->
+        <div class="md:hidden px-4 sm:px-6 flex flex-col gap-4 mt-2">
+            <!-- Mobile Search -->
+            <div class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink">
+                <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                <input id="mobile-search-input" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent">
+            </div>
+
+            <!-- Mobile Action Buttons -->
+            <div class="flex items-center gap-2 justify-between">
+                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
+
+        <div class="w-full px-4 sm:px-[24px] xl:px-8 mt-[35px] flex flex-col gap-[33px]">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-[15px]">
+                <div class="stat-card-shadow bg-[rgba(171,226,95,0.23)] border border-[#99D546] rounded-[10px] h-[99px] flex flex-col justify-center items-center">
+                    <span class="font-['Roboto'] font-normal text-[15px] leading-[18px] text-[#042C13] mb-1">Total Revenue</span>
+                    <span id="stat-revenue" class="font-['Poppins'] font-semibold text-[25px] leading-[38px] text-[#042C13]">₹0.00</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[10px] h-[99px] flex flex-col justify-center items-center">
+                    <span class="font-['Roboto'] font-normal text-[15px] leading-[18px] text-black mb-1">Total Orders</span>
+                    <span id="stat-orders" class="font-['Poppins'] font-semibold text-[25px] leading-[38px] text-black">0</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[10px] h-[99px] flex flex-col justify-center items-center">
+                    <span class="font-['Roboto'] font-normal text-[15px] leading-[18px] text-black mb-1">Total Customers</span>
+                    <span id="stat-users" class="font-['Poppins'] font-semibold text-[25px] leading-[38px] text-black">0</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[10px] h-[99px] flex flex-col justify-center items-center">
+                    <span class="font-['Roboto'] font-normal text-[15px] leading-[18px] text-black mb-1">Pending Orders</span>
+                    <span id="stat-pending-orders" class="font-['Poppins'] font-semibold text-[25px] leading-[38px] text-black">0</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[10px] h-[99px] flex flex-col justify-center items-center">
+                    <span class="font-['Roboto'] font-normal text-[15px] leading-[18px] text-black mb-1">Average Order Value</span>
+                    <span id="stat-aov" class="font-['Poppins'] font-semibold text-[25px] leading-[38px] text-black">₹0.00</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-[1fr_218px] gap-[20px]">
+                <!-- Main Analytics Graph Panel -->
+                <div class="bg-white border border-[#D7D7D7] rounded-[10px] min-h-[440px] w-full flex flex-col overflow-hidden stat-card-shadow">
+                    <!-- Graph Header -->
+                    <div class="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <h3 id="graph-title" class="font-['Poppins'] font-semibold text-[18px] text-black">Revenue Growth</h3>
+                                <span id="graph-growth" class="px-2 py-0.5 rounded-full text-[12px] font-bold bg-green-50 text-green-600 border border-green-100">↑ 0%</span>
+                            </div>
+                            <p class="text-[13px] text-gray-400 font-['Roboto']">Performance insights for the selected period</p>
+                        </div>
+                        
+                        <!-- Metric Tabs -->
+                        <div class="flex items-center bg-gray-50 p-1 rounded-xl self-start md:self-auto overflow-x-auto no-scrollbar">
+                            <button data-metric="revenue" class="metric-tab active px-4 py-2 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap bg-white text-[#BE2229] shadow-sm">Revenue</button>
+                            <button data-metric="orders" class="metric-tab px-4 py-2 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap text-gray-500 hover:text-gray-700">Orders</button>
+                            <button data-metric="customers" class="metric-tab px-4 py-2 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap text-gray-500 hover:text-gray-700">Customers</button>
+                            <button data-metric="aov" class="metric-tab px-4 py-2 rounded-lg text-[13px] font-bold transition-all whitespace-nowrap text-gray-500 hover:text-gray-700">AOV</button>
+                        </div>
+                    </div>
+
+                    <!-- Graph Filters & Stats -->
+                    <div class="px-6 py-4 flex items-center justify-between bg-gray-50/30">
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Total for period</span>
+                                <span id="graph-period-total" class="text-[18px] font-bold text-black">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Time Range Filters -->
+                        <div class="flex items-center gap-2">
+                            <button data-range="7d" class="range-filter px-4 py-1.5 rounded-full text-[12px] font-bold transition-all text-gray-500 hover:bg-gray-100 hover:text-gray-700">7D</button>
+                            <button data-range="30d" class="range-filter active px-4 py-1.5 rounded-full text-[12px] font-bold transition-all bg-[#BE2229] text-white shadow-md shadow-red-100">30D</button>
+                            <button data-range="90d" class="range-filter px-4 py-1.5 rounded-full text-[12px] font-bold transition-all text-gray-500 hover:bg-gray-100 hover:text-gray-700">90D</button>
+                            <button data-range="1y" class="range-filter px-4 py-1.5 rounded-full text-[12px] font-bold transition-all text-gray-500 hover:bg-gray-100 hover:text-gray-700">1Y</button>
+                        </div>
+                    </div>
+
+                    <!-- Graph Container -->
+                    <div class="flex-1 p-6 relative min-h-[300px]">
+                        <canvas id="main-analytics-chart"></canvas>
+                        
+                        <!-- Empty State (Overlay) -->
+                        <div id="graph-empty-state" class="absolute inset-0 flex flex-col items-center justify-center bg-white/80 hidden">
+                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            </div>
+                            <h4 class="text-gray-800 font-bold">No Data Available Yet</h4>
+                            <p class="text-gray-400 text-[13px]">Start getting orders to see insights</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-[18px] w-full lg:max-w-none mx-auto xl:mx-0">
+                    <div class="bg-white border border-[#E9E9E9] rounded-[10px] h-[211px] w-full flex flex-col items-center pt-[11px] overflow-hidden">
+                        <span class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-black text-center px-4 mb-2 shrink-0">Sales by Category</span>
+                        <div id="dashboard-sales-by-cat" class="w-full flex-1 overflow-y-auto no-scrollbar pb-2">
+                            <div class="text-center text-gray-400 text-xs py-2">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-[#E9E9E9] rounded-[10px] h-[211px] w-full flex flex-col items-center pt-[11px] overflow-hidden">
+                        <span class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-black text-center px-4 mb-2 shrink-0">Returning vs New Customers</span>
+                        <div id="dashboard-top-customers" class="w-full flex-1 overflow-y-auto no-scrollbar pb-2">
+                            <div class="text-center text-gray-400 text-xs py-2">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-[1fr_219px_218px] gap-[16px] xl:gap-[20px]">
+                <div class="lg:col-span-3 xl:col-span-1 bg-white border border-[#D7D7D7] rounded-[10px] p-[13px] pb-[16px] xl:min-h-[304px] flex flex-col w-full min-h-[100px]">
+                    <h2 class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-black mb-[6px] pl-[12px]">Inventory Overview</h2>
+                    <div class="w-full h-[1px] bg-[#000000]/25 mb-[12px]"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-[16px] flex-1">
+                        <div class="bg-[#FAFAFA] border border-[#E5E5E5] rounded-[7px] flex flex-col">
+                            <h3 class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-black text-center pt-[13px] pb-[13px] shrink-0">High Stock</h3>
+                            <div class="w-full h-[1px] bg-black/25 shrink-0"></div>
+                            <div id="inv-high-stock" class="flex flex-col flex-1 pb-[12px]">
+                                <!-- Loaded by dashboard.js -->
+                            </div>
+                        </div>
+
+                        <div class="bg-[#FAFAFA] border border-[#E5E5E5] rounded-[7px] flex flex-col">
+                            <h3 class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-black text-center pt-[13px] pb-[13px] shrink-0">Low Stock</h3>
+                            <div class="w-full h-[1px] bg-black/25 shrink-0"></div>
+                            <div id="inv-low-stock" class="flex flex-col flex-1 pb-[12px]">
+                                <!-- Loaded by dashboard.js -->
+                            </div>
+                        </div>
+
+                        <div class="bg-[#FAFAFA] border border-[#E5E5E5] rounded-[7px] flex flex-col">
+                            <h3 class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-black text-center pt-[13px] pb-[13px] shrink-0">Top Selling Products</h3>
+                            <div class="w-full h-[1px] bg-black/25 shrink-0"></div>
+                            <div id="inv-top-selling" class="flex flex-col flex-1 pb-[12px]">
+                                <!-- Loaded by dashboard.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 xl:col-span-1 bg-white border border-[#D7D7D7] rounded-[10px] pt-[9px] xl:min-h-[304px] flex flex-col w-full h-full min-h-[100px]">
+                    <h2 class="font-['Poppins'] font-medium text-[18px] leading-[27px] text-black mb-[7px] text-center w-full px-2">Recent Activity</h2>
+                    <div class="w-full h-[1px] bg-[#B9B9B9]"></div>
+                    <div id="activity-feed" class="flex flex-col w-full h-full pb-[18px]">
+                        <!-- Activity loaded by dashboard.js -->
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 xl:col-span-1 bg-white border border-[#D7D7D7] rounded-[10px] pt-[9px] xl:min-h-[304px] flex flex-col items-center w-full h-full min-h-[100px]">
+                    <h2 class="font-['Poppins'] font-medium text-[18px] leading-[27px] text-black mb-[7px] w-full text-center px-2">Quick Action</h2>
+                    <div class="w-full h-[1px] bg-[#B9B9B9] mb-[15px]"></div>
+                    <div class="flex flex-col gap-[15px] w-full px-[13px] pb-[10px]">
+                        <button data-quick-action="Add a Product" class="w-full bg-[#E5E5E5] hover:bg-[#D5D5D5] transition rounded-[3px] flex items-center justify-center h-[26px]"><span class="font-['Roboto'] text-[14px] leading-[16px] text-black">Add a Product</span></button>
+                        <button data-quick-action="Add a Category" class="w-full bg-[#E5E5E5] hover:bg-[#D5D5D5] transition rounded-[3px] flex items-center justify-center h-[26px]"><span class="font-['Roboto'] text-[14px] leading-[16px] text-black">Add a Category</span></button>
+                        <button data-quick-action="Bulk Upload" class="w-full bg-[#E5E5E5] hover:bg-[#D5D5D5] transition rounded-[3px] flex items-center justify-center h-[26px]"><span class="font-['Roboto'] text-[14px] leading-[16px] text-black">Bulk Upload</span></button>
+                        <button data-quick-action="Update Inventory" class="w-full bg-[#E5E5E5] hover:bg-[#D5D5D5] transition rounded-[3px] flex items-center justify-center h-[26px]"><span class="font-['Roboto'] text-[14px] leading-[16px] text-black">Update Inventory</span></button>
+                        <button data-quick-action="Generate Report" class="w-full bg-[#E5E5E5] hover:bg-[#D5D5D5] transition rounded-[3px] flex items-center justify-center h-[26px]"><span class="font-['Roboto'] text-[14px] leading-[16px] text-black">Generate Report</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="bg-white border border-[#B9B9B9] rounded-[10px] flex flex-col min-w-[1100px] w-full">
+                    <div class="w-full bg-[#F7F7F9] min-h-[58px] border-b border-[#B9B9B9] px-[20px] lg:px-[53px] grid grid-cols-[100px_160px_230px_130px_160px_100px] gap-4 justify-between rounded-t-[10px]">
+                        <div class="flex items-center"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black whitespace-nowrap">Order ID</span></div>
+                        <div class="flex items-center"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black whitespace-nowrap">Customer Name</span></div>
+                        <div class="flex items-center"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black whitespace-nowrap">Product</span></div>
+                        <div class="flex items-center justify-center"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black">Status</span></div>
+                        <div class="flex items-center justify-center"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black whitespace-nowrap">Payment Status</span></div>
+                        <div class="flex items-center justify-end pr-3"><span class="font-['Roboto'] font-normal text-[18px] leading-[21px] text-black">Amount</span></div>
+                    </div>
+                    <div id="recent-orders-tbody">
+                        <!-- Recent orders loaded by dashboard.js -->
+                    </div>
+                    <div class="flex flex-row items-center justify-center xl:justify-end gap-[9px] w-full py-4 px-4 sm:px-[53px] bg-white rounded-b-[10px]">
+                        <button id="prev-orders-btn" class="w-[23px] h-[23px] bg-white border border-[#EEEEEE] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
+                            <svg class="w-3 h-3 text-[#BDBDBD]" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                        </button>
+                        <span id="orders-pagination-text" class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] text-center w-[120px]">0–0 of 0</span>
+                        <button id="next-orders-btn" class="w-[23px] h-[23px] bg-white border border-[#E6E6E6] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
+                            <svg class="w-3 h-3 text-[#2B2B2B]" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script>
+        Auth.requireAuth();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        if (openBtn) openBtn.addEventListener('click', toggleSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+        const productsMenuBtn = document.getElementById('products-menu-btn');
+        const productsSubmenu = document.getElementById('products-submenu');
+        const productsChevron = document.getElementById('products-menu-chevron');
+
+        if (productsMenuBtn) {
+            productsMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (productsSubmenu.classList.contains('hidden')) {
+                    productsSubmenu.classList.remove('hidden'); productsSubmenu.classList.add('flex'); productsChevron.classList.add('rotate-180');
+                } else {
+                    productsSubmenu.classList.add('hidden'); productsSubmenu.classList.remove('flex'); productsChevron.classList.remove('rotate-180');
+                }
+            });
+        }
+
+        const bannersMenuBtn = document.getElementById('banners-menu-btn');
+        const bannersSubmenu = document.getElementById('banners-submenu');
+        const bannersChevron = document.getElementById('banners-menu-chevron');
+
+        if (bannersMenuBtn) {
+            bannersMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (bannersSubmenu.classList.contains('hidden')) {
+                    bannersSubmenu.classList.remove('hidden'); bannersSubmenu.classList.add('flex'); bannersChevron.classList.add('rotate-180');
+                } else {
+                    bannersSubmenu.classList.add('hidden'); bannersSubmenu.classList.remove('flex'); bannersChevron.classList.remove('rotate-180');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

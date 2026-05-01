@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala | Die Spring OD 10mm</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F4F6F6;
+        }
+
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .font-gotham {
+            font-family: 'Gotham', sans-serif;
+        }
+
+        /* Hide scrollbar for batch selector */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+	<script src="assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F4F6F6] text-[#1E1E1E] font-['Roboto']" data-page="product">
+
+    <!-- Header (Same as Index) -->
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+        <span class="text-white text-[13px]">Get discount on every selected product</span>
+    </div>
+
+    <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
+
+        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
+            <!-- Hamburger -->
+            <button id="menu-btn"
+                class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
+                <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
+            </button>
+
+            <!-- Logo -->
+            <img src="assets/images/header.png" alt="Springwala Logo"
+                class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
+
+            <!-- Cart & Wishlist -->
+            <div class="absolute right-[16px] top-[11px] flex items-center gap-3">
+                <a href="wishlist.html" class="w-[26px] h-[26px] relative flex items-center justify-center">
+                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-full h-full object-contain">
+                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+                <a href="cart.html" class="w-[29px] h-[29px] relative flex items-center justify-center">
+                    <svg class="w-full h-full text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+
+        <div id="mobile-sub-header" class="md:hidden flex flex-col w-full origin-top">
+            <div class="px-[14px] py-[5px] bg-[#BE2229] flex items-center gap-3">
+                <div class="bg-white rounded-[6px] flex-1 flex items-center px-[11px] h-[30px]">
+                    <img src="assets/icons/mobile/search.svg" alt="Search" class="w-4 h-4 text-[#797979]">
+                    <input type="text" placeholder="Search..." class="ml-2 outline-none text-[14px] w-full">
+                </div>
+
+                <a href="login.html" class="cursor-pointer flex-shrink-0">
+                    <img src="assets/icons/mobile/account.svg" alt="Account" class="w-[26px] h-[26px]">
+                </a>
+            </div>
+
+            <!-- Shop by Categories / Deliver to Sub-header -->
+            <div
+                class="flex flex-row justify-between items-center px-[15px] py-[6px] bg-[#F6D6D6] h-[30px] w-full gap-2">
+                <!-- Shop by Categories -->
+                <div class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
+                    style="font-family: 'Roboto', sans-serif;">Shop by Categories
+                </div>
+
+                <!-- Deliver to Section -->
+                <div class="flex items-center gap-1 cursor-pointer min-w-0" id="location-btn">
+                    <span class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
+                        style="font-family: 'Roboto', sans-serif;">Deliver to</span>
+                    <img src="assets/icons/mobile/location.svg" alt="Location"
+                        class="w-[10px] sm:w-[12px] h-[14px] sm:h-[16px] flex-shrink-0"
+                        style="transform: scaleX(-1); filter: brightness(0) saturate(100%) invert(18%) sepia(90%) saturate(2687%) hue-rotate(338deg) brightness(91%) contrast(92%);">
+                    <span
+                        class="text-[#BD2830] text-[12px] sm:text-[14px] underline truncate max-w-[100px] sm:max-w-[130px]"
+                        id="location-text" style="font-family: 'Roboto', sans-serif;">Thane, Maharashtra</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
+            <img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto">
+
+            <div class="flex items-start gap-2 ml-8">
+                <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
+                <div class="flex flex-col">
+                    <span class="text-[#747474] text-[10px]">Location</span>
+                    <span class="text-[#242323] text-[12px] font-medium">Thane, Maharashtra</span>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-[519px] mx-10 flex h-[40px]">
+                <div
+                    class="border border-[#BE2229] rounded-l-[6px] px-3 flex items-center gap-2 cursor-pointer bg-white">
+                    <span class="text-[#BE2229] text-[13px]">All Categories</span>
+                    <svg class="w-3 h-3 text-[#BE2229]" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="flex-1 border border-[#D7D9D9] border-l-0 rounded-r-[6px] flex items-center px-3 bg-white">
+                    <input type="text" class="flex-1 outline-none text-[13px]" placeholder="Search Products...">
+                    <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979]">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-7">
+                <a href="login.html" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <img src="assets/icons/desktop/profile.svg" alt="Account" class="w-6 h-6 text-[#525252]">
+                    <span class="text-[#525252] text-[15px]">Your Account</span>
+                </a>
+                <a href="cart.html" class="cursor-pointer hover:opacity-80 transition relative">
+                    <img src="assets/icons/desktop/cart.svg" alt="Cart" class="w-6 h-6 text-[#525252]">
+                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+                <a href="wishlist.html" class="cursor-pointer hover:opacity-80 transition relative">
+                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 text-[#525252]">
+                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="w-full bg-white">
+        <div class="hidden md:flex max-w-[1440px] mx-auto items-center h-[56px] px-[80px]">
+            <a href="categories.html"
+                class="border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-50 transition">
+                <img src="assets/icons/mobile/categories-red.svg" alt="Categories" class="w-4 h-4 text-[#BE2229]">
+                <span class="text-[#BE2229] text-[12px] font-medium uppercase">Browse All Categories</span>
+            </a>
+
+            <ul class="flex items-center gap-8 ml-10 text-[15px] text-[#525252]">
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="index.html">Home</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="allproducts.html">All Products</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="orders.html">Orders</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]">Knowledge Centre</li>
+                <li class="cursor-pointer hover:text-[#BE2229]">Contact Us</li>
+            </ul>
+
+            <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
+                <img src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-50 hidden-menu md:hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <img src="assets/images/header.png" alt="Logo" class="h-8">
+                <button id="close-menu" class="text-gray-500 text-2xl">&times;</button>
+            </div>
+            <ul class="space-y-6 text-[#525252] font-['Poppins'] text-lg">
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="index.html">Home</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="categories.html">Categories</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="allproducts.html">All Products</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="orders.html">Your Orders</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="#">Your Wishlist</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="login.html">Your Account</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <!-- Main Content -->
+    <main class="max-w-[1440px] mx-auto md:px-[80px] pb-[180px] md:pb-20">
+
+        <!-- Breadcrumb (Mobile/Desktop) -->
+        <div id="breadcrumb" class="px-4 py-3 text-[14px] text-[#5C5C5C] overflow-x-auto whitespace-nowrap md:px-0">
+            All Categories &gt; Die and Mould Springs &gt; <span class="text-black">Die Spring OD 10 mm L 25 mm Red
+                (R)</span>
+        </div>
+
+        <div class="flex flex-col gap-8 mt-4 md:hidden">
+
+            <!-- Left: Product Image Section -->
+            <div class="bg-white p-4 rounded-[10px] flex flex-col items-center relative">
+                <!-- Recently Added Tag -->
+                <div
+                    class="absolute left-0 top-[15px] bg-[#E9783B] text-white text-[12px] font-medium px-4 py-1.5 rounded-r-full z-10">
+                    Recently Added
+                </div>
+
+                <!-- Expand/Zoom Icon (Top Right for Mobile) -->
+                <button
+                    class="absolute right-[15px] top-[15px] w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-80 transition z-10 zoom-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="14" y1="10" x2="21" y2="3"></line>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="10" y1="14" x2="3" y2="21"></line>
+                    </svg>
+                </button>
+
+                <!-- Main Image -->
+                <div
+                    class="w-full max-w-[270px] h-[270px] flex items-center justify-center my-4 overflow-hidden relative">
+                    <img id="mobileMainImage" src="assets/images/deafult.png" alt="Die Spring"
+                        class="w-full h-full object-contain mix-blend-multiply transition-opacity duration-300">
+                </div>
+
+                <!-- Share & Star (Bottom Right) -->
+                <div class="absolute right-[15px] bottom-[40px] flex flex-col gap-[15px] items-center z-10">
+                    <button
+                        class="w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-80 transition text-[#525252]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    </button>
+                    <button
+                        class="w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-80 transition product-wishlist-btn" data-product-id="">
+                        <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-full h-full object-contain">
+                    </button>
+                </div>
+
+                <!-- Carousel Dots -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2" id="mobileCarouselDots">
+                    <div class="w-6 h-1 bg-[#625656] rounded-full transition-colors duration-300 cursor-pointer"></div>
+                    <div class="w-6 h-1 bg-[#D9D9D9] rounded-full transition-colors duration-300 cursor-pointer"></div>
+                    <div class="w-6 h-1 bg-[#D9D9D9] rounded-full transition-colors duration-300 cursor-pointer"></div>
+                    <div class="w-6 h-1 bg-[#D9D9D9] rounded-full transition-colors duration-300 cursor-pointer"></div>
+                </div>
+            </div>
+
+            <!-- Right: Product Details Section -->
+            <div class="flex flex-col">
+
+                <!-- Brand & Title -->
+                <div class="px-4">
+                    <p id="product-brand-mobile" class="text-[#BE2229] text-[14px]">by Springwala Composites</p>
+                    <h1 id="product-title-mobile" class="text-[20px] font-bold font-poppins mt-1 mb-2">Die Spring OD 10 mm L 25 mm Red (R)</h1>
+                    <p id="product-short-desc-mobile" class="text-[#5C5C5C] text-[15px] leading-tight mb-6">
+                        Rectangular Wire Die Spring as per ISO 10243, Dia 10 Length 44, Red (R) Heavy Duty Load for
+                        precision dies and mould tools...
+                    </p>
+                </div>
+
+                <!-- Batch Selector -->
+                <div class="px-4 mb-6">
+                    <h3 class="text-[18px] text-[#242323] mb-3">Choose Batch:</h3>
+                    <div id="product-variants-mobile" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                        <button class="bg-[#D9D9D9] px-4 py-1 rounded-[6px] whitespace-nowrap text-[16px]">Pack of
+                            6</button>
+                        <button
+                            class="bg-white border border-[#D9D9D9] px-4 py-1 rounded-[6px] whitespace-nowrap text-[16px]">Pack
+                            of 8</button>
+                        <button
+                            class="bg-white border border-[#D9D9D9] px-4 py-1 rounded-[6px] whitespace-nowrap text-[16px]">Pack
+                            of 10</button>
+                        <button
+                            class="bg-white border border-[#D9D9D9] px-4 py-1 rounded-[6px] whitespace-nowrap text-[16px]">Pack
+                            of 12</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Desktop Product Layout (3 Columns)         -->
+        <!-- ========================================== -->
+        <div class="hidden md:flex flex-col mt-4 mb-[60px]">
+
+            <div class="flex gap-5 items-start">
+
+                <!-- Left & Middle Columns Wrapper (For consistent width with bottom tabs) -->
+                <div class="flex flex-col gap-[20px] w-[915px]">
+
+                    <div class="flex gap-[19px] w-full items-start">
+                        <!-- Column 1: Images -->
+                        <div class="w-[435px] flex flex-col gap-[17px] shrink-0">
+                            <div
+                                class="w-full h-[358px] bg-white rounded-[10px] relative flex justify-center items-center">
+                                <div
+                                    class="absolute left-0 top-[15px] bg-[#F67379] text-white text-[12px] font-medium font-['Roboto'] px-4 py-1.5 rounded-r-full shadow-sm z-10">
+                                    Recently Added
+                                </div>
+                                <img id="product-main-image-desktop" src="assets/images/deafult.png" alt="Main Product Image"
+                                    class="max-w-[80%] max-h-[80%] object-contain mix-blend-multiply">
+
+                                <!-- Expand/Zoom Icon (Bottom Left) -->
+                                <button
+                                    class="absolute left-[15px] bottom-[15px] w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-80 transition z-10 zoom-btn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#525252"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="14" y1="10" x2="21" y2="3"></line>
+                                        <polyline points="9 21 3 21 3 15"></polyline>
+                                        <line x1="10" y1="14" x2="3" y2="21"></line>
+                                    </svg>
+                                </button>
+
+                                <!-- Share & Star Icons (Bottom Right) -->
+                                <div
+                                    class="absolute right-[15px] bottom-[15px] flex flex-col gap-[12px] items-center z-10">
+                                    <button
+                                        class="w-[22px] h-[22px] flex items-center justify-center cursor-pointer hover:opacity-80 transition text-[#525252]">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="18" cy="5" r="3"></circle>
+                                            <circle cx="6" cy="12" r="3"></circle>
+                                            <circle cx="18" cy="19" r="3"></circle>
+                                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        class="w-[22px] h-[22px] flex items-center justify-center cursor-pointer hover:opacity-80 transition product-wishlist-btn" data-product-id="">
+                                        <img src="assets/icons/mobile/star.svg" alt="Wishlist"
+                                            class="w-full h-full object-contain">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Thumbnails -->
+                            <div id="product-thumbnails-desktop" class="flex gap-[17px] w-full">
+                                <div
+                                    class="w-[96px] h-[88px] bg-[#D9D9D9] rounded-[7px] cursor-pointer hover:opacity-80 transition overflow-hidden">
+                                    <img src="assets/images/deafult.png" alt="Thumb"
+                                        class="w-full h-full object-contain mix-blend-multiply p-2">
+                                </div>
+                                <div
+                                    class="w-[96px] h-[88px] bg-[#D9D9D9] rounded-[7px] cursor-pointer hover:opacity-80 transition overflow-hidden">
+                                    <img src="assets/images/deafult.png" alt="Thumb"
+                                        class="w-full h-full object-contain mix-blend-multiply p-2">
+                                </div>
+                                <div
+                                    class="w-[96px] h-[88px] bg-[#D9D9D9] rounded-[7px] cursor-pointer hover:opacity-80 transition overflow-hidden">
+                                    <img src="assets/images/deafult.png" alt="Thumb"
+                                        class="w-full h-full object-contain mix-blend-multiply p-2">
+                                </div>
+                                <div
+                                    class="w-[96px] h-[88px] bg-[#D9D9D9] rounded-[7px] cursor-pointer hover:opacity-80 transition overflow-hidden">
+                                    <img src="assets/images/deafult.png" alt="Thumb"
+                                        class="w-full h-full object-contain mix-blend-multiply p-2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Details -->
+                        <div
+                            class="w-[461px] bg-white rounded-[11px] p-6 relative flex flex-col shrink-0 min-h-[458px]">
+                            <p id="product-brand-desktop" class="text-[#BE2229] text-[12px] font-['Roboto'] mb-2 uppercase">by Springwala
+                                Composites</p>
+                            <h1 id="product-title-desktop" class="text-[20px] font-bold font-['Poppins'] leading-[30px] mb-3 pr-8">Die Spring OD 10
+                                mm L 25 mm Red (R)</h1>
+
+                            <!-- Share Icon Top Right -->
+                            <div class="absolute right-6 top-6 cursor-pointer opacity-70 hover:opacity-100">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                            </div>
+
+                            <p id="product-short-desc-desktop" class="text-[#5C5C5C] text-[15px] font-['Roboto'] leading-[18px] mb-4">
+                                Rectangular Wire Die Spring as per ISO 10243, Dia 10 Length 44, Red (R) Heavy Duty Load
+                                for precision dies and mould tools, designed for high load and controlled deflection.
+                            </p>
+
+                            <!-- Ratings -->
+                            <div class="flex items-center gap-1 mb-5">
+                                <span class="flex text-[#F9C71D] gap-0.5">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F9C71D" stroke="none">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F9C71D" stroke="none">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F9C71D" stroke="none">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F9C71D" stroke="none">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#F9C71D" stroke="none">
+                                        <polygon
+                                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                        </polygon>
+                                    </svg>
+                                </span>
+                                <span id="product-reviews-desktop" class="text-[#000000] text-[10px] font-['Roboto'] ml-1">(220)</span>
+                            </div>
+
+                            <!-- Batch Selector -->
+                            <div class="mb-5 relative w-full h-[42px]">
+                                <h3 class="text-[12px] font-['Roboto'] text-[#242323] absolute left-0 top-0">Choose
+                                    Batch</h3>
+                                <div id="product-variants-desktop" class="flex gap-2 absolute left-0 top-5">
+                                    <button
+                                        class="bg-[#D9D9D9] px-3 py-1 rounded-[6px] text-black text-[12px] font-['Roboto'] h-[22px] flex items-center focus:outline-none">Pack
+                                        of 6</button>
+                                    <button
+                                        class="bg-white border text-black border-[#D9D9D9] px-3 py-1 rounded-[6px] text-[12px] font-['Roboto'] h-[22px] flex items-center hover:bg-gray-50 transition focus:outline-none">Pack
+                                        of 8</button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col mb-4">
+                                <div class="flex items-end gap-2">
+                                    <span id="product-price-desktop" class="text-[25px] font-black font-['Roboto'] leading-[29px] text-black">₹0.00</span>
+                                    <span id="product-pack-size-desktop" class="text-[16px] font-medium text-[#525252] mb-[2px]">(Pack of 0)</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span id="product-unit-price-desktop" class="text-[15px] font-medium text-[#656565]">₹0.00 per unit</span>
+                                    <span id="product-old-unit-price-desktop" class="text-[13px] text-[#A0A0A0] line-through hidden">₹0.00 per unit</span>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="w-full h-[2px] bg-[#D9D9D9] mb-4"></div>
+
+                            <!-- Specs List -->
+                            <div id="product-specs-desktop" class="text-[13px] font-['Roboto'] text-[#525252] leading-[21px]">
+                                Outer Diameter (OD) - 10 mm<br>
+                                Inner diameter(ID) - 5 mm<br>
+                                Free Length (L₀) - 44 mm<br>
+                                Wire Section (Thickness) - 1.5 mm (Rectangular)<br>
+                                Colour CodeRed (R) - Heavy Duty<br>
+                                Spring Constant (k) - 1.5 kgf/mm<br>
+                                Maximum Deflection (Δmax) - 15.1 mm
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Tabs Area -->
+                    <div class="w-full bg-white rounded-[10px] overflow-hidden shadow-sm mt-4">
+                        <div class="w-full bg-[#8E8E8E] flex flex-row items-center px-[28px] h-[58px] gap-10 relative">
+                            <!-- Active indicator line -->
+                            <div class="absolute left-[28px] bottom-0 w-[84px] h-[5px] bg-[#4C4949] rounded-t-[5px]">
+                            </div>
+
+                            <span
+                                class="text-[#FFFFFF] text-[16px] font-bold font-['Roboto'] cursor-pointer">Description</span>
+                            <span
+                                class="text-[#C0BEBE] text-[16px] font-normal font-['Roboto'] cursor-pointer hover:text-white transition">Product
+                                Details</span>
+                            <span
+                                class="text-[#C0BEBE] text-[16px] font-normal font-['Roboto'] cursor-pointer hover:text-white transition">Reviews</span>
+                            <span
+                                class="text-[#C0BEBE] text-[16px] font-normal font-['Roboto'] cursor-pointer hover:text-white transition">FAQs</span>
+                        </div>
+                        <div id="product-description-desktop" class="p-[28px] text-[#1E1E1E] text-[16px] font-semibold font-['Roboto'] leading-[19px]">
+                            <p class="mb-4">Product Description</p>
+                            <p class="mb-4 font-normal">This heavy-duty die spring is engineered for applications that
+                                require high load capacity, consistent force output, and controlled deflection.
+                                Manufactured using rectangular wire, the spring is designed to distribute load evenly,
+                                resulting in improved durability and reduced fatigue under repetitive compression
+                                cycles.</p>
+                            <p class="mb-4 font-normal">The spring is suitable for use in die and mould assemblies,
+                                press tools, jigs, fixtures, and various industrial mechanisms where space constraints
+                                demand high performance in compact form. Its construction allows it to operate reliably
+                                under continuous working conditions while maintaining dimensional stability.</p>
+                            <p class="mb-4 font-normal">Designed for precision-oriented environments, this die spring
+                                provides predictable compression behaviour, making it ideal for tooling systems that
+                                require accuracy, repeatability, and long service life. The surface finish and material
+                                selection contribute to resistance against wear during prolonged operation.</p>
+                            <p class="font-normal">This product is intended for general industrial use and is commonly
+                                selected for applications involving moderate to heavy loads, short to medium stroke
+                                lengths, and repeated compression cycles.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Column 3: Order Summary -->
+                <div class="w-[340px] flex flex-col gap-[20px] shrink-0">
+
+                    <!-- Yellow Promo Banner -->
+                    <div
+                        class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-6 relative overflow-hidden">
+                        <div class="flex flex-col justify-center">
+                            <span
+                                class="text-[#000000] text-[24px] font-black font-['Roboto'] leading-tight whitespace-nowrap">Flat
+                                ₹200 OFF</span>
+                            <span class="text-[#000000] text-[12px] font-['Roboto'] mt-[1px]">on this Product</span>
+                        </div>
+                        <div
+                            class="bg-[#FFE280] rounded-[5px] px-[10px] py-[6px] flex items-center justify-center flex-shrink-0 ml-2">
+                            <span class="text-[#212121] text-[13px] font-medium font-['Roboto'] whitespace-nowrap">Until
+                                20th Jan 2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Box -->
+                    <div class="w-full bg-white rounded-[11px] p-4 flex flex-col shadow-sm">
+                        <h3 class="text-[#1E1E1E] text-[15px] font-['Roboto'] mb-3 px-1">Order Details</h3>
+                        <div class="w-full h-[1px] bg-[#E8E8E8] mb-4"></div>
+
+                        <div class="flex flex-col gap-4 px-1">
+                            <!-- Quantity -->
+                            <div class="flex justify-between items-center h-[22px]">
+                                <span class="text-[#000000] text-[14px] font-medium font-['Roboto']">Quantity</span>
+                                <div class="flex items-center w-[84px] h-[22px]">
+                                    <button id="qty-minus"
+                                        class="w-[18px] h-[22px] bg-[#CACACA] flex justify-center items-center text-white text-[15px] font-medium focus:outline-none">-</button>
+                                    <div id="qty-value"
+                                        class="flex-1 bg-white flex justify-center items-center text-[#000000] text-[15px] font-medium">
+                                        1</div>
+                                    <button id="qty-plus"
+                                        class="w-[18px] h-[22px] bg-[#BE2229] flex justify-center items-center text-white text-[15px] font-medium focus:outline-none">+</button>
+                                </div>
+                            </div>
+                            <div class="flex justify-end pr-1 -mt-3 mb-2">
+                                <span id="total-units-display" class="text-[11px] text-[#747474] font-medium">Total: 6 units</span>
+                            </div>
+                            <div class="flex flex-col gap-3 mt-4 px-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Batch</span>
+                                    <span id="summary-batch" class="text-[#000000] text-[13px] font-['Roboto'] text-right">Pack of 6</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Total Units</span>
+                                    <span id="summary-total-units" class="text-[#000000] text-[13px] font-['Roboto'] text-right">6</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Per Unit Price</span>
+                                    <span id="summary-unit-price" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">HSN</span>
+                                    <span id="summary-hsn" class="text-[#000000] text-[13px] font-['Roboto'] text-right">ABCD11010</span>
+                                </div>
+                            </div>
+
+                            <div class="w-full h-[1px] bg-[#E8E8E8] my-4"></div>
+
+                            <div class="flex flex-col gap-3 px-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Price (Batch)</span>
+                                    <span id="summary-price" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Discount</span>
+                                    <span id="summary-discount" class="text-[#000000] text-[13px] font-['Roboto'] text-right">- ₹0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">GST</span>
+                                    <span id="summary-gst" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Delivery Charges</span>
+                                    <span id="summary-delivery" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-[1px] bg-[#E8E8E8] my-4"></div>
+
+                        <!-- Sub Total -->
+                        <div class="flex justify-between items-center px-1 mb-6">
+                            <span class="text-[#000000] text-[15px] font-medium font-['Roboto']">Sub Total</span>
+                            <span id="summary-subtotal"
+                                class="text-[#000000] text-[18px] font-medium font-['Roboto'] text-right flex items-center justify-end">₹0.00</span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col gap-[11px]">
+                            <button id="buy-now-btn"
+                                class="w-full h-[36px] bg-[#BE2229] text-white rounded-[4px] text-[16px] font-medium font-['Roboto'] flex items-center justify-center hover:bg-opacity-90 transition">Buy
+                                Now</button>
+                            <button id="add-to-cart-btn"
+                                class="w-full h-[36px] bg-white border border-[#BE2229] text-[#BE2229] rounded-[4px] text-[16px] font-medium font-['Roboto'] flex items-center justify-center hover:bg-red-50 transition">Add
+                                to Cart</button>
+                        </div>
+                    </div>
+
+                    <!-- Banner Images -->
+                    <div
+                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100">
+                        <img src="assets/images/deafult.png" alt="Promo Large"
+                            class="w-full h-auto max-h-[277px] object-cover mix-blend-multiply">
+                    </div>
+                    <div
+                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100 mt-[-8px]">
+                        <img src="assets/images/deafult.png" alt="Promo Small"
+                            class="w-full h-auto max-h-[138px] object-cover mix-blend-multiply">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Specs & Details (Stacked) -->
+        <div class="px-4 mt-6 md:hidden">
+            <div class="bg-white rounded-[10px] p-4 mb-4">
+                <h3 class="font-poppins text-[18px] text-center mb-2">Features</h3>
+                <hr class="border-gray-200 mb-4">
+                <p id="product-specs-mobile" class="text-[#525252] text-[15px] leading-relaxed">
+                    Outer Diameter (OD) - 10 mm<br>
+                    Inner diameter(ID) - 5 mm<br>
+                    Free Length (L₀) - 44 mm<br>
+                    Wire Section (Thickness) - 1.5 mm<br>
+                    Colour Code: Red (R) – Heavy Duty<br>
+                    Spring Constant (k) - 1.5 kgf/mm
+                </p>
+            </div>
+
+            <!-- Mobile Promo Banner -->
+            <div
+                class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-5 relative overflow-hidden mb-4">
+                <div class="flex flex-col justify-center">
+                    <span
+                        class="text-[#000000] text-[20px] font-black font-['Roboto'] leading-tight whitespace-nowrap">Flat
+                        ₹200 OFF</span>
+                    <span class="text-[#000000] text-[11px] font-['Roboto'] mt-[1px]">on this Product</span>
+                </div>
+                <div
+                    class="bg-[#FFE280] rounded-[5px] px-[8px] py-[6px] flex items-center justify-center flex-shrink-0 ml-2">
+                    <span class="text-[#212121] text-[11px] font-medium font-['Roboto'] whitespace-nowrap">Until 20th
+                        Jan 2026</span>
+                </div>
+            </div>
+
+            <!-- Mobile Order Box -->
+            <div class="w-full bg-white rounded-[11px] p-4 flex flex-col shadow-sm mb-4">
+                <h3 class="text-[#1E1E1E] text-[15px] font-['Roboto'] mb-3 px-1">Order Details</h3>
+                <div class="w-full h-[1px] bg-[#E8E8E8] mb-4"></div>
+
+                <div class="flex flex-col gap-4 px-1">
+                <div class="flex flex-col gap-3 px-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Batch</span>
+                        <span id="summary-batch-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">Pack of 6</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Total Units</span>
+                        <span id="summary-total-units-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">6</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Per Unit Price</span>
+                        <span id="summary-unit-price-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">HSN</span>
+                        <span id="summary-hsn-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">ABCD11010</span>
+                    </div>
+                </div>
+
+                <div class="w-full h-[1px] bg-[#E8E8E8] my-4"></div>
+
+                <div class="flex flex-col gap-3 px-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Price (Batch)</span>
+                        <span id="summary-price-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Discount</span>
+                        <span id="summary-discount-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">- ₹0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">GST</span>
+                        <span id="summary-gst-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Delivery Charges</span>
+                        <span id="summary-delivery-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="w-full h-[1px] bg-[#E8E8E8] my-4"></div>
+
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-[#000000] text-[15px] font-medium font-['Roboto']">Sub Total</span>
+                    <span id="summary-subtotal-mobile"
+                        class="text-[#000000] text-[18px] font-medium font-['Roboto'] text-right flex items-center justify-end">₹0.00</span>
+                </div>
+            </div>
+
+            <!-- Mobile Tabs & Description -->
+            <div
+                class="bg-[#8E8E8E] rounded-[8px] flex h-[40px] items-end px-3 gap-5 mb-0 overflow-x-auto hide-scroll mt-6 shadow-sm">
+                <!-- Active Tab -->
+                <div
+                    class="h-[32px] flex items-center border-b-[3px] border-[#4C4949] cursor-pointer whitespace-nowrap">
+                    <span
+                        class="text-white font-bold text-[14px] font-['Roboto'] leading-[16px] translate-y-[1px]">Description</span>
+                </div>
+                <!-- Inactive Tabs -->
+                <div class="h-[32px] flex items-center cursor-pointer opacity-70 whitespace-nowrap">
+                    <span
+                        class="text-white font-normal text-[14px] font-['Roboto'] leading-[16px] translate-y-[-1px] hover:text-white hover:opacity-100 transition">Product
+                        Details</span>
+                </div>
+                <div class="h-[32px] flex items-center cursor-pointer opacity-70 whitespace-nowrap">
+                    <span
+                        class="text-white font-normal text-[14px] font-['Roboto'] leading-[16px] translate-y-[-1px] hover:text-white hover:opacity-100 transition">Reviews</span>
+                </div>
+                <div class="h-[32px] flex items-center cursor-pointer opacity-70 whitespace-nowrap">
+                    <span
+                        class="text-white font-normal text-[14px] font-['Roboto'] leading-[16px] translate-y-[-1px] hover:text-white hover:opacity-100 transition">FAQs</span>
+                </div>
+            </div>
+            <div id="product-description-mobile"
+                class="bg-white px-5 py-5 rounded-b-[10px] text-[#1E1E1E] text-[13px] font-medium font-['Roboto'] leading-[18px] mb-6 shadow-sm border border-gray-100 mt-[-2px]">
+                <h4 class="font-bold text-[14px] font-['Roboto'] mb-4">Product Description</h4>
+                <p class="mb-4">This heavy-duty die spring is engineered for applications that require high load
+                    capacity, consistent force output, and controlled deflection. Manufactured using rectangular wire,
+                    the spring is designed to distribute load evenly, resulting in improved durability and reduced
+                    fatigue under repetitive compression cycles.</p>
+                <p class="mb-4">The spring is suitable for use in die and mould assemblies, press tools, jigs, fixtures,
+                    and various industrial mechanisms where space constraints demand high performance in compact form.
+                    Its construction allows it to operate reliably under continuous working conditions while maintaining
+                    dimensional stability.</p>
+                <p class="mb-4">Designed for precision-oriented environments, this die spring provides predictable
+                    compression behaviour, making it ideal for tooling systems that require accuracy, repeatability, and
+                    long service life. The surface finish and material selection contribute to resistance against wear
+                    during prolonged operation.</p>
+                <p>This product is intended for general industrial use and is commonly selected for applications
+                    involving moderate to heavy loads, short to medium stroke lengths, and repeated compression cycles.
+                </p>
+            </div>
+
+            <!-- Mobile Promo Banner Placeholders -->
+            <div
+                class="w-full bg-[#DCDCDC] rounded-[10px] h-[320px] mb-4 overflow-hidden flex items-center justify-center border border-gray-200 shadow-sm">
+                <img src="assets/images/deafult.png" alt="Promo Large"
+                    class="w-full h-full object-cover mix-blend-multiply opacity-10">
+            </div>
+            <div
+                class="w-full bg-[#DCDCDC] rounded-[10px] h-[160px] mb-8 overflow-hidden flex items-center justify-center border border-gray-200 shadow-sm">
+                <img src="assets/images/deafult.png" alt="Promo Small"
+                    class="w-full h-full object-cover mix-blend-multiply opacity-10">
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <section class="featured-offers-section">
+            <div class="fo-container">
+
+                <div class="fo-header-wrapper">
+                    <div class="fo-header">
+                        <h2 class="fo-title">Related Products</h2>
+
+                        <div class="fo-pagination flex items-center gap-[10px]">
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#BDBDBD] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <span class="text-[#746A6A] font-bold text-[18px] font-['Roboto'] tracking-[0.5px]">1-6 of
+                                24</span>
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#212121] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fo-divider"></div>
+                </div>
+
+                <div id="related-products-grid" class="fo-grid">
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Top sold products -->
+        <section class="featured-offers-section">
+            <div class="fo-container">
+
+                <div class="fo-header-wrapper">
+                    <div class="fo-header">
+                        <h2 class="fo-title">Top sold products</h2>
+
+                        <div class="fo-pagination flex items-center gap-[10px]">
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#BDBDBD] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <span class="text-[#746A6A] font-bold text-[18px] font-['Roboto'] tracking-[0.5px]">1-6 of
+                                24</span>
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#212121] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fo-divider"></div>
+                </div>
+
+                <div id="top-sold-products-grid" class="fo-grid">
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Top categories -->
+        <section class="featured-offers-section">
+            <div class="fo-container">
+
+                <div class="fo-header-wrapper">
+                    <div class="fo-header">
+                        <h2 class="fo-title">Featured Products</h2>
+
+                        <div class="fo-pagination flex items-center gap-[10px]">
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#BDBDBD] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <span class="text-[#746A6A] font-bold text-[18px] font-['Roboto'] tracking-[0.5px]">1-6 of
+                                24</span>
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#212121] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fo-divider"></div>
+                </div>
+
+                <div id="featured-products-grid" class="fo-grid">
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest products -->
+        <section class="featured-offers-section">
+            <div class="fo-container">
+
+                <div class="fo-header-wrapper">
+                    <div class="fo-header">
+                        <h2 class="fo-title">Latest products</h2>
+
+                        <div class="fo-pagination flex items-center gap-[10px]">
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#BDBDBD] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <span class="text-[#746A6A] font-bold text-[18px] font-['Roboto'] tracking-[0.5px]">1-6 of
+                                24</span>
+                            <button
+                                class="w-[30px] h-[30px] border border-[#E0E0E0] rounded-[4px] flex items-center justify-center bg-white text-[#212121] hover:bg-gray-50 focus:outline-none transition">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="fo-divider"></div>
+                </div>
+
+                <div id="latest-products-grid" class="fo-grid">
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="fo-card">
+                        <span class="fo-badge">Save 20%</span>
+                        <a href="product.html" class="fo-image-box">
+                            <img src="assets/images/deafult.png" alt="Die Spring Red">
+                            <button class="fo-wishlist">
+                                <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-6 h-6 wishlist-icon">
+                            </button>
+                        </a>
+                        <div class="fo-details">
+                            <a href="product.html" class="fo-prod-name">Die Spring OD 10 mm L 25 mm Red (R)</a>
+                            <div class="fo-pricing">
+                                <span class="fo-price">₹311.52</span>
+                                <span class="fo-old-price">₹400.90</span>
+                            </div>
+                            <button class="fo-cart-btn">
+                                Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart"
+                                    class="w-4 h-4 ml-2">
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 mt-10 relative">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex flex-row justify-between items-start gap-8 mb-10">
+                <!-- Col 1: Brand & Contact -->
+                <div class="flex flex-col gap-4 w-[253px]">
+                    <img src="assets/images/header.png" alt="Springwala" class="w-[200px]">
+                    <div class="w-full h-[1px] bg-[#525252] my-2"></div>
+                    <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                        <p>Mumbai, Maharashtra (India)</p>
+                        <p>Phone: +91 8879 241085</p>
+                        <p>Email: support@springwala.in</p>
+                    </div>
+                </div>
+
+                <!-- Links Cols -->
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Account</a>
+                    <a href="orders.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Orders</a>
+                    <a href="cart.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Cart</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Saved Items</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col gap-4 w-[300px]">
+                    <h3 class="font-['Poppins'] font-semibold text-[18px]">Stay Updated with Springwala</h3>
+                    <p class="text-[14px]">Get E-mail updates about latest shop and special offers</p>
+                    <div class="flex h-[35px] w-full">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 border border-[#BE2229] rounded-l-[5px] px-3 outline-none text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-4 rounded-r-[5px] font-medium text-[14px]">Subscribe</button>
+                    </div>
+                    <!-- Social Icons -->
+                    <div class="flex gap-4 mt-2">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6 cursor-pointer"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden flex flex-col items-center text-center gap-6 pb-20 relative">
+                <img src="assets/images/header.png" alt="Springwala" class="w-[200px] mb-2">
+
+                <!-- Line 14 -->
+                <div class="w-[90%] h-[1px] bg-[#525252]"></div>
+
+                <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                    <p>Mumbai, Maharashtra (India)</p>
+                    <p>Phone: +91 8879 241085</p>
+                    <p>Email: support@springwala.in</p>
+                </div>
+
+                <!-- Line 18 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col items-center gap-3 w-full px-2">
+                    <h3 class="font-['Poppins'] font-semibold text-[16px] sm:text-[18px] text-center">Join Our
+                        Newsletter Now</h3>
+                    <p class="text-[12px] sm:text-[14px] text-center">Get E-mail updates about latest shop and special
+                        offers</p>
+                    <div class="flex h-[35px] w-full max-w-[350px]">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 min-w-0 border border-[#BE2229] rounded-l-[5px] px-2 sm:px-3 outline-none text-[13px] sm:text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-3 sm:px-4 rounded-r-[5px] font-medium text-[13px] sm:text-[14px] whitespace-nowrap">Subscribe</button>
+                    </div>
+                    <div class="flex gap-4 mt-2 justify-center">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                    </div>
+                </div>
+
+                <!-- Line 19 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Links Groups -->
+                <div
+                    class="flex flex-row justify-between w-full px-2 sm:px-8 mt-4 text-[13px] sm:text-[15px] text-[#525252]">
+                    <div class="flex flex-col gap-4 text-left">
+                        <a href="index.html">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Contact Us</a>
+                        <a href="#">Delivery & Shipping</a>
+                    </div>
+
+                    <div class="flex flex-col gap-4 text-right">
+                        <a href="login.html">My Account</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="cart.html">My Cart</a>
+                        <a href="#">Saved Items</a>
+                    </div>
+                </div>
+
+                <div class="flex gap-6 text-[#525252] mt-4 flex-wrap justify-center">
+                    <a href="#">Knowledge Section</a>
+                    <a href="#">Sell on Springwala</a>
+                    <a href="#">Career</a>
+                </div>
+
+                <!-- Bottom Links -->
+                <div class="w-full h-[1px] bg-[#525252] mt-4 opacity-50"></div>
+
+                <div class="flex flex-wrap gap-x-6 gap-y-3 justify-center text-[15px] text-[#525252] max-w-[350px]">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms & Conditions</a>
+                    <a href="#">Return Policy</a>
+                    <a href="#">Vendor Agreement</a>
+                    <a href="#">GST Compliance</a>
+                    <a href="#">Data Protection</a>
+                </div>
+
+                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 All rights reserved</p>
+            </div>
+
+            <!-- Desktop Bottom Divider & Links -->
+            <div class="hidden md:block w-full h-[1px] bg-[#525252] my-6"></div>
+            <div class="hidden md:flex justify-center gap-8 text-[14px] text-[#666] mb-2">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Return Policy</a>
+                <a href="#">Vendor Agreement</a>
+                <a href="#">GST Compliance</a>
+                <a href="#">Data Protection</a>
+            </div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 All rights reserved</div>
+
+        </div>
+    </footer>
+
+    <!-- Mobile Sticky Action Bar -->
+    <div
+        class="md:hidden fixed bottom-[57px] left-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-[90] flex flex-col gap-3 border-t border-gray-100">
+        <!-- Row 1: Price and Quantity -->
+        <div class="flex justify-between items-center">
+            <!-- Price -->
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                    <span id="product-price-mobile" class="text-[28px] font-black font-['Roboto'] leading-none text-black">₹0.00</span>
+                    <span id="product-pack-size-mobile" class="text-[16px] font-medium text-[#525252] leading-none relative top-[2px]">(Pack of 0)</span>
+                </div>
+                <div class="flex items-center gap-2 mt-1">
+                    <span id="product-unit-price-mobile" class="text-[15px] font-medium text-[#656565]">₹0.00 per unit</span>
+                    <span id="product-old-unit-price-mobile" class="text-[13px] text-[#A0A0A0] line-through hidden">₹0.00 per unit</span>
+                </div>
+            </div>
+            <!-- Quantity -->
+            <div class="flex flex-col items-center">
+                <span class="text-[12px] font-bold font-['Roboto'] text-black mb-1">Quantity</span>
+                <div class="flex items-center w-[74px] h-[24px]">
+                    <button id="qty-minus-mobile"
+                        class="w-[20px] h-[24px] flex items-center justify-center text-white bg-[#C6C6C6] font-bold text-[14px] leading-none focus:outline-none">-</button>
+                    <div id="qty-value-mobile"
+                        class="flex-1 h-[24px] flex justify-center items-center text-black text-[14px] font-bold bg-white">
+                        1</div>
+                    <button id="qty-plus-mobile"
+                        class="w-[20px] h-[24px] flex items-center justify-center text-white bg-[#BE2229] font-bold text-[14px] leading-none focus:outline-none">+</button>
+                </div>
+                <span id="total-units-display-mobile-text" class="text-[10px] text-[#747474] mt-0.5">Total: 6 units</span>
+            </div>
+        </div>
+
+        <!-- Row 2: Buttons -->
+        <div class="flex gap-2">
+            <button id="buy-now-btn-mobile"
+                class="flex-1 h-[40px] bg-[#BE2229] text-white rounded-[6px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center">Buy
+                Now</button>
+            <button
+                class="flex-1 h-[40px] bg-white border border-[#BE2229] text-[#BE2229] rounded-[6px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center">Add
+                to Cart</button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Bar (Fixed Bottom) -->
+    <nav class="mobile-navbar">
+        <a href="index.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/home.svg" alt="Home">
+        </a>
+        <a href="categories.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+        </a>
+        <a href="orders.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/orders.svg" alt="Orders">
+        </a>
+        <a href="wishlist.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 grayscale brightness-0 invert-[0.3]">
+        </a>
+        <a href="login.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/profile.svg" alt="Profile">
+        </a>
+    </nav>
+    <!-- Add padding to body for the double sticky bars -->
+    <style>
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 85px;
+                /* Action bar height, footer pb-20 handles the nav bar 57px */
+            }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/app.js"></script>
+
+    <!-- Product Image Zoom & Gallery Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Create Modal Container
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div id="imageModal" class="fixed inset-0 z-[9999] hidden bg-black bg-opacity-90 flex flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+                    <button id="closeModal" class="absolute top-6 right-6 text-white hover:text-gray-300 focus:outline-none z-50">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                    <!-- Modal Content Container -->
+                    <div class="relative w-full h-full flex flex-col items-center justify-center pt-8 pb-32">
+                        <img id="modalImage" src="" alt="Expanded Image" class="max-w-[95vw] max-h-[70vh] object-contain select-none">
+                    </div>
+                    <!-- Thumbnails row -->
+                    <div id="modalThumbnails" class="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-4 max-w-[95vw] overflow-x-auto px-4 py-3 bg-black/60 rounded-[10px] items-center">
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModal = document.getElementById('closeModal');
+            const modalThumbnailsContainer = document.getElementById('modalThumbnails');
+            const zoomBtns = document.querySelectorAll('.zoom-btn');
+            const thumbnails = document.querySelectorAll('.flex.gap-\\[17px\\] > div > img');
+            const desktopMainImg = document.querySelector('.w-\\[435px\\] > div > img.mix-blend-multiply');
+
+            // Set up common images
+            const sliderImages = [
+                'assets/images/deafult.png',
+                'assets/images/deafult.png',
+                'assets/images/deafult.png',
+                'assets/images/deafult.png'
+            ];
+
+            // Setup Modal Thumbnails
+            sliderImages.forEach((imgSrc, i) => {
+                const thumbWrapper = document.createElement('div');
+                thumbWrapper.className = 'w-[60px] h-[60px] flex-shrink-0 bg-white rounded-[6px] overflow-hidden cursor-pointer hover:opacity-80 transition cursor-pointer border-2 border-transparent';
+                const imgNode = document.createElement('img');
+                imgNode.src = imgSrc;
+                imgNode.className = 'w-full h-full object-contain p-1';
+                thumbWrapper.appendChild(imgNode);
+
+                thumbWrapper.addEventListener('click', () => {
+                    modalImage.src = imgSrc;
+                    // Active state indication
+                    Array.from(modalThumbnailsContainer.children).forEach(c => c.classList.remove('border-[#BE2229]'));
+                    thumbWrapper.classList.add('border-[#BE2229]');
+                });
+                modalThumbnailsContainer.appendChild(thumbWrapper);
+            });
+
+            // 2. Modal Functions
+            function openModal(imgSrc) {
+                modalImage.src = imgSrc;
+                imageModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Highlight corresponding thumbnail 
+                Array.from(modalThumbnailsContainer.children).forEach((child, i) => {
+                    child.classList.remove('border-[#BE2229]');
+                    if (child.querySelector('img').src === modalImage.src && child.classList.length > 0) {
+                        child.classList.add('border-[#BE2229]');
+                    }
+                });
+            }
+
+            function close() {
+                imageModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            closeModal.addEventListener('click', close);
+            imageModal.addEventListener('click', (e) => {
+                if (e.target === imageModal || e.target.parentElement === imageModal) close();
+            });
+
+            // 3. Bind Zoom Expand Buttons
+            zoomBtns.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const container = btn.parentElement;
+                    const img = container.querySelector('img');
+                    if (img) openModal(img.src);
+                });
+            });
+
+            // 4. Bind Thumbnails Activity (Desktop)
+            thumbnails.forEach(thumb => {
+                thumb.parentElement.addEventListener('click', () => {
+                    if (desktopMainImg) {
+                        desktopMainImg.src = thumb.src;
+                    }
+                    openModal(thumb.src); // ALSO open the modal carousel upon clicking a thumbnail!
+                });
+            });
+
+            // 5. Mobile Auto Carousel Logic
+            const mobileMainImage = document.getElementById('mobileMainImage');
+            const mobileDotsContainer = document.getElementById('mobileCarouselDots');
+
+            if (mobileMainImage && mobileDotsContainer) {
+                const dots = Array.from(mobileDotsContainer.children);
+                let currentIndex = 0;
+
+                function changeMobileSlide(index) {
+                    dots.forEach((dot, i) => {
+                        dot.classList.remove('bg-[#625656]');
+                        dot.classList.add('bg-[#D9D9D9]');
+                        if (i === index) {
+                            dot.classList.remove('bg-[#D9D9D9]');
+                            dot.classList.add('bg-[#625656]');
+                        }
+                    });
+
+                    // simple fade
+                    mobileMainImage.style.opacity = '0.5';
+                    setTimeout(() => {
+                        mobileMainImage.src = sliderImages[index];
+                        mobileMainImage.style.opacity = '1';
+                    }, 150);
+
+                    currentIndex = index;
+                }
+
+                let slideInterval = setInterval(() => {
+                    let nextIndex = (currentIndex + 1) % sliderImages.length;
+                    changeMobileSlide(nextIndex);
+                }, 3000);
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        changeMobileSlide(i);
+                        slideInterval = setInterval(() => {
+                            let nextIndex = (currentIndex + 1) % sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        }, 3000);
+                    });
+                });
+
+                // --- Mobile Swipe Support ---
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                const handleSwipe = () => {
+                    const swipeDistance = touchEndX - touchStartX;
+                    if (Math.abs(swipeDistance) > 40) { // threshold
+                        clearInterval(slideInterval);
+                        if (swipeDistance < 0) {
+                            // swiped left -> next
+                            let nextIndex = (currentIndex + 1) % sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        } else {
+                            // swiped right -> prev
+                            let prevIndex = (currentIndex - 1 + sliderImages.length) % sliderImages.length;
+                            changeMobileSlide(prevIndex);
+                        }
+                        // restart interval
+                        slideInterval = setInterval(() => {
+                            let nextIndex = (currentIndex + 1) % sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        }, 3000);
+                    }
+                };
+
+                // Add listeners to the container of the mobile image
+                const swipeContainer = mobileMainImage.parentElement;
+                swipeContainer.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                swipeContainer.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+            }
+
+            // 6. Product Wishlist Toggle (Main Image Stars)
+            const productWishlistBtns = document.querySelectorAll('.product-wishlist-btn');
+            productWishlistBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const img = btn.querySelector('img');
+                    if (img) {
+                        const currentSrc = img.getAttribute('src');
+                        if (currentSrc.includes('star.svg')) {
+                            img.setAttribute('src', 'assets/icons/mobile/star-gold.svg');
+                        } else {
+                            img.setAttribute('src', 'assets/icons/mobile/star.svg');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
+

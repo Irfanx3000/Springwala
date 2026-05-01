@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala Admin | Categories</title>
+
+    <link rel="icon" type="image/png" href="../favicon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .stat-card-shadow { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
+        .accordion-content { transition: max-height 0.3s ease-out; overflow: hidden; max-height: 0; }
+        .accordion-content.expanded { max-height: 2000px; }
+
+        /* Modal Styles */
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: transform 0.3s ease, opacity 0.3s ease; }
+        .upload-box { border: 1.5px dashed #008060; background-color: #F0FBF9; cursor: pointer; transition: background-color 0.2s; }
+        .upload-box:hover { background-color: #E6F7F4; }
+    </style>
+	<script src="../assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
+        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="px-11 mb-10 w-full flex justify-center">
+            <img src="../assets/images/header.png" alt="Springwala Admin Logo" class="h-[40px] w-auto">
+        </div>
+
+        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
+            <a href="dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="categories.html" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0" style="filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%);">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229]">Categories</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]">Products</span>
+                    </div>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
+                    <a href="products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
+                    <a href="products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229]">Users</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <!-- Banners Dropdown -->
+            <div class="w-full flex flex-col group relative">
+                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
+                    </div>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="banners/homepage.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Homepage</a>
+                    <a href="banners/category.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Category</a>
+                    <a href="banners/promotional.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Promotional</a>
+                    <a href="banners/features.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Features</a>
+                    <a href="banners/advertisement.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Advertisement</a>
+                    <a href="banners/section.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Section</a>
+                    <a href="banners/informational.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Informational</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
+            </a>
+        
+            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
+
+            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
+                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
+        <!-- Persistent Top Bar (Mobile Sticky / Desktop Single Row) -->
+        <div class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-[24px] xl:px-8 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-4 flex-1">
+                <button id="open-sidebar" class="md:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center admin-name">Admin</h2>
+
+                <!-- Desktop Search (Hidden on Mobile) -->
+                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink">
+                    <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                    <input type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent">
+                </div>
+            </div>
+
+            <!-- Desktop Action Buttons (Visible md+) -->
+            <div class="hidden md:flex items-center gap-3">
+                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
+
+        <!-- Mobile Scrollable Section (Visible only on mobile below md) -->
+        <div class="md:hidden px-4 sm:px-[24px] flex flex-col gap-4 mt-2">
+            <!-- Mobile Search -->
+            <div class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink">
+                <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                <input type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent">
+            </div>
+
+            <!-- Mobile Action Buttons -->
+            <div class="flex items-center gap-2 justify-between">
+                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
+
+        <div class="w-full px-4 sm:px-[24px] xl:px-8 mt-[20px] flex flex-col gap-4">
+            
+            <!-- Page Title -->
+            <div class="flex items-center gap-[18px]">
+                <a href="dashboard.html" class="flex items-center justify-center w-[40px] h-[40px] bg-white rounded-[5px] border border-[#E9E9E9] shadow-[0px_2px_4px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition shrink-0">
+                    <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+                <h2 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Categories</h2>
+            </div>
+            
+            <!-- Statistic Cards Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-[15px] w-full mt-1">
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Total Categories</span>
+                    <span id="total-categories" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">...</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Total Sub-Categories</span>
+                    <span id="total-subcategories" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">...</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Active Categories</span>
+                    <span id="active-categories" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">...</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Active Sub-Categories</span>
+                    <span id="active-subcategories" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">...</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Total Products</span>
+                    <span id="total-products" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">...</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls - Refined with Correct Alignment -->
+            <div class="w-full bg-white rounded-[10px] p-4 sm:p-5 mt-2 shadow-[0px_4px_10px_rgba(0,0,0,0.05)] border border-[#E9E9E9]">
+                <div class="flex flex-col lg:flex-row items-end justify-between gap-4 w-full">
+                    <!-- Search & Filters Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full lg:flex-1 items-end">
+                        <!-- Search with Top-Right Transparent Refresh Icon -->
+                        <div class="flex flex-col gap-2 w-full">
+                            <div class="flex items-center justify-between w-full">
+                                <label class="font-['Roboto'] font-medium text-[16px] sm:text-[17px] leading-[21px] text-black">Search Categories</label>
+                                <button class="bg-transparent hover:bg-gray-50 transition w-[24px] h-[24px] rounded flex items-center justify-center shrink-0">
+                                    <img src="../assets/icons/admin/refresh.svg" alt="Refresh" class="w-[18px] h-[18px]">
+                                </button>
+                            </div>
+                            <div class="flex items-center bg-[#EDEDED] rounded-[5px] h-[40px] px-3 w-full">
+                                <input id="category-search" type="text" placeholder="Enter Category Name" class="w-full outline-none text-[#656565] font-['Roboto'] text-[15px] sm:text-[16px] bg-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="font-['Roboto'] font-medium text-[16px] sm:text-[17px] leading-[21px] text-black">Status</label>
+                            <div class="relative w-full">
+                                <select id="category-filter-status" class="w-full h-[40px] appearance-none bg-[#EDEDED] rounded-[5px] px-3 outline-none text-[#656565] font-['Roboto'] text-[15px] sm:text-[16px] cursor-pointer">
+                                    <option value="">Select Status</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Disabled</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                    <svg class="w-[15px] h-full text-[#696969] transform rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sort By -->
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="font-['Roboto'] font-medium text-[16px] sm:text-[17px] leading-[21px] text-black">Sort By</label>
+                            <div class="relative w-full">
+                                <select id="category-sort" class="w-full h-[40px] appearance-none bg-[#EDEDED] rounded-[5px] px-3 outline-none text-[#656565] font-['Roboto'] text-[15px] sm:text-[16px] cursor-pointer">
+                                    <option value="">Sort By</option>
+                                    <option value="date-desc">Date Added</option>
+                                    <option value="name-asc">Name A-Z</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                    <svg class="w-[15px] h-full text-[#696969] transform rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Category Action -->
+            <button id="add-category-btn" class="w-full bg-[#BE2229] hover:bg-red-800 transition rounded-[10px] h-[41px] flex items-center justify-center mt-3">
+                <span class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-white">+ Add a new Category</span>
+            </button>
+
+            <!-- Breakdown Line -->
+            <div class="w-full h-[1px] bg-black/10 my-3 md:my-4"></div>
+
+            <!-- Main Categories Table Structure -->
+            <div class="w-full bg-white rounded-[10px] pb-[30px] pt-4 mb-[40px] flex flex-col shadow-[0px_4px_10px_rgba(0,0,0,0.05)] border border-[#E9E9E9]">
+                <!-- Table Header Tabs -->
+                <div class="flex items-center justify-between px-6 pb-2 border-b border-[#000000]/30 w-full mb-4">
+                     <div class="relative pb-[5px]">
+                         <span class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-black">All Categories</span>
+                         <div class="absolute bottom-[-1px] left-[-5px] right-[-5px] h-[2px] bg-black"></div>
+                     </div>
+                     <span class="font-['Roboto'] font-normal text-[17px] text-black cursor-pointer hover:underline">Bulk Actions: <span class="underline">Delete</span></span>
+                </div>
+
+                <!-- Table Container Wrapper -->
+                <div class="w-full max-w-full overflow-x-auto pb-4 px-6 relative no-scrollbar">
+                         <div class="min-w-[1160px] grid grid-cols-[60px_60px_1fr_150px_150px_150px_120px] gap-4 items-center pb-3 border-b border-black/10 mb-3 px-4">
+                             <div></div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black text-center">Banner</div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black">Category Name</div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black text-center">No. Of<br>Subcategories</div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black text-center">No. of Products</div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black text-center">Date Created</div>
+                             <div class="font-['Roboto'] font-medium text-[14px] text-black text-center">Actions</div>
+                         </div>
+                         <div id="categories-tbody" class="min-w-[1160px] flex flex-col gap-0 border border-[#E9E9E9] rounded-lg overflow-hidden bg-white">
+                             <!-- Categories loaded by categories.js -->
+                         </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Structure -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden items-center justify-center modal-overlay opacity-0 p-4 overflow-y-auto">
+        <div id="modal-container" class="bg-white rounded-[15px] shadow-2xl w-full max-w-[500px] p-6 sm:p-8 modal-container scale-95 opacity-0 my-8">
+            <!-- Modal Header -->
+            <h2 id="modal-title" class="font-['Poppins'] font-semibold text-[20px] sm:text-[24px] text-center mb-4">Create a New Sub-category</h2>
+            <div class="w-full h-[1px] bg-black/10 mb-6"></div>
+
+            <!-- Modal Content -->
+            <div class="flex flex-col gap-4 sm:gap-5">
+                <!-- Name Input -->
+                <div class="flex flex-col gap-2">
+                    <label id="name-label" class="font-['Roboto'] font-medium text-[16px] sm:text-[18px]">Enter Category Name</label>
+                    <input type="text" id="category-name" placeholder="Category Name" class="w-full h-[45px] bg-[#EDEDED] rounded-[5px] px-4 outline-none font-['Roboto'] text-[15px] sm:text-[16px] text-[#656565]">
+                </div>
+
+                <!-- Description Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-['Roboto'] font-medium text-[16px] sm:text-[18px]">Description</label>
+                    <textarea id="category-description" placeholder="Short description..." class="w-full min-h-[80px] bg-[#EDEDED] rounded-[5px] px-4 py-2 outline-none font-['Roboto'] text-[15px] sm:text-[16px] text-[#656565]"></textarea>
+                </div>
+
+                <!-- Banner Section -->
+                <div class="flex flex-col gap-2">
+                    <label id="banner-label" class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] text-[#656565]">Category Banner</label>
+                    <div id="banner-upload-container" class="flex flex-col sm:flex-row items-center gap-4 min-h-[120px]">
+                        <!-- Input Hidden -->
+                        <input type="file" id="real-file-input" class="hidden" accept="image/*">
+                        
+                        <!-- Preview -->
+                        <div id="banner-preview" class="hidden w-full sm:w-[180px] h-[120px] rounded-[10px] border border-[#B9B9B9] overflow-hidden">
+                            <img src="" id="preview-img" alt="Preview" class="w-full h-full object-contain p-2">
+                        </div>
+                        
+                        <!-- Upload Box -->
+                        <div id="banner-upload-box" class="upload-box w-full sm:flex-1 h-[120px] rounded-[10px] flex flex-col items-center justify-center gap-2">
+                            <img src="../assets/icons/admin/upload.svg" alt="Upload" class="w-8 h-8 opacity-70">
+                            <span class="font-['Roboto'] text-[15px] sm:text-[16px] text-black text-center px-4">Click to upload</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Select -->
+                <div id="parent-category-group" class="flex flex-col gap-2 hidden">
+                    <label class="font-['Roboto'] font-medium text-[16px] sm:text-[18px]">Category</label>
+                    <div class="relative w-full">
+                        <select id="parent-category-select" class="w-full h-[45px] appearance-none bg-[#EDEDED] rounded-[5px] px-4 outline-none text-[#656565] font-['Roboto'] text-[15px] sm:text-[16px] cursor-pointer">
+                            <option value="">Select Parent Category</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-4">
+                    <button id="save-category-btn" class="flex-1 h-[45px] bg-white border border-[#BE2229] rounded-[8px] flex items-center justify-center font-['Roboto'] font-medium text-[16px] sm:text-[17px] text-[#BE2229] hover:bg-red-50 transition active:scale-95">
+                        Confirm & Create
+                    </button>
+                    <button id="cancel-modal-btn" class="w-[80px] sm:w-[100px] h-[45px] bg-[#EDEDED] rounded-[8px] flex items-center justify-center font-['Roboto'] font-medium text-[16px] sm:text-[17px] text-[#656565] hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script>
+        Auth.requireAuth();
+    </script>
+    <script src="../assets/js/categories.js"></script>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        openBtn.addEventListener('click', toggleSidebar);
+        closeBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        const productsMenuBtn = document.getElementById('products-menu-btn');
+        const productsSubmenu = document.getElementById('products-submenu');
+        const productsChevron = document.getElementById('products-menu-chevron');
+
+        productsMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (productsSubmenu.classList.contains('hidden')) {
+                productsSubmenu.classList.remove('hidden'); productsSubmenu.classList.add('flex'); productsChevron.classList.add('rotate-180');
+            } else {
+                productsSubmenu.classList.add('hidden'); productsSubmenu.classList.remove('flex'); productsChevron.classList.remove('rotate-180');
+            }
+        });
+
+        const bannersMenuBtn = document.getElementById('banners-menu-btn');
+        const bannersSubmenu = document.getElementById('banners-submenu');
+        const bannersChevron = document.getElementById('banners-menu-chevron');
+
+        if (bannersMenuBtn) {
+            bannersMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (bannersSubmenu.classList.contains('hidden')) {
+                    bannersSubmenu.classList.remove('hidden'); bannersSubmenu.classList.add('flex'); bannersChevron.classList.add('rotate-180');
+                } else {
+                    bannersSubmenu.classList.add('hidden'); bannersSubmenu.classList.remove('flex'); bannersChevron.classList.remove('rotate-180');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

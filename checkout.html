@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Springwala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9F9F9; }
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+        .checkout-container { max-width: 1280px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .input-field { width: 100%; border: 1px solid #E4E4E4; border-radius: 8px; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
+        .input-field:focus { border-color: #BE2229; }
+    </style>
+	<script src="assets/js/config.js"></script>
+</head>
+
+<body>
+    <!-- Header Placeholder (Same as other pages) -->
+    <header class="w-full bg-white border-b border-[#E8E8E8]">
+        <div class="max-w-[1440px] mx-auto flex items-center justify-between px-4 md:px-[80px] h-[73px]">
+            <a href="index.html"><img src="assets/images/header.png" alt="Springwala Logo" class="h-[35px] md:h-[40px] w-auto"></a>
+            <div class="hidden md:flex items-center gap-4">
+                <span class="text-[#525252] text-[14px]">Secure Checkout</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+        </div>
+    </header>
+
+    <div class="checkout-container py-8">
+        <h1 class="text-[28px] font-bold text-[#242323] mb-8">Checkout</h1>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left: Delivery Details -->
+            <div class="flex-1 space-y-6">
+                <!-- Delivery Address Card -->
+                <div class="card">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 bg-[#BE2229] rounded-full flex items-center justify-center text-white font-bold">1</div>
+                        <h2 class="text-[20px] font-semibold text-[#242323]">Delivery Address</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-[14px] text-[#525252] mb-1">Full Name</label>
+                            <input type="text" id="ship-name" class="input-field" placeholder="Enter your full name">
+                        </div>
+                        <div>
+                            <label class="block text-[14px] text-[#525252] mb-1">Phone Number</label>
+                            <input type="tel" id="ship-phone" class="input-field" placeholder="10-digit mobile number">
+                        </div>
+                        <div>
+                            <label class="block text-[14px] text-[#525252] mb-1">Pincode</label>
+                            <input type="text" id="ship-pincode" class="input-field" placeholder="6-digit pincode">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[14px] text-[#525252] mb-1">Address Line</label>
+                            <input type="text" id="ship-address" class="input-field" placeholder="House No, Building, Street, Area">
+                        </div>
+                        <div>
+                            <label class="block text-[14px] text-[#525252] mb-1">City</label>
+                            <input type="text" id="ship-city" class="input-field" placeholder="City">
+                        </div>
+                        <div>
+                            <label class="block text-[14px] text-[#525252] mb-1">State</label>
+                            <input type="text" id="ship-state" class="input-field" placeholder="State">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[14px] text-[#525252] mb-1">Country</label>
+                            <input type="text" id="ship-country" class="input-field" value="India" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method Card -->
+                <div class="card">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 bg-[#BE2229] rounded-full flex items-center justify-center text-white font-bold">2</div>
+                        <h2 class="text-[20px] font-semibold text-[#242323]">Payment Method</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div id="method-cod" class="payment-method-item p-4 border-2 border-[#BE2229] bg-red-50 rounded-lg flex items-center gap-4 cursor-pointer" data-method="COD">
+                            <div class="radio-outer w-5 h-5 rounded-full border-4 border-[#BE2229] flex items-center justify-center">
+                                <div class="radio-inner w-2 h-2 bg-[#BE2229] rounded-full"></div>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-[#BE2229]">Cash on Delivery (COD)</p>
+                                <p class="text-[12px] text-[#BE2229]/80">Pay when you receive your order</p>
+                            </div>
+                        </div>
+
+                        <div id="method-online" class="payment-method-item p-4 border-2 border-gray-200 bg-white rounded-lg flex items-center gap-4 cursor-pointer" data-method="Online">
+                            <div class="radio-outer w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                                <div class="radio-inner w-2 h-2 bg-transparent rounded-full"></div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-700">Online Payment</p>
+                                <p class="text-[12px] text-gray-500">Pay securely via UPI, Card, or Netbanking</p>
+                            </div>
+                            <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" class="h-6 opacity-60">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="w-full lg:w-[400px]">
+                <div class="card sticky top-8">
+                    <h2 class="text-[18px] font-bold text-[#242323] mb-4">Order Summary</h2>
+                    
+                    <!-- Items List -->
+                    <div id="checkout-items" class="max-h-[300px] overflow-y-auto no-scrollbar space-y-4 mb-6 pr-1">
+                        <!-- Items rendered here -->
+                    </div>
+
+                    <div class="h-[1px] bg-[#E4E4E4] mb-4"></div>
+
+                    <!-- Price Details -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-[#525252]">
+                            <span>Items Total (MRP)</span>
+                            <span id="summary-mrp">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-[#2E7D32]">
+                            <span>Discount</span>
+                            <span id="summary-discount">- ₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-[#525252]">
+                            <span>GST Amount</span>
+                            <span id="summary-gst">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between text-[#525252]">
+                            <span>Delivery Charges</span>
+                            <span id="summary-delivery">₹0.00</span>
+                        </div>
+                        <div class="h-[1px] bg-[#E4E4E4] my-2"></div>
+                        <div class="flex justify-between text-[18px] font-bold text-[#242323]">
+                            <span>Total Payable</span>
+                            <span id="summary-total">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <button id="place-order-btn" class="w-full bg-[#BE2229] text-white py-4 rounded-lg font-bold text-[16px] hover:bg-red-800 transition-colors shadow-lg">
+                        Place Order
+                    </button>
+                    <p class="text-center text-[12px] text-[#747474] mt-4">By placing an order, you agree to our Terms and Conditions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripting -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script>
+        document.body.dataset.page = 'checkout';
+    </script>
+</body>
+</html>
+
+

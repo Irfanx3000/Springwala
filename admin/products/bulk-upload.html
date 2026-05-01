@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala Admin | Bulk Import Products</title>
+
+    <link rel="icon" type="image/png" href="../../favicon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F8FAFC; }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .box-shadow-card { box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.03); }
+        
+        /* Stepper Styles - Fixed Alignment */
+        .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; border: 2px solid #E2E8F0; color: #94A3B8; background: #fff; transition: all 0.3s; position: relative; z-index: 2; }
+        .step-circle.active { border-color: #BE2229; color: #BE2229; background: #FFF5F5; box-shadow: 0 0 0 4px rgba(190, 34, 41, 0.1); }
+        .step-circle.completed { border-color: #BE2229; background: #BE2229; color: #fff; }
+        .step-line { height: 2px; flex: 1; background: #E2E8F0; transition: all 0.3s; margin-top: 20px; position: relative; z-index: 1; margin-left: -20px; margin-right: -20px; }
+        .step-line.active { background: #BE2229; }
+        
+        /* Dropzone */
+        .dropzone { border: 2px dashed #CBD5E1; transition: all 0.3s; background: #fff; cursor: pointer; }
+        .dropzone:hover { border-color: #BE2229; background-color: #FAFAFA; }
+        .dropzone.dragging { border-color: #BE2229; background-color: #FFF5F5; transform: scale(1.01); }
+        .dropzone.has-file { border-style: solid; border-color: #10B981; background-color: #F0FDF4; }
+        
+        .progress-bar-fill { transition: width 0.4s ease-out; }
+        
+        .column-tag { background: #F1F5F9; border: 1px solid #E2E8F0; color: #475569; font-size: 12px; padding: 2px 10px; border-radius: 100px; display: inline-flex; align-items: center; }
+        .column-tag.required { border-color: #FECACA; color: #DC2626; background: #FEF2F2; }
+
+        /* Smooth transitions */
+        .step-content { transition: opacity 0.3s ease-in-out; }
+    </style>
+	<script src="../../assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F8FAFC] text-[#334155] min-h-screen flex text-[16px]">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden transition-opacity"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white border-r border-slate-100 flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
+        <button id="close-sidebar" class="xl:hidden absolute top-4 right-4 text-slate-400 hover:text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="px-11 mb-10 w-full flex justify-center">
+            <a href="../dashboard.html"><img src="../../assets/images/header.png" alt="Logo" class="h-[40px] w-auto"></a>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
+            <a href="../dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Dashboard</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Categories</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="products-menu-btn" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0" style="filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%);">
+                        <span class="font-['Poppins'] text-[18px] leading-[28px] text-[#BE2229] font-medium">Products</span>
+                    </div>
+                    <svg id="products-menu-chevron" class="w-4 h-4 text-[#BE2229] transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div id="products-submenu" class="flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-slate-200"></div>
+                    <a href="product-list.html" class="font-['Poppins'] text-[17px] text-slate-500 hover:text-[#BE2229] leading-[27px]">Product List</a>
+                    <a href="add-product.html" class="font-['Poppins'] text-[17px] text-slate-500 hover:text-[#BE2229] leading-[27px]">Add a Product</a>
+                    <a href="bulk-upload.html" class="font-['Poppins'] text-[17px] text-[#BE2229] font-medium leading-[27px]">Bulk Upload</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Orders</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Users</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Inventory</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Analytics</span>
+            </a>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <a href="../settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0 opacity-60">
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Settings</span>
+            </a>
+        
+            <div class="mt-8 mb-2 w-full h-[1px] bg-slate-100"></div>
+
+            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
+                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="font-['Poppins'] text-[18px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
+        <!-- Header -->
+        <div class="px-4 sm:px-10 h-[80px] md:h-auto md:pt-10 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button id="open-sidebar" class="xl:hidden p-2 -ml-2 text-slate-400 hover:text-black">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div>
+                    <h1 class="font-['Poppins'] font-bold text-[24px] text-slate-900 leading-none">Bulk Import</h1>
+                    <p class="text-[14px] text-slate-500 mt-2">Upload products and images in bulk.</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex gap-3">
+                <a href="product-list.html" class="px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 font-medium text-sm hover:bg-slate-50 transition">Cancel</a>
+                <button id="main-import-btn" class="px-8 py-2.5 rounded-lg bg-[#BE2229] text-white font-bold text-sm hover:bg-red-800 transition shadow-md shadow-red-100 hidden">Start Import</button>
+            </div>
+        </div>
+
+        <div class="w-full px-4 sm:px-10 mt-10">
+            <!-- Stepper - Improved Centering & Alignment -->
+            <div class="max-w-[700px] mx-auto mb-16 flex items-center relative">
+                <!-- Line 1 -->
+                <div id="step-1-line" class="step-line"></div>
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center gap-3 relative z-10">
+                    <div id="step-1-circle" class="step-circle active">1</div>
+                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Upload Files</span>
+                </div>
+                <!-- Line 2 -->
+                <div id="step-2-line" class="step-line"></div>
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center gap-3 relative z-10">
+                    <div id="step-2-circle" class="step-circle">2</div>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Validate & Preview</span>
+                </div>
+                <!-- Line 3 -->
+                <div id="step-3-line" class="step-line"></div>
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center gap-3 relative z-10">
+                    <div id="step-3-circle" class="step-circle">3</div>
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Import Data</span>
+                </div>
+                <!-- Line 4 -->
+                <div id="step-4-line" class="step-line invisible"></div>
+            </div>
+
+            <!-- Main Content Card -->
+            <div class="max-w-[1000px] mx-auto bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden min-h-[500px] flex flex-col">
+                
+                <!-- STEP 1: DUAL UPLOAD -->
+                <div id="step-1-content" class="step-content flex-1 p-8 lg:p-12">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                        <!-- CSV Upload (Required) -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <span class="w-6 h-6 bg-slate-900 text-white rounded-full text-[10px] flex items-center justify-center">1</span>
+                                Upload CSV File <span class="text-red-500 font-bold">*</span>
+                            </label>
+                            <div id="csv-dropzone" class="dropzone rounded-2xl flex flex-col items-center justify-center p-8 h-[250px] group relative overflow-hidden">
+                                <div class="icon-container mb-4">
+                                    <svg class="w-10 h-10 text-slate-300 group-hover:text-[#BE2229] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-700 mb-1">Drag CSV here</h4>
+                                <p class="text-xs text-slate-400">or click to browse</p>
+                                <input type="file" id="csv-input" accept=".csv" class="hidden">
+                                
+                                <!-- File Selected State -->
+                                <div id="csv-selected" class="absolute inset-0 bg-green-50 flex flex-col items-center justify-center p-6 hidden">
+                                    <svg class="w-8 h-8 text-green-500 mb-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    <p id="csv-filename" class="text-sm font-bold text-green-800 text-center truncate w-full px-4">products.csv</p>
+                                    <button id="remove-csv" class="mt-4 text-xs font-bold text-red-500 hover:underline">Remove file</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ZIP Upload (Optional) -->
+                        <div class="flex flex-col">
+                            <label class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <span class="w-6 h-6 bg-slate-400 text-white rounded-full text-[10px] flex items-center justify-center">2</span>
+                                Upload Images ZIP <span class="text-slate-400 font-normal">(Optional)</span>
+                            </label>
+                            <div id="zip-dropzone" class="dropzone rounded-2xl flex flex-col items-center justify-center p-8 h-[250px] group relative overflow-hidden">
+                                <div class="icon-container mb-4">
+                                    <svg class="w-10 h-10 text-slate-300 group-hover:text-[#BE2229] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-700 mb-1">Drag Images ZIP here</h4>
+                                <p class="text-xs text-slate-400">or click to browse</p>
+                                <input type="file" id="zip-input" accept=".zip" class="hidden">
+
+                                <!-- File Selected State -->
+                                <div id="zip-selected" class="absolute inset-0 bg-blue-50 flex flex-col items-center justify-center p-6 hidden">
+                                    <svg class="w-8 h-8 text-blue-500 mb-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    <p id="zip-filename" class="text-sm font-bold text-blue-800 text-center truncate w-full px-4">images.zip</p>
+                                    <button id="remove-zip" class="mt-4 text-xs font-bold text-red-500 hover:underline">Remove file</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conditional Messaging -->
+                    <div id="upload-status-msg" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-5 mb-10 flex items-center gap-4 transition-all opacity-0">
+                        <div id="status-icon-container" class="w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                            <!-- Icon injected via JS -->
+                        </div>
+                        <div>
+                            <h5 id="status-title" class="font-bold text-slate-800 text-sm">Waiting for files...</h5>
+                            <p id="status-desc" class="text-xs text-slate-500 mt-1">Please upload the required CSV file to proceed.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button id="go-to-preview" class="w-full max-w-[400px] h-14 bg-slate-100 text-slate-400 font-bold rounded-xl transition cursor-not-allowed" disabled>Continue to Preview</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PREVIEW -->
+                <div id="step-2-content" class="step-content hidden flex-1 flex flex-col overflow-hidden">
+                    <div class="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Validation & Preview</h3>
+                            <p class="text-xs text-slate-500 mt-1">Found <span id="preview-row-count" class="font-bold text-[#BE2229]">0</span> rows. Previewing the first 10 rows.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <div id="validation-badge" class="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-100 text-xs font-bold">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                All rows valid
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead class="bg-slate-50 sticky top-0 z-10">
+                                <tr id="preview-header" class="text-slate-400 font-bold uppercase tracking-widest text-[10px] h-12">
+                                    <!-- Dynamic Headers -->
+                                </tr>
+                            </thead>
+                            <tbody id="preview-body" class="divide-y divide-slate-100">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- STEP 3: IMPORTING -->
+                <div id="step-3-content" class="step-content hidden flex-1 p-16 lg:p-24 flex flex-col items-center justify-center">
+                    <div id="import-active" class="w-full max-w-[500px] flex flex-col items-center text-center">
+                        <div class="w-28 h-28 relative mb-10">
+                            <svg class="w-full h-full text-slate-100" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="6"></circle>
+                                <circle id="progress-circle" cx="50" cy="50" r="45" fill="none" stroke="#BE2229" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" class="transition-all duration-500"></circle>
+                            </svg>
+                            <div id="progress-percentage" class="absolute inset-0 flex items-center justify-center font-['Poppins'] font-bold text-2xl text-[#BE2229]">0%</div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 mb-10">
+                            <h3 id="import-status-text" class="text-xl font-bold text-slate-800">Uploading file...</h3>
+                            <p id="import-processed-text" class="text-slate-400 text-sm">Initializing connection to server</p>
+                        </div>
+                        
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+                            <div id="progress-bar" class="h-full bg-[#BE2229] progress-bar-fill shadow-[0_0_10px_rgba(190,34,41,0.3)]" style="width: 0%"></div>
+                        </div>
+                        <div class="w-full flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span>Progress</span>
+                            <span id="progress-fraction">0 / 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebars / Sections -->
+            <div class="max-w-[1000px] mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Supported Columns -->
+                <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm box-shadow-card">
+                    <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                        Supported Columns
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="column-tag required">sku *</span>
+                        <span class="column-tag required">name *</span>
+                        <span class="column-tag required">unitPrice *</span>
+                        <span class="column-tag required">batch1_qty *</span>
+                        <span class="column-tag required">batch1_price *</span>
+                        <span class="column-tag">discountPercent</span>
+                        <span class="column-tag">gstPercent</span>
+                        <span class="column-tag">category</span>
+                        <span class="column-tag">subcategory</span>
+                        <span class="column-tag">description</span>
+                        <span class="column-tag">image_names</span>
+                        <span class="column-tag">batch2_qty</span>
+                        <span class="column-tag">batch2_price</span>
+                    </div>
+                    <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p class="text-[12px] text-slate-500 leading-relaxed italic">Tip: Ensure your headers match these exactly for the most accurate import. Required fields are marked in red.</p>
+                    </div>
+                </div>
+
+                <!-- Rules & Samples -->
+                <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm box-shadow-card flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Import Rules
+                        </h4>
+                        <ul class="space-y-3 text-[13px] text-slate-600">
+                            <li class="flex items-start gap-2"><svg class="w-4 h-4 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> <span>File must be in <strong>.CSV</strong> format only.</span></li>
+                            <li class="flex items-start gap-2"><svg class="w-4 h-4 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> <span>ZIP should contain images only.</span></li>
+                        </ul>
+                    </div>
+                    <!-- Fixed Download Button Alignment -->
+                    <a href="../../assets/samples/products_sample.csv" download class="mt-8 flex items-center justify-between p-4 border border-[#BE2229]/30 bg-white rounded-xl text-[#BE2229] font-bold text-sm hover:bg-[#BE2229] hover:text-white transition-all group shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-[#BE2229]/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </div>
+                            <span>Download Sample CSV</span>
+                        </div>
+                        <svg class="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Result Summary Modal -->
+    <div id="result-modal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="bg-white w-full max-w-[500px] rounded-3xl shadow-2xl relative z-10 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="modal-container">
+            <!-- Modal Header -->
+            <div class="p-8 text-center border-b border-slate-50">
+                <div id="modal-icon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <!-- Icon Injected via JS -->
+                </div>
+                <h2 id="modal-title" class="text-2xl font-bold text-slate-900">Import Completed</h2>
+                <p id="modal-subtitle" class="text-slate-500 mt-2 text-sm">Your product database has been updated.</p>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-8 bg-slate-50/50">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Records</p>
+                        <p id="sum-total" class="text-2xl font-bold text-slate-800">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Successfully Added</p>
+                        <p id="sum-added" class="text-2xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">Updated</p>
+                        <p id="sum-updated" class="text-2xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Failed Records</p>
+                        <p id="sum-failed" class="text-2xl font-bold text-red-600">0</p>
+                    </div>
+                </div>
+
+                <!-- Error Preview (if any) -->
+                <div id="modal-error-box" class="mt-6 hidden">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Error Details</h4>
+                        <button id="download-error-btn" class="text-[#BE2229] text-[11px] font-bold hover:underline flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download CSV
+                        </button>
+                    </div>
+                    <div class="bg-red-50 border border-red-100 rounded-xl p-4 max-h-[120px] overflow-y-auto font-mono text-[11px] text-red-700 leading-relaxed" id="error-preview-list">
+                        <!-- Errors injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-8 flex flex-col sm:flex-row gap-3 bg-white">
+                <button onclick="window.location.reload()" class="flex-1 h-12 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition">Upload Again</button>
+                <a href="product-list.html" class="flex-1 h-12 bg-[#BE2229] text-white font-bold rounded-xl flex items-center justify-center hover:bg-red-800 transition shadow-lg shadow-red-100">View Products</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/bulk-upload.js"></script>
+    <script>
+        // Sidebar logic
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        openBtn?.addEventListener('click', toggleSidebar);
+        closeBtn?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        document.getElementById('products-menu-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const sub = document.getElementById('products-submenu');
+            const chev = document.getElementById('products-menu-chevron');
+            if (sub.classList.contains('hidden')) { sub.classList.remove('hidden'); sub.classList.add('flex'); chev.classList.add('rotate-180'); }
+            else { sub.classList.add('hidden'); sub.classList.remove('flex'); chev.classList.remove('rotate-180'); }
+        });
+    </script>
+</body>
+</html>
+
+

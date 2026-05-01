@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment Variables
+.env
+Backend/.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Local Uploads/Scratch
+Backend/uploads/*
+!Backend/uploads/.gitkeep
+!Backend/uploads/**/.gitkeep
+Backend/scratch/
+admin/tmp/
+
+# Temporary files
+tmp/
+temp/

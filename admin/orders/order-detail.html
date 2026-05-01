@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala Admin | Order Details</title>
+
+    <link rel="icon" type="image/png" href="../../favicon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../assets/css/style.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .box-shadow-card { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
+    </style>
+	<script src="../../assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
+        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="px-11 mb-10 w-full flex justify-center">
+            <a href="../dashboard.html"><img src="../../assets/images/header.png" alt="Springwala Admin Logo" class="h-[40px] w-auto"></a>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
+            <a href="../dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]">Products</span>
+                    </div>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="../products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
+                    <a href="../products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
+                    <a href="../products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../orders.html" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0" style="filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%);">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229]">Orders</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
+                    </div>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
+                    <a href="../banners/homepage.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Homepage</a>
+                    <a href="../banners/category.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Category</a>
+                    <a href="../banners/promotional.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Promotional</a>
+                    <a href="../banners/features.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Features</a>
+                    <a href="../banners/advertisement.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Advertisement</a>
+                    <a href="../banners/section.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Section</a>
+                    <a href="../banners/informational.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Informational</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+
+            <a href="../settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
+            </a>
+        
+            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
+
+            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
+                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
+        <!-- Persistent Top Bar -->
+        <div class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-[24px] xl:px-8 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-4 flex-1">
+                <button id="open-sidebar" class="md:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center admin-name">Admin</h2>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="w-full px-4 sm:px-[24px] xl:px-8 mt-[20px] flex flex-col gap-6">
+            
+            <!-- Back & Title -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="../orders.html" class="w-10 h-10 bg-white border border-[#E9E9E9] rounded-[5px] flex items-center justify-center hover:bg-gray-50 transition shrink-0 shadow-sm">
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </a>
+                    <div>
+                        <h1 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Order Details</h1>
+                        <p class="text-[14px] text-gray-500">Order ID: <span id="detail-order-id" class="font-bold text-black">Loading...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Left Column: Order Summary & Items -->
+                <div class="xl:col-span-2 flex flex-col gap-6">
+                    <!-- Order Summary Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-[10px] border border-[#E9E9E9] box-shadow-card flex flex-col items-center text-center">
+                            <span class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Status</span>
+                            <div id="detail-order-status">...</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-[10px] border border-[#E9E9E9] box-shadow-card flex flex-col items-center text-center">
+                            <span class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Payment</span>
+                            <div id="detail-payment-status">...</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-[10px] border border-[#E9E9E9] box-shadow-card flex flex-col items-center text-center">
+                            <span class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Method</span>
+                            <span id="detail-payment-method" class="font-['Roboto'] font-medium text-[15px]">...</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-[10px] border border-[#E9E9E9] box-shadow-card flex flex-col items-center text-center">
+                            <span class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Date</span>
+                            <span id="detail-order-date" class="font-['Roboto'] font-medium text-[15px]">...</span>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="bg-white rounded-[10px] border border-[#E9E9E9] box-shadow-card overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <h3 class="font-['Poppins'] font-medium text-[18px]">Order Items</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50">
+                                    <tr class="text-[13px] font-bold text-gray-400 uppercase tracking-widest h-12">
+                                        <th class="px-6">Product</th>
+                                        <th class="px-4 text-center">Price</th>
+                                        <th class="px-4 text-center">Qty</th>
+                                        <th class="px-6 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-items-tbody">
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-10 text-center text-gray-400">Loading items...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Financial Summary -->
+                        <div class="p-6 bg-gray-50/30 flex justify-end">
+                            <div class="w-full max-w-[300px] space-y-3">
+                                <div class="flex justify-between text-[15px]">
+                                    <span class="text-gray-500">Subtotal</span>
+                                    <span id="detail-subtotal" class="font-medium">₹0</span>
+                                </div>
+                                <div class="flex justify-between text-[15px]">
+                                    <span class="text-gray-500">Shipping</span>
+                                    <span id="detail-shipping" class="font-medium">₹0</span>
+                                </div>
+                                <div class="flex justify-between text-[15px]">
+                                    <span class="text-gray-500">Discount</span>
+                                    <span id="detail-discount" class="font-medium text-green-500">- ₹0</span>
+                                </div>
+                                <div class="w-full h-[1px] bg-gray-200 my-2"></div>
+                                <div class="flex justify-between text-[18px] font-bold">
+                                    <span>Total Amount</span>
+                                    <span id="detail-total" class="text-[#BE2229]">₹0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status History Timeline -->
+                    <div class="bg-white rounded-[10px] border border-[#E9E9E9] box-shadow-card p-6">
+                        <h3 class="font-['Poppins'] font-medium text-[18px] mb-6 border-b border-gray-100 pb-4">Order History</h3>
+                        <div id="status-history-list" class="space-y-4">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Customer & Update Form -->
+                <div class="flex flex-col gap-6">
+                    <!-- Customer Details -->
+                    <div class="bg-white rounded-[10px] border border-[#E9E9E9] box-shadow-card p-6">
+                        <h3 class="font-['Poppins'] font-medium text-[18px] mb-6 border-b border-gray-100 pb-4">Customer Info</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Name</label>
+                                <p id="detail-customer-name" class="font-['Roboto'] font-medium text-[16px]">...</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Email</label>
+                                <p id="detail-customer-email" class="font-['Roboto'] text-[15px] text-gray-600">...</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Phone</label>
+                                <p id="detail-customer-phone" class="font-['Roboto'] text-[15px] text-gray-600">...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="bg-white rounded-[10px] border border-[#E9E9E9] box-shadow-card p-6">
+                        <h3 class="font-['Poppins'] font-medium text-[18px] mb-6 border-b border-gray-100 pb-4">Shipping Address</h3>
+                        <div id="detail-address" class="text-[15px] leading-relaxed text-gray-600">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Update Order Form -->
+                    <div class="bg-white rounded-[10px] border border-[#E9E9E9] box-shadow-card p-6">
+                        <h3 class="font-['Poppins'] font-medium text-[18px] mb-6 border-b border-gray-100 pb-4">Manage Order</h3>
+                        <div id="update-status-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+                                <select id="status-select" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Returned">Returned</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                                <select id="payment-status-select" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Failed">Failed</option>
+                                    <option value="Refunded">Refunded</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Courier</label>
+                                    <input id="courier-input" type="text" placeholder="e.g. BlueDart" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tracking #</label>
+                                    <input id="tracking-input" type="text" placeholder="AWB Number" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Internal Note</label>
+                                <textarea id="note-input" placeholder="Add a note to history..." class="w-full h-24 bg-gray-50 border border-gray-200 rounded-lg p-4 outline-none focus:border-[#BE2229] transition resize-none"></textarea>
+                            </div>
+                            <div id="cancel-reason-container" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 text-red-500">Cancel Reason</label>
+                                <input id="cancel-reason-input" type="text" placeholder="Reason for cancellation" class="w-full h-11 bg-red-50 border border-red-200 rounded-lg px-4 outline-none focus:border-red-500 transition">
+                            </div>
+                            <button id="update-btn" class="w-full h-12 bg-[#BE2229] text-white font-bold rounded-lg shadow-md hover:bg-red-800 transition transform active:scale-95">Update Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script>
+        Auth.requireAuth();
+    </script>
+    <script src="../../assets/js/order-detail.js"></script>
+    <script>
+        // Sidebar logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        if (openBtn) openBtn.addEventListener('click', toggleSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // Dropdowns
+        const productsBtn = document.getElementById('products-menu-btn');
+        const productsSub = document.getElementById('products-submenu');
+        const productsChev = document.getElementById('products-menu-chevron');
+
+        if (productsBtn) {
+            productsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isHidden = productsSub.classList.contains('hidden');
+                productsSub.classList.toggle('hidden', !isHidden);
+                productsSub.classList.toggle('flex', isHidden);
+                productsChev.classList.toggle('rotate-180', isHidden);
+            });
+        }
+
+        // Show/hide cancel reason
+        const statusSelect = document.getElementById('status-select');
+        const cancelReasonContainer = document.getElementById('cancel-reason-container');
+        if (statusSelect && cancelReasonContainer) {
+            statusSelect.addEventListener('change', () => {
+                if (statusSelect.value === 'Cancelled') {
+                    cancelReasonContainer.classList.remove('hidden');
+                } else {
+                    cancelReasonContainer.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

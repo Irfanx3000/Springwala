@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Springwala</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 for beautiful notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F4F6F6;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Auto Slider CSS Animation */
+        .slide {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            inset: 0;
+        }
+
+        .slide.active {
+            opacity: 1;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 24px;
+            height: 4px;
+            border-radius: 9999px;
+            background-color: #D9D9D9;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .indicator.active {
+            background-color: #625656;
+        }
+
+        /* Ensures the container fits on smaller latpop screens without scrolling body */
+        .responsive-container {
+            width: 100%;
+            max-width: 1110px;
+            height: calc(100vh - 40px);
+            max-height: 743px;
+        }
+
+        /* Mobile specific overrides */
+        @media (max-width: 1023px) {
+            .responsive-container {
+                max-width: 428px;
+                height: calc(100vh - 32px);
+                max-height: 900px;
+            }
+        }
+
+        /* Hide scrollbar for auth panels but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Loading state for buttons */
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-loading::after {
+            content: " ...";
+        }
+    </style>
+	<script src="assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F4F6F6] min-h-screen flex items-center justify-center p-4 md:p-5 relative w-full overflow-hidden">
+
+    <!-- Overall Responsive Container -->
+    <div
+        class="responsive-container bg-white rounded-[10px] shadow-[0px_4px_13.3px_rgba(0,0,0,0.15)] flex flex-col lg:flex-row overflow-hidden relative">
+
+        <!-- Desktop Slider Panel (Left Side - 50%) -->
+        <div class="hidden lg:block w-1/2 bg-[#E6E6E6] relative overflow-hidden transition-transform duration-[600ms] ease-in-out transform translate-x-0"
+            id="slider-container">
+            <div id="slider" class="w-full h-full relative">
+                <div class="slide active bg-cover bg-center"
+                    style="background-image: url('assets/banners/login-1.png'); background-color: #E6E6E6;"></div>
+                <div class="slide bg-cover bg-center"
+                    style="background-image: url('assets/banners/login-2.png'); background-color: #D9D9D9;">
+                </div>
+                <div class="slide bg-cover bg-center"
+                    style="background-image: url('assets/banners/categories.png'); background-color: #F0F0F0;">
+                </div>
+            </div>
+            <div class="absolute bottom-[38px] left-1/2 -translate-x-1/2 flex items-center gap-[6px] z-20"
+                id="slider-indicators">
+                <div class="indicator active" data-slide="0"></div>
+                <div class="indicator" data-slide="1"></div>
+                <div class="indicator" data-slide="2"></div>
+            </div>
+        </div>
+
+        <!-- Right Side Panel (Form Content - 100% Mobile, 50% Desktop) -->
+        <div id="form-container"
+            class="w-full lg:w-1/2 bg-white flex flex-col relative h-full overflow-hidden transition-transform duration-[600ms] ease-in-out transform translate-x-0 z-10">
+
+            <!-- Sliding Container for Panels -->
+            <div id="auth-slider"
+                class="absolute left-0 top-0 h-full flex transition-transform duration-[600ms] ease-in-out transform translate-x-0"
+                style="width: 300%;">
+
+                <!-- ================== PANEL 0: LOGIN ================== -->
+                <div
+                    class="w-1/3 h-full flex-shrink-0 flex flex-col items-center justify-center py-[20px] px-[20px] lg:px-[40px] overflow-y-auto no-scrollbar">
+                    <div
+                        class="w-full max-w-[365px] flex flex-col items-center flex-1 justify-center my-auto min-h-min">
+                        <div
+                            class="w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] rounded-full mx-auto flex items-center justify-center overflow-hidden bg-white mb-[15px] lg:mb-[25px] flex-shrink-0">
+                            <img src="assets/images/welcome.png" alt="Welcome Robo"
+                                class="w-full h-full object-cover rounded-full border border-gray-100">
+                        </div>
+                        <h1
+                            class="text-[#000000] text-[22px] lg:text-[24px] font-normal leading-[1.3] text-center mb-[20px] lg:mb-[30px] flex-shrink-0">
+                            Welcome Back!
+                        </h1>
+                        <div class="w-full flex flex-col gap-[10px] lg:gap-[12px] flex-shrink-0">
+                            <div class="w-full h-[55px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="text" id="loginIdentifier" placeholder="Enter Your Email or Phone Number"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] lg:text-[16px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+                            <div
+                                class="w-full h-[55px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px] relative">
+                                <input type="password" id="loginPassword" placeholder="Enter Password"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] lg:text-[16px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40 pr-[40px]">
+                                <button type="button" id="togglePasswordBtn"
+                                    class="absolute right-[16px] text-black opacity-50 hover:opacity-100 transition p-2 cursor-pointer flex items-center justify-center bg-transparent border-none">
+                                    <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full mt-[10px] mb-[20px] lg:mb-[30px] text-center pl-[5px] flex-shrink-0">
+                            <button onclick="slideAuth(2)"
+                                class="text-[#BE2229] border-none bg-transparent cursor-pointer text-[12px] font-normal leading-[18px] underline outline-none">Forgot
+                                Password?</button>
+                        </div>
+                        <div class="w-full flex flex-col gap-[8px] lg:gap-[10px] flex-shrink-0">
+                            <button id="loginBtn"
+                                class="w-full h-[40px] bg-[#BE2229] rounded-[5px] flex items-center justify-center text-[#FFFFFF] text-[15px] lg:text-[16px] font-semibold leading-[24px] hover:bg-red-800 transition shadow-sm">
+                                Login
+                            </button>
+                            <a href="index.html"
+                                class="w-full h-[40px] bg-[#EDEDED] border border-[#DADADA] rounded-[5px] flex items-center justify-center text-[#474747] text-[15px] lg:text-[16px] font-semibold leading-[24px] hover:bg-[#e0e0e0] transition shadow-sm">
+                                Continue as Guest
+                            </a>
+                            <button id="googleLoginBtn"
+                                class="w-full h-[40px] bg-[#FFFFFF] border border-[#DADADA] rounded-[5px] flex items-center justify-center gap-[10px] text-[#474747] text-[15px] lg:text-[16px] font-semibold leading-[24px] hover:bg-gray-50 transition shadow-sm">
+                                <svg width="20" height="21" viewBox="0 0 20 21" fill="none">
+                                    <path
+                                        d="M19.6059 10.7412C19.6059 10.0381 19.5428 9.35914 19.4239 8.70526H10.0059V12.5516H15.3853C15.1537 13.7947 14.4442 14.8516 13.3884 15.5589V18.0611H16.6231C18.5173 16.3195 19.6059 13.7663 19.6059 10.7412Z"
+                                        fill="#4285F4" />
+                                    <path
+                                        d="M10.0059 20.5284C12.7048 20.5284 14.9748 19.6337 16.6231 18.0611L13.3884 15.5589C12.4968 16.1568 11.3526 16.5116 10.0059 16.5116C7.40484 16.5116 5.19747 14.7558 4.4101 12.3958H1.06696V14.9853C2.71538 18.2611 6.10801 20.5284 10.0059 20.5284Z"
+                                        fill="#34A853" />
+                                    <path
+                                        d="M4.41009 12.3958C4.20857 11.7916 4.09536 11.1495 4.09536 10.4916C4.09536 9.83368 4.20857 9.19158 4.41009 8.58737V5.99789H1.06695C0.388005 7.35158 0 8.87789 0 10.4916C0 12.1053 0.388005 13.6316 1.06695 14.9853L4.41009 12.3958Z"
+                                        fill="#FBBC05" />
+                                    <path
+                                        d="M10.0059 4.47158C11.4748 4.47158 12.7906 4.97684 13.8275 5.96526L16.6943 3.09842C14.9696 1.49158 12.6996 0.454735 10.0059 0.454735C6.10801 0.454735 2.71538 2.72211 1.06696 5.99789L4.4101 8.58737C5.19747 6.22737 7.40484 4.47158 10.0059 4.47158Z"
+                                        fill="#EA4335" />
+                                </svg>
+                                Sign in with Google
+                            </button>
+                            <div class="text-center mt-[8px]">
+                                <span class="text-[#000000] text-[12px] font-normal leading-[18px]">New User? </span>
+                                <button onclick="slideAuth(1)"
+                                    class="text-[#BE2229] border-none bg-transparent cursor-pointer text-[12px] font-normal leading-[18px] underline outline-none">Register
+                                    Now!</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================== PANEL 1: REGISTER ================== -->
+                <div
+                    class="w-1/3 h-full flex-shrink-0 flex flex-col items-center justify-center py-[20px] px-[20px] lg:px-[40px] overflow-y-auto no-scrollbar">
+                    <div
+                        class="w-full max-w-[365px] flex flex-col items-center flex-1 justify-center my-auto min-h-min">
+                        <div
+                            class="w-[100px] h-[100px] lg:w-[120px] lg:h-[120px] rounded-full mx-auto flex items-center justify-center overflow-hidden bg-white mb-[15px] flex-shrink-0">
+                            <img src="assets/images/welcome.png" alt="Register Robo"
+                                class="w-full h-full object-cover rounded-full border border-gray-100">
+                        </div>
+                        <h1
+                            class="text-[#000000] text-[22px] lg:text-[24px] font-normal leading-[1.3] text-center mb-[20px] flex-shrink-0">
+                            Create Your Account
+                        </h1>
+                        <div class="w-full flex flex-col gap-[10px] lg:gap-[12px] flex-shrink-0">
+                            <div class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="text" id="regFirstName" placeholder="First Name"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+                            <div class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="text" id="regLastName" placeholder="Last Name"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+                            <div class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="email" id="regEmail" placeholder="Email Address"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+                            <div class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="tel" id="regPhoneNumber" placeholder="Phone Number (10 digits - Optional)"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+
+                            <!-- OTP Preference Selection -->
+                            <div class="w-full flex gap-[10px] items-center justify-between mt-[5px]">
+                                <label class="text-[12px] text-gray-600">Receive OTP via:</label>
+                                <div class="flex gap-[15px]">
+                                    <label class="flex items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="otpPreference" value="email" checked class="w-4 h-4 accent-[#BE2229]">
+                                        <span class="text-[12px]">Email</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 cursor-pointer">
+                                        <input type="radio" name="otpPreference" value="sms" class="w-4 h-4 accent-[#BE2229]">
+                                        <span class="text-[12px]">SMS</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div
+                                class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px] relative">
+                                <input type="password" id="regPassword" placeholder="Password"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40 pr-[40px]">
+                                <button type="button" id="toggleRegPasswordBtn"
+                                    class="absolute right-[16px] text-black opacity-50 hover:opacity-100 transition p-2 cursor-pointer flex items-center justify-center bg-transparent border-none">
+                                    <svg id="eyeIconReg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div
+                                class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px] relative">
+                                <input type="password" id="regConfirmPassword" placeholder="Confirm Password"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40 pr-[40px]">
+                                <button type="button" id="toggleRegConfirmBtn"
+                                    class="absolute right-[16px] text-black opacity-50 hover:opacity-100 transition p-2 cursor-pointer flex items-center justify-center bg-transparent border-none">
+                                    <svg id="eyeIconRegConf" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path
+                                            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full flex flex-col gap-[8px] mt-[15px] flex-shrink-0">
+                            <button id="registerBtn"
+                                class="w-full h-[40px] bg-[#BE2229] rounded-[5px] flex items-center justify-center text-[#FFFFFF] text-[15px] font-semibold leading-[24px] hover:bg-red-800 transition shadow-sm">
+                                Register
+                            </button> 
+                            <button id="googleRegisterBtn"
+                                class="w-full h-[40px] bg-[#FFFFFF] border border-[#DADADA] rounded-[5px] flex items-center justify-center gap-[10px] text-[#474747] text-[15px] font-semibold leading-[24px] hover:bg-gray-50 transition shadow-sm">
+                                <svg width="20" height="21" viewBox="0 0 20 21" fill="none">
+                                    <path
+                                        d="M19.6059 10.7412C19.6059 10.0381 19.5428 9.35914 19.4239 8.70526H10.0059V12.5516H15.3853C15.1537 13.7947 14.4442 14.8516 13.3884 15.5589V18.0611H16.6231C18.5173 16.3195 19.6059 13.7663 19.6059 10.7412Z"
+                                        fill="#4285F4" />
+                                    <path
+                                        d="M10.0059 20.5284C12.7048 20.5284 14.9748 19.6337 16.6231 18.0611L13.3884 15.5589C12.4968 16.1568 11.3526 16.5116 10.0059 16.5116C7.40484 16.5116 5.19747 14.7558 4.4101 12.3958H1.06696V14.9853C2.71538 18.2611 6.10801 20.5284 10.0059 20.5284Z"
+                                        fill="#34A853" />
+                                    <path
+                                        d="M4.41009 12.3958C4.20857 11.7916 4.09536 11.1495 4.09536 10.4916C4.09536 9.83368 4.20857 9.19158 4.41009 8.58737V5.99789H1.06695C0.388005 7.35158 0 8.87789 0 10.4916C0 12.1053 0.388005 13.6316 1.06695 14.9853L4.41009 12.3958Z"
+                                        fill="#FBBC05" />
+                                    <path
+                                        d="M10.0059 4.47158C11.4748 4.47158 12.7906 4.97684 13.8275 5.96526L16.6943 3.09842C14.9696 1.49158 12.6996 0.454735 10.0059 0.454735C6.10801 0.454735 2.71538 2.72211 1.06696 5.99789L4.4101 8.58737C5.19747 6.22737 7.40484 4.47158 10.0059 4.47158Z"
+                                        fill="#EA4335" />
+                                </svg>
+                                Sign in with Google
+                            </button>
+                            <div class="text-center mt-[8px]">
+                                <span class="text-[#000000] text-[12px] font-normal leading-[18px]">Already a User?
+                                </span>
+                                <button onclick="slideAuth(0)"
+                                    class="text-[#BE2229] border-none bg-transparent cursor-pointer text-[12px] font-normal leading-[18px] underline outline-none">Login</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================== PANEL 2: FORGOT PASSWORD ================== -->
+                <div
+                    class="w-1/3 h-full flex-shrink-0 flex flex-col items-center justify-center py-[20px] px-[20px] lg:px-[40px] overflow-y-auto no-scrollbar">
+                    <div
+                        class="w-full max-w-[365px] flex flex-col items-center flex-1 justify-center my-auto min-h-min">
+                        <div
+                            class="w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] rounded-full mx-auto flex items-center justify-center overflow-hidden bg-white mb-[15px] lg:mb-[25px] flex-shrink-0">
+                            <img src="assets/images/oops.png" alt="Forgot Password Robo"
+                                class="w-full h-full object-cover rounded-full border border-gray-100">
+                        </div>
+                        <h1
+                            class="text-[#000000] text-[22px] lg:text-[24px] font-normal leading-[1.3] text-center mb-[20px] lg:mb-[30px] flex-shrink-0">
+                            Forgot Your Password?
+                        </h1>
+                        <div class="w-full flex flex-col gap-[10px] lg:gap-[12px] flex-shrink-0">
+                            <div class="w-full h-[55px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px]">
+                                <input type="text" id="forgotIdentifier" placeholder="Enter Your Email or Phone Number"
+                                    class="w-full bg-transparent border-none outline-none text-[15px] lg:text-[16px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
+                            </div>
+                        </div>
+                        <div class="w-full flex flex-col gap-[8px] mt-[15px] lg:mt-[20px] mb-[15px] flex-shrink-0">
+                            <button id="sendResetLinkBtn"
+                                class="w-full h-[40px] bg-[#BE2229] rounded-[5px] flex items-center justify-center text-[#FFFFFF] text-[15px] lg:text-[16px] font-semibold leading-[24px] hover:bg-red-800 transition shadow-sm">
+                                Send Reset Link
+                            </button>
+                        </div>
+                        <div class="text-center flex-shrink-0">
+                            <button onclick="slideAuth(0)"
+                                class="text-[#BE2229] border-none bg-transparent cursor-pointer text-[12px] font-normal leading-[18px] underline outline-none">Back
+                                to Login</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Backend Integration JavaScript -->
+    <script>
+        // API Configuration
+        const API_BASE_URL = CONFIG.API_BASE_URL;
+        
+        // Check for Google OAuth callback on page load
+        
+        let currentOTPIdentifier = null;
+        let currentOTPChannel = null;
+        
+        // Helper function to make API requests
+        async function apiRequest(endpoint, method, data) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            };
+            
+            const response = await fetch(url, options);
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.message || 'Something went wrong');
+            }
+            
+            return result;
+        }
+        
+        // Store token in localStorage
+        function storeToken(token, user = null) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('userToken', token); // Compatibility
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('springwalaUser', JSON.stringify(user)); // Compatibility
+            }
+        }
+        
+        function getToken() {
+            return localStorage.getItem('token') || localStorage.getItem('userToken');
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('springwalaUser');
+        }
+        
+        // Show notification using SweetAlert
+        function showNotification(title, message, type = 'success') {
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: type,
+                confirmButtonColor: '#BE2229',
+                timer: type === 'success' ? 3000 : 5000,
+                timerProgressBar: true
+            });
+        }
+        
+        // Show OTP verification modal with channel support
+        async function showOTPModal(identifier, channel = 'email') {
+            currentOTPIdentifier = identifier;
+            currentOTPChannel = channel;
+            
+            const result = await Swal.fire({
+                title: 'Verify Your Account',
+                html: `
+                    <p style="margin-bottom: 15px;">We've sent a verification code via <strong>${channel.toUpperCase()}</strong> to:</p>
+                    <strong style="color: #BE2229; word-break: break-all;">${identifier}</strong>
+                    <input type="text" id="otpInput" class="swal2-input" placeholder="Enter 6-digit OTP" maxlength="6" style="margin-top: 15px; text-align: center; font-size: 20px; letter-spacing: 5px;">
+                    <button id="resendOtpBtn" style="margin-top: 15px; background: none; border: none; color: #BE2229; cursor: pointer; text-decoration: underline;">Resend OTP</button>
+                `,
+                confirmButtonText: 'Verify',
+                cancelButtonText: 'Cancel',
+                showCancelButton: true,
+                confirmButtonColor: '#BE2229',
+                didOpen: () => {
+                    const resendBtn = document.getElementById('resendOtpBtn');
+                    if (resendBtn) {
+                        resendBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            Swal.showLoading();
+                            try {
+                                const resendResult = await apiRequest('/auth/resend-otp', 'POST', { identifier: currentOTPIdentifier });
+                                Swal.close();
+                                if (resendResult.devOTP) {
+                                    await Swal.fire({
+                                        title: 'Development Mode',
+                                        text: `Your new OTP is: ${resendResult.devOTP}`,
+                                        icon: 'info',
+                                        confirmButtonColor: '#BE2229'
+                                    });
+                                } else {
+                                    showNotification('OTP Resent', `New verification code sent via ${(resendResult.channel || channel).toUpperCase()}`, 'success');
+                                }
+                                setTimeout(() => showOTPModal(currentOTPIdentifier, resendResult.channel || channel), 500);
+                            } catch (error) {
+                                Swal.close();
+                                showNotification('Failed', error.message, 'error');
+                            }
+                        });
+                    }
+                },
+                preConfirm: () => {
+                    const otp = document.getElementById('otpInput')?.value;
+                    if (!otp || otp.length !== 6) {
+                        Swal.showValidationMessage('Please enter a valid 6-digit OTP');
+                        return false;
+                    }
+                    if (!/^\d+$/.test(otp)) {
+                        Swal.showValidationMessage('OTP must contain only numbers');
+                        return false;
+                    }
+                    return otp;
+                }
+            });
+            
+            if (result.isConfirmed && result.value) {
+                try {
+                    const verifyResult = await apiRequest('/auth/verify-otp', 'POST', { 
+                        identifier: currentOTPIdentifier, 
+                        otp: result.value 
+                    });
+                    
+                    if (verifyResult.success) {
+                        storeToken(verifyResult.token, verifyResult.user);
+                        // Merge guest cart after verification
+                        if (typeof Cart !== 'undefined' && Cart.mergeGuestCart) {
+                            await Cart.mergeGuestCart();
+                        }
+                        showNotification('Success!', 'Account verified successfully! Redirecting...', 'success');
+                        
+                        // Post-login redirect logic
+                        const redirect = localStorage.getItem("redirectAfterLogin");
+                        if (redirect) {
+                            localStorage.removeItem("redirectAfterLogin");
+                            setTimeout(() => {
+                                window.location.href = redirect;
+                            }, 2000);
+                        } else {
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 2000);
+                        }
+                    }
+                } catch (error) {
+                    showNotification('Verification Failed', error.message, 'error');
+                    if (!error.message.includes('expired') && !error.message.includes('attempts')) {
+                        setTimeout(() => showOTPModal(currentOTPIdentifier, currentOTPChannel), 1000);
+                    }
+                }
+            }
+        }
+        
+        // REGISTER FUNCTIONALITY - Complete with SMS/Email support
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const firstName = document.getElementById('regFirstName').value.trim();
+            const lastName = document.getElementById('regLastName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const phoneNumber = document.getElementById('regPhoneNumber').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // Get OTP preference
+            let otpPreference = 'email';
+            const smsRadio = document.querySelector('input[name="otpPreference"][value="sms"]');
+            if (smsRadio && smsRadio.checked) {
+                otpPreference = 'sms';
+            }
+            
+            // Validation
+            if (!firstName || !lastName || !password) {
+                showNotification('Missing Fields', 'First name, last name, and password are required', 'error');
+                return;
+            }
+            
+            if (!email && !phoneNumber) {
+                showNotification('Missing Contact', 'Please provide either email OR phone number', 'error');
+                return;
+            }
+            
+            if (email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showNotification('Invalid Email', 'Please enter a valid email address', 'error');
+                    return;
+                }
+            }
+            
+            if (phoneNumber) {
+                const phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(phoneNumber)) {
+                    showNotification('Invalid Phone', 'Please enter a valid 10-digit phone number', 'error');
+                    return;
+                }
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Password Mismatch', 'Passwords do not match', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('Weak Password', 'Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('registerBtn');
+            const originalText = btn.textContent;
+            btn.classList.add('btn-loading');
+            btn.textContent = 'Sending OTP...';
+            
+            try {
+                const requestBody = { firstName, lastName, password, otpPreference };
+                if (email) requestBody.email = email;
+                if (phoneNumber) requestBody.phoneNumber = phoneNumber;
+                
+                const result = await apiRequest('/auth/register', 'POST', requestBody);
+                
+                if (result.success) {
+                    const identifier = result.identifier || (email || phoneNumber);
+                    const channel = result.channel || otpPreference;
+                    
+                    if (result.devOTP) {
+                        await Swal.fire({
+                            title: '🔐 Development Mode',
+                            html: `
+                                <p>OTP sent via <strong>${channel.toUpperCase()}</strong></p>
+                                <p>Your verification code is:</p>
+                                <h1 style="color: #BE2229; font-size: 48px; letter-spacing: 10px; margin: 20px;">${result.devOTP}</h1>
+                                <p>Using identifier: <strong>${identifier}</strong></p>
+                                <p style="font-size: 12px; color: #666;">In production, this would be sent to your ${channel}.</p>
+                            `,
+                            icon: 'info',
+                            confirmButtonColor: '#BE2229'
+                        });
+                    } else {
+                        showNotification('OTP Sent', `Verification code sent via ${channel.toUpperCase()}`, 'success');
+                    }
+                    
+                    await showOTPModal(identifier, channel);
+                }
+            } catch (error) {
+                showNotification('Registration Failed', error.message, 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.textContent = originalText;
+            }
+        });
+        
+        // LOGIN FUNCTIONALITY - Supports both email and phone
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!identifier || !password) {
+                showNotification('Missing Fields', 'Please enter email/phone and password', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('loginBtn');
+            const originalText = btn.textContent;
+            btn.classList.add('btn-loading');
+            btn.textContent = 'Logging in...';
+            
+            try {
+                const result = await apiRequest('/auth/login', 'POST', { identifier, password });
+                
+                if (result.success) {
+                    storeToken(result.token, result.user);
+                    // Merge guest cart after login
+                    if (typeof Cart !== 'undefined' && Cart.mergeGuestCart) {
+                        await Cart.mergeGuestCart();
+                    }
+                    showNotification('Welcome Back!', `Hello ${result.user.firstName}! Redirecting...`, 'success');
+                    
+                    // Post-login redirect logic
+                    const redirect = localStorage.getItem("redirectAfterLogin");
+                    if (redirect) {
+                        localStorage.removeItem("redirectAfterLogin");
+                        setTimeout(() => {
+                            window.location.href = redirect;
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                if (error.message.toLowerCase().includes('verify')) {
+                    showNotification('Account Not Verified', 'Please verify your account first.', 'warning');
+                    await showOTPModal(identifier, 'email');
+                } else {
+                    showNotification('Login Failed', error.message, 'error');
+                }
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.textContent = originalText;
+            }
+        });
+        
+        // FORGOT PASSWORD - Send Reset Link (supports email and phone)
+        document.getElementById('sendResetLinkBtn').addEventListener('click', async () => {
+            const identifier = document.getElementById('forgotIdentifier').value.trim().toLowerCase();
+            
+            if (!identifier) {
+                showNotification('Missing Information', 'Please enter your email address or phone number', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('sendResetLinkBtn');
+            const originalText = btn.textContent;
+            btn.classList.add('btn-loading');
+            btn.textContent = 'Sending...';
+            
+            try {
+                const result = await apiRequest('/auth/forgot-password', 'POST', { identifier });
+                
+                if (result.success) {
+                    showNotification('Reset Link Sent', result.message || 'If an account exists, a password reset link has been sent.', 'success');
+                    document.getElementById('forgotIdentifier').value = '';
+                    setTimeout(() => slideAuth(0), 3000);
+                }
+            } catch (error) {
+                showNotification('Failed', error.message, 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.textContent = originalText;
+            }
+        });
+        
+        // GOOGLE LOGIN FUNCTIONALITY
+        function handleGoogleLogin() {
+            window.location.href = `${API_BASE_URL}/auth/google`;
+        }
+        
+        document.getElementById('googleLoginBtn')?.addEventListener('click', handleGoogleLogin);
+        document.getElementById('googleRegisterBtn')?.addEventListener('click', handleGoogleLogin);
+        
+        // Check for Google OAuth callback on page load
+        (function checkGoogleCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const error = urlParams.get('error');
+            
+            if (token) {
+                // If Google OAuth returns user data too, store it. 
+                // Usually it returns token, and we might need to fetch profile.
+                // For now, let's just store the token. validateUser will fetch profile later.
+                storeToken(token);
+                // Merge guest cart
+                if (typeof Cart !== 'undefined' && Cart.mergeGuestCart) {
+                    Cart.mergeGuestCart();
+                }
+                showNotification('Google Login Successful', 'Welcome! Redirecting...', 'success');
+                
+                // Post-login redirect logic
+                const redirect = localStorage.getItem("redirectAfterLogin");
+                if (redirect) {
+                    localStorage.removeItem("redirectAfterLogin");
+                    setTimeout(() => {
+                        window.location.href = redirect;
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }
+            } else if (error) {
+                showNotification('Google Login Failed', 'Please try again', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        })();
+        
+        // Auto Slider and Panel Animation
+        function slideAuth(index) {
+            const authSlider = document.getElementById('auth-slider');
+            const imagePanel = document.getElementById('slider-container');
+            const formPanel = document.getElementById('form-container');
+
+            if (authSlider) {
+                const percentage = -(index * 33.333333);
+                authSlider.style.transform = `translateX(${percentage}%)`;
+            }
+
+            if (window.innerWidth >= 1024) {
+                if (index === 1) {
+                    if (imagePanel && formPanel) {
+                        imagePanel.style.transform = 'translateX(100%)';
+                        formPanel.style.transform = 'translateX(-100%)';
+                    }
+                } else {
+                    if (imagePanel && formPanel) {
+                        imagePanel.style.transform = 'translateX(0)';
+                        formPanel.style.transform = 'translateX(0)';
+                    }
+                }
+            } else {
+                if (imagePanel && formPanel) {
+                    imagePanel.style.transform = 'none';
+                    formPanel.style.transform = 'none';
+                }
+            }
+        }
+        
+        // Check if user is already logged in
+        function checkAuthAndRedirect() {
+            const token = getToken();
+            if (token) {
+                fetch(`${API_BASE_URL}/user/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).then(res => {
+                    if (res.ok) {
+                        window.location.href = 'index.html';
+                    } else if (res.status === 401) {
+                        clearToken();
+                    }
+                }).catch(() => {});
+            }
+        }
+        
+        // Image Slider Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthAndRedirect();
+            
+            const slides = document.querySelectorAll('.slide');
+            const indicators = document.querySelectorAll('.indicator');
+            let currentSlide = 0;
+            const slideInterval = 4000;
+            let slideTimer;
+
+            function goToSlide(index) {
+                if (!slides.length) return;
+                slides[currentSlide].classList.remove('active');
+                indicators[currentSlide].classList.remove('active');
+                currentSlide = index;
+                slides[currentSlide].classList.add('active');
+                indicators[currentSlide].classList.add('active');
+            }
+
+            function nextSlide() {
+                let nextIndex = (currentSlide + 1) % slides.length;
+                goToSlide(nextIndex);
+            }
+
+            function startSlider() {
+                if (slides.length > 0) {
+                    slideTimer = setInterval(nextSlide, slideInterval);
+                }
+            }
+
+            indicators.forEach(indicator => {
+                indicator.addEventListener('click', (e) => {
+                    const slideIndex = parseInt(e.target.getAttribute('data-slide'));
+                    clearInterval(slideTimer);
+                    goToSlide(slideIndex);
+                    startSlider();
+                });
+            });
+
+            startSlider();
+
+            // Password Eye Toggle Functionality
+            function setupPasswordToggle(btnId, inputId, iconId) {
+                const btn = document.getElementById(btnId);
+                const input = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+
+                const eyeSlashSVG = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/><path d="M2.71 3.16c-.39.39-.39 1.02 0 1.41l16.32 16.33c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L4.12 3.16c-.39-.39-1.02-.39-1.41 0z" fill="gray"/>';
+                const eyeSVG = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />';
+
+                if (btn && input && icon) {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const isPassword = input.getAttribute('type') === 'password';
+                        input.setAttribute('type', isPassword ? 'text' : 'password');
+                        btn.style.opacity = isPassword ? '1' : '0.5';
+                        icon.innerHTML = isPassword ? eyeSlashSVG : eyeSVG;
+                    });
+                }
+            }
+
+            setupPasswordToggle('togglePasswordBtn', 'loginPassword', 'eyeIcon');
+            setupPasswordToggle('toggleRegPasswordBtn', 'regPassword', 'eyeIconReg');
+            setupPasswordToggle('toggleRegConfirmBtn', 'regConfirmPassword', 'eyeIconRegConf');
+        });
+        
+        // Enter key support
+        document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+        document.getElementById('loginIdentifier')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+        document.getElementById('forgotIdentifier')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('sendResetLinkBtn').click();
+        });
+    </script>
+</body>
+
+</html>

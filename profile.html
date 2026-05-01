@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Springwala | My Profile</title>
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F4F6F6;
+        }
+    </style>
+	<script src="assets/js/config.js"></script>
+</head>
+
+<body class="bg-[#F4F6F6] text-[#1E1E1E] min-h-screen" data-page="profile">
+
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+        <span class="text-white text-[13px]">Get discount on every selected product</span>
+    </div>
+
+    <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
+
+        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
+            <!-- Hamburger -->
+            <button id="menu-btn"
+                class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
+                <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
+            </button>
+
+            <!-- Logo -->
+            <img src="assets/images/header.png" alt="Springwala Logo"
+                class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
+
+            <!-- Cart -->
+            <a href="cart.html"
+                class="absolute right-[16px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
+                <svg class="w-full h-full text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+            </a>
+        </div>
+
+        <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
+            <a href="index.html"><img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto"></a>
+
+            <div class="flex items-start gap-2 ml-8">
+                <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
+                <div class="flex flex-col">
+                    <span class="text-[#747474] text-[10px]">Location</span>
+                    <span class="text-[#242323] text-[12px] font-medium">Thane, Maharashtra</span>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-[519px] mx-10 flex h-[40px]">
+                <div
+                    class="border border-[#BE2229] rounded-l-[6px] px-3 flex items-center gap-2 cursor-pointer bg-white">
+                    <span class="text-[#BE2229] text-[13px]">All Categories</span>
+                    <svg class="w-3 h-3 text-[#BE2229]" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="flex-1 border border-[#D7D9D9] border-l-0 rounded-r-[6px] flex items-center px-3 bg-white">
+                    <input type="text" class="flex-1 outline-none text-[13px]" placeholder="Search Products...">
+                    <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979]">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-7">
+                <a href="login.html" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
+                    <img src="assets/icons/desktop/profile-red.svg" alt="Account" class="w-6 h-6 text-[#BE2229]">
+                    <span class="text-[#BE2229] text-[15px] font-medium">Your Account</span>
+                </a>
+                <a href="cart.html" class="cursor-pointer hover:opacity-80 transition relative">
+                    <img src="assets/icons/desktop/cart.svg" alt="Cart" class="w-6 h-6 text-[#525252]">
+                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+                <a href="wishlist.html" class="cursor-pointer hover:opacity-80 transition relative">
+                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 text-[#525252]">
+                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Secondary Desktop Nav (Categories) -->
+    <div class="hidden md:flex w-full bg-white border-b border-[#E8E8E8]">
+        <div class="max-w-[1440px] mx-auto flex items-center h-[56px] w-full pl-[80px]">
+            <a href="categories.html"
+                class="border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-50 transition bg-white">
+                <img src="assets/icons/mobile/categories-red.svg" alt="Categories" class="w-4 h-4 text-[#BE2229]">
+                <span class="text-[#BE2229] text-[12px] font-medium uppercase">Browse All Categories</span>
+            </a>
+
+            <ul class="flex items-center gap-8 ml-10 text-[15px] text-[#525252]">
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="index.html">Home</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="allproducts.html">All Products</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]"><a href="orders.html">Orders</a></li>
+                <li class="cursor-pointer hover:text-[#BE2229]">Knowledge Centre</li>
+                <li class="cursor-pointer hover:text-[#BE2229]">Contact Us</li>
+            </ul>
+
+            <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition pr-0 flex justify-end">
+                <img src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sub-Header (My Account) -->
+    <div id="mobile-sub-header"
+        class="md:hidden flex relative w-full items-center justify-center bg-white border-b border-[#E8E8E8] origin-top">
+        <div class="relative w-full pt-[20px] pb-[16px] flex items-center justify-center max-w-[428px] mx-auto">
+            <a href="index.html" class="absolute left-5 top-1/2 -translate-y-1/2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#525252" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <h1 class="text-[20px] font-semibold font-['Poppins'] text-[#242323]">My Account</h1>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-[60] hidden-menu md:hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <img src="assets/images/header.png" alt="Logo" class="h-8">
+                <button id="close-menu" class="text-gray-500 text-2xl">&times;</button>
+            </div>
+            <ul class="space-y-6 text-[#525252] font-['Poppins'] text-lg">
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="index.html">Home</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="categories.html">Categories</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="allproducts.html">All Products</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="orders.html">Your Orders</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="#">Manage Password</a>
+                </li>
+                <li class="flex items-center gap-3 text-[#BE2229] font-medium">
+                    <span class="w-2 h-2 bg-[#BE2229] rounded-full"></span>
+                    <a href="login.html">Your Account</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Wrapper for Cards -->
+    <main class="w-full flex flex-col items-center mt-2 mb-10 md:mt-12 md:mb-20 space-y-8">
+        <div
+            class="w-full max-w-[428px] md:max-w-[1440px] px-4 md:px-[80px] flex flex-col md:flex-row items-center md:items-start gap-8">
+
+            <!-- Left Sidebar (Mobile View) -->
+            <div class="w-full md:w-[350px] lg:w-[400px] flex-shrink-0 flex flex-col items-center">
+
+                <!-- Red Profile Card -->
+                <div class="w-full bg-[#BE2229] rounded-t-[10px] pt-8 pb-6 flex flex-col items-center relative">
+
+                    <!-- Profile Image Area -->
+                    <div class="relative mb-4">
+                        <div class="w-[140px] h-[140px] rounded-full overflow-hidden border-4 border-white bg-gray-300">
+                            <img id="profile-image" src="assets/images/deafult.png" alt="Profile"
+                                class="w-full h-full object-cover">
+                        </div>
+
+                        <!-- Edit Icon (Pencil) -->
+                        <button onclick="document.getElementById('file-input').click()"
+                            class="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-md cursor-pointer hover:bg-gray-100 transition">
+                            <!-- Placeholder for edit icon (pencil) -->
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BE2229"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                        </button>
+                        <input type="file" id="file-input" class="hidden" accept="image/*"
+                            onchange="loadProfileImage(event)">
+                    </div>
+
+                    <!-- Name and Email -->
+                    <h2 id="profile-display-name" class="text-white text-[20px] font-medium font-['Poppins']">Loading...</h2>
+                    <p id="profile-display-email" class="text-white text-[15px] font-['Poppins'] opacity-90">...</p>
+
+                    <!-- Vector Overlay (Optional) -->
+                    <div class="absolute inset-0 bg-black opacity-[0.05] pointer-events-none rounded-t-[10px]"></div>
+                </div>
+
+                <!-- White Menu Card -->
+                <div class="w-full bg-white rounded-b-[10px] pb-4 shadow-sm">
+
+                    <!-- Menu Item: My Profile -->
+                    <div id="sidebar-tab-my-profile" data-target="profile-form-container"
+                        data-default-icon="assets/icons/desktop/profile.svg"
+                        data-active-icon="assets/icons/desktop/profile-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/desktop/profile-red.svg" alt="Profile"
+                                class="w-5 h-5 text-[#BE2229] tab-icon">
+                            <span class="text-[16px] text-[#BE2229] font-medium tab-text">My Profile</span>
+                        </div>
+                        <!-- Chevron Right -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#BE2229" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron rotate-90 md:rotate-0">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: Company Profile -->
+                    <div id="sidebar-tab-company" data-target="company-profile-form-container"
+                        data-default-icon="assets/icons/mobile/company.svg"
+                        data-active-icon="assets/icons/mobile/company-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <!-- Placeholder Icon -->
+                            <img src="assets/icons/mobile/company.svg" alt="Company"
+                                class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">Company Profile</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: GSTIN -->
+                    <div id="sidebar-tab-gstin" data-target="gstin-form-container"
+                        data-default-icon="assets/icons/mobile/company.svg"
+                        data-active-icon="assets/icons/mobile/company-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/company.svg" alt="GSTIN" class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">GSTIN</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: Billing Address -->
+                    <div id="sidebar-tab-billing" data-target="billing-address-form-container"
+                        data-default-icon="assets/icons/mobile/my-oders.svg"
+                        data-active-icon="assets/icons/mobile/billing-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/my-oders.svg" alt="Bill" class="w-5 h-5 opacity-70 tab-icon">
+                            <!-- Simulating Bill icon -->
+                            <span class="text-[16px] text-black tab-text">Billing Address</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: Shipping Address -->
+                    <div id="sidebar-tab-shipping" data-target="shipping-address-form-container"
+                        data-default-icon="assets/icons/mobile/shipping.svg"
+                        data-active-icon="assets/icons/mobile/shipping-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/shipping.svg" alt="Shipping"
+                                class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">Shipping Address</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: My Orders -->
+                    <div id="sidebar-tab-orders" data-target="orders-form-container"
+                        data-default-icon="assets/icons/mobile/my-oders.svg"
+                        data-active-icon="assets/icons/mobile/my-oders-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/my-oders.svg" alt="Orders"
+                                class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">My Orders</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- Menu Item: Manage Password -->
+                    <div id="sidebar-tab-password" data-target="manage-password-form-container"
+                        data-default-icon="assets/icons/mobile/paas.svg"
+                        data-active-icon="assets/icons/mobile/paas-red.svg"
+                        class="sidebar-tab flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/paas.svg" alt="Manage Password"
+                                class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">Manage Password</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex flex-row flex-wrap gap-4 justify-center w-full px-4">
+
+                    <!-- Switch Account -->
+                    <button
+                        class="flex flex-1 items-center justify-center gap-2 border border-[#BE2229] bg-white rounded-[5px] py-2 px-2 h-[40px] cursor-pointer hover:bg-red-50 transition min-w-[140px] max-w-[200px]">
+                        <span class="text-[#BE2229] text-[13px] font-['Roboto'] font-medium whitespace-nowrap">Switch
+                            Account</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BE2229" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 1l4 4-4 4"></path>
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                            <path d="M7 23l-4-4 4-4"></path>
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Logout -->
+                    <button id="logout-btn"
+                        class="flex flex-1 items-center justify-center gap-2 bg-[#BE2229] rounded-[5px] py-2 px-2 h-[40px] cursor-pointer hover:bg-red-800 transition min-w-[140px] max-w-[200px]">
+                        <span class="text-white text-[13px] font-['Roboto'] font-medium whitespace-nowrap">Logout</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Right Content Panel (Desktop Form / Mobile Accordion) -->
+            <div id="profile-form-container"
+                class="flex flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <!-- Header -->
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        My Profile</h2>
+                    <button id="update-profile-btn"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
+                        Profile</button>
+                </div>
+
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+
+                <!-- Form Grid -->
+                <div class="flex flex-col gap-6">
+
+                    <!-- Row 1: Name -->
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Name</label>
+                        <div class="flex flex-col md:flex-row gap-6 w-full">
+                            <!-- First Name -->
+                            <div
+                                class="relative w-full md:flex-1 bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="profile-first-name" type="text" placeholder="Your First Name"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                            <!-- Last Name -->
+                            <div
+                                class="relative w-full md:flex-1 bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="profile-last-name" type="text" placeholder="Your Last Name"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Contact -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <!-- Phone -->
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <div
+                                    class="flex items-center gap-1 border-r border-[#D7D9D9] pr-3 mr-3 text-[#2B2B2B] text-[14px] font-medium cursor-pointer">
+                                    +91
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <input id="profile-phone" type="text" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- Email -->
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Email</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="profile-email" type="email" placeholder="Your Email"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Alternate Phone -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Alternate Phone Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <div
+                                    class="flex items-center gap-1 border-r border-[#D7D9D9] pr-3 mr-3 text-[#2B2B2B] text-[14px] font-medium cursor-pointer">
+                                    +91
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <input id="profile-alt-phone" type="text" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1"></div> <!-- Empty space to push phone to left -->
+                    </div>
+
+                    <div class="w-full h-[1px] bg-[#D7D9D9] my-2"></div>
+
+                    <!-- Row 4: Location -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full pb-4">
+                        <!-- Country -->
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
+                            <div
+                                class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="profile-country" type="text" placeholder="Country" list="country-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- State -->
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State</label>
+                            <div
+                                class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="profile-state" type="text" placeholder="State" list="state-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Company Profile Form Container -->
+            <div id="company-profile-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        Company Profile</h2>
+                    <button id="update-company-btn"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
+                        Profile</button>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+                <div class="flex flex-col gap-6">
+                    <!-- Row 1 -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Company Name</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-name" type="text" placeholder="Your Company Name"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Industry</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-industry" type="text" placeholder="Select Industry"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Company Type</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-type" type="text" placeholder="e.g. LLC, Private Limited"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-country" type="text" placeholder="Enter Country" list="country-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Row 3 -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-state" type="text" placeholder="Enter State" list="state-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Website URL</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-website" type="text" placeholder="https://www.example.com"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Row 4 -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Email Address</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-email" type="email" placeholder="company@example.com"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Row 5 -->
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Full Address</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="company-address" type="text" placeholder="Enter Company Full Address"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GSTIN Form Container -->
+            <div id="gstin-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        GSTIN Details</h2>
+                    <button id="update-gstin-btn"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
+                        GSTIN</button>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">GSTIN Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="gstin-number" type="text" placeholder="Enter GSTIN Number"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">PAN Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="gstin-pan" type="text" placeholder="Enter PAN Number"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Address Form Container -->
+            <div id="billing-address-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        Billing Address</h2>
+                    <button id="save-billing-btn"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Save
+                        Address</button>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Street Address</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-street" type="text" placeholder="Enter Street Address"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Apartment, suite, etc.
+                                (optional)</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc."
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">City / Town</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-city" type="text" placeholder="Enter City"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State / Province</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-state" type="text" placeholder="Enter State" list="state-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-country" type="text" placeholder="Enter Country" list="country-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Postal Code</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-zip" type="text" placeholder="Enter Zip/Postal Code"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full md:w-1/2">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="billing-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Address Form Container -->
+            <div id="shipping-address-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        Shipping Address</h2>
+                    <button id="save-shipping-btn"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Save
+                        Address</button>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-4"></div>
+                
+                <!-- Same as Billing Checkbox -->
+                <div class="flex items-center gap-2 mb-6">
+                    <input type="checkbox" id="same-as-billing" class="w-4 h-4 accent-[#BE2229] cursor-pointer">
+                    <label for="same-as-billing" class="text-[14px] text-[#2B2B2B] font-medium cursor-pointer">Shipping address same as Billing address</label>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Street Address</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-street" type="text" placeholder="Enter Street Address"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Apartment, suite, etc.
+                                (optional)</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc."
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">City / Town</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-city" type="text" placeholder="Enter City"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State / Province</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-state" type="text" placeholder="Enter State" list="state-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-country" type="text" placeholder="Enter Country" list="country-list"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Postal Code</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-zip" type="text" placeholder="Enter Zip/Postal Code"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 w-full md:w-1/2">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input id="shipping-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Form Container -->
+            <div id="orders-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        Recent Orders</h2>
+                    <a href="orders.html"
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0 text-center">View
+                        All Orders</a>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+                <!-- Empty State for Orders -->
+                <div class="flex flex-col items-center justify-center py-10 opacity-70">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#BE2229" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="mb-4">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <p class="text-[16px] text-[#525252]">No recent orders found.</p>
+                </div>
+            </div>
+
+            <!-- Manage Password Form Container -->
+            <div id="manage-password-form-container"
+                class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
+                    <h2
+                        class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
+                        Manage Password</h2>
+                    <button
+                        class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
+                        Password</button>
+                </div>
+                <div class="w-full h-[1px] bg-[#D7D9D9] mb-8"></div>
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col gap-2 w-full md:w-[60%]">
+                        <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Current Password</label>
+                        <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                            <input type="password" placeholder="Enter Current Password"
+                                class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                class="ml-2 flex-shrink-0 cursor-pointer password-toggle">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 w-full">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">New Password</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input type="password" placeholder="Enter New Password"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0 cursor-pointer password-toggle">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Confirm Password</label>
+                            <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
+                                <input type="password" placeholder="Confirm New Password"
+                                    class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    class="ml-2 flex-shrink-0 cursor-pointer password-toggle">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Banner below profile block -->
+        <div class="w-full max-w-[1440px] px-4 md:px-[80px] mt-8 mb-4 flex justify-center">
+            <div class="w-full bg-[#E8E8E8] rounded-[10px] overflow-hidden h-[120px] lg:h-[180px]">
+                <img src="assets/images/deafult.png" alt="Promo Banner" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <!-- Mobile Navigation Bar (Fixed Bottom) -->
+    <!-- New Responsive Footer -->
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 mt-10 relative">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex flex-row justify-between items-start gap-8 mb-10">
+                <!-- Col 1: Brand & Contact -->
+                <div class="flex flex-col gap-4 w-[253px]">
+                    <img src="assets/images/header.png" alt="Springwala" class="w-[200px]">
+                    <div class="w-full h-[1px] bg-[#525252] my-2"></div>
+                    <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                        <p>Mumbai, Maharashtra (India)</p>
+                        <p>Phone: +91 8879 241085</p>
+                        <p>Email: support@springwala.in</p>
+                    </div>
+                </div>
+
+                <!-- Links Cols -->
+                <div class="flex flex-col gap-4">
+                    <a href="index.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="login.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Account</a>
+                    <a href="orders.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Orders</a>
+                    <a href="cart.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Cart</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Saved Items</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col gap-4 w-[300px]">
+                    <h3 class="font-['Poppins'] font-semibold text-[18px]">Stay Updated with Springwala</h3>
+                    <p class="text-[14px]">Get E-mail updates about latest shop and special offers</p>
+                    <div class="flex h-[35px] w-full">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 border border-[#BE2229] rounded-l-[5px] px-3 outline-none text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-4 rounded-r-[5px] font-medium text-[14px]">Subscribe</button>
+                    </div>
+                    <!-- Social Icons -->
+                    <div class="flex gap-4 mt-2">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6 cursor-pointer"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden flex flex-col items-center text-center gap-6 pb-20 relative">
+                <img src="assets/images/header.png" alt="Springwala" class="w-[200px] mb-2">
+
+                <!-- Line 14 -->
+                <div class="w-[90%] h-[1px] bg-[#525252]"></div>
+
+                <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                    <p>Mumbai, Maharashtra (India)</p>
+                    <p>Phone: +91 8879 241085</p>
+                    <p>Email: support@springwala.in</p>
+                </div>
+
+                <!-- Line 18 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col items-center gap-3 w-full px-2">
+                    <h3 class="font-['Poppins'] font-semibold text-[16px] sm:text-[18px] text-center">Join Our
+                        Newsletter Now</h3>
+                    <p class="text-[12px] sm:text-[14px] text-center">Get E-mail updates about latest shop and special
+                        offers</p>
+                    <div class="flex h-[35px] w-full max-w-[350px]">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 min-w-0 border border-[#BE2229] rounded-l-[5px] px-2 sm:px-3 outline-none text-[13px] sm:text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-3 sm:px-4 rounded-r-[5px] font-medium text-[13px] sm:text-[14px] whitespace-nowrap">Subscribe</button>
+                    </div>
+                    <div class="flex gap-4 mt-2 justify-center">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                    </div>
+                </div>
+
+                <!-- Line 19 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Links Groups -->
+                <div
+                    class="flex flex-row justify-between w-full px-2 sm:px-8 mt-4 text-[13px] sm:text-[15px] text-[#525252]">
+                    <div class="flex flex-col gap-4 text-left">
+                        <a href="index.html">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Contact Us</a>
+                        <a href="#">Delivery & Shipping</a>
+                    </div>
+
+                    <div class="flex flex-col gap-4 text-right">
+                        <a href="login.html">My Account</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="cart.html">My Cart</a>
+                        <a href="#">Saved Items</a>
+                    </div>
+                </div>
+
+                <div class="flex gap-6 text-[#525252] mt-4 flex-wrap justify-center">
+                    <a href="#">Knowledge Section</a>
+                    <a href="#">Sell on Springwala</a>
+                    <a href="#">Career</a>
+                </div>
+
+                <!-- Bottom Links -->
+                <div class="w-full h-[1px] bg-[#525252] mt-4 opacity-50"></div>
+
+                <div class="flex flex-wrap gap-x-6 gap-y-3 justify-center text-[15px] text-[#525252] max-w-[350px]">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms & Conditions</a>
+                    <a href="#">Return Policy</a>
+                    <a href="#">Vendor Agreement</a>
+                    <a href="#">GST Compliance</a>
+                    <a href="#">Data Protection</a>
+                </div>
+
+                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 All rights reserved</p>
+            </div>
+
+            <!-- Desktop Bottom Divider & Links -->
+            <div class="hidden md:block w-full h-[1px] bg-[#525252] my-6"></div>
+            <div class="hidden md:flex justify-center gap-8 text-[14px] text-[#666] mb-2">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Return Policy</a>
+                <a href="#">Vendor Agreement</a>
+                <a href="#">GST Compliance</a>
+                <a href="#">Data Protection</a>
+            </div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 All rights reserved</div>
+
+        </div>
+    </footer>
+
+    <nav class="mobile-navbar">
+        <a href="index.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/home.svg" alt="Home">
+        </a>
+        <a href="categories.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+        </a>
+        <a href="orders.html" class="nav-item cursor-pointer">
+            <img src="assets/icons/mobile/orders.svg" alt="Orders">
+        </a>
+        <div class="nav-item active">
+            <img src="assets/icons/mobile/profile-red.svg" alt="Profile">
+            <div class="active-indicator"></div>
+        </div>
+    </nav>
+
+    <!-- JS for Profile Image Upload & Mobile Accordion -->
+    <script>
+        function loadProfileImage(event) {
+            const image = document.getElementById('profile-image');
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    image.src = e.target.result;
+                    localStorage.setItem('userProfileImage', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Tab / Accordion Logic
+            const tabs = document.querySelectorAll('.sidebar-tab');
+            const containers = document.querySelectorAll('[id$="-form-container"]');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-target');
+                    const activeIcon = tab.getAttribute('data-active-icon');
+                    const targetContainer = document.getElementById(targetId);
+
+                    const isMobile = window.innerWidth < 768;
+                    const isActive = tab.querySelector('.tab-text').classList.contains('text-[#BE2229]');
+
+                    if (isMobile && isActive) {
+                        // Collapse on mobile if clicked again
+                        collapseContainer(targetContainer);
+                        deactivateTab(tab);
+                        return;
+                    }
+
+                    // Deactivate ALL tabs and hide ALL containers
+                    tabs.forEach(t => deactivateTab(t));
+                    containers.forEach(c => {
+                        if (c !== targetContainer) collapseContainer(c);
+                    });
+
+                    // Activate THIS tab and show THIS container
+                    activateTab(tab, activeIcon);
+                    if (targetContainer) {
+                        expandContainer(targetContainer);
+                        setTimeout(() => {
+                            const yOffset = isMobile ? -120 : -100; // Account for fixed navbars
+                            const y = targetContainer.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                            window.scrollTo({ top: y, behavior: 'smooth' });
+                        }, 50);
+                    }
+                });
+            });
+
+            function activateTab(tab, activeIconPath) {
+                const icon = tab.querySelector('.tab-icon');
+                const text = tab.querySelector('.tab-text');
+                const chevron = tab.querySelector('.tab-chevron');
+
+                if (icon && activeIconPath) {
+                    icon.src = activeIconPath;
+                    icon.classList.remove('opacity-70');
+                }
+                if (text) {
+                    text.classList.remove('text-black');
+                    text.classList.add('text-[#BE2229]', 'font-medium');
+                }
+                if (chevron) {
+                    chevron.setAttribute('stroke', '#BE2229');
+                    if (window.innerWidth < 768) chevron.classList.add('rotate-90');
+                }
+            }
+
+            function deactivateTab(tab) {
+                const icon = tab.querySelector('.tab-icon');
+                const text = tab.querySelector('.tab-text');
+                const chevron = tab.querySelector('.tab-chevron');
+                const defaultIconPath = tab.getAttribute('data-default-icon');
+
+                if (icon && defaultIconPath) {
+                    icon.src = defaultIconPath;
+                    // Dont add opacity-70 to My Profile default icon
+                    if (tab.id !== 'sidebar-tab-my-profile') icon.classList.add('opacity-70');
+                }
+                if (text) {
+                    text.classList.remove('text-[#BE2229]', 'font-medium');
+                    text.classList.add('text-black');
+                }
+                if (chevron) {
+                    chevron.setAttribute('stroke', '#000');
+                    chevron.classList.remove('rotate-90');
+                }
+            }
+
+            function expandContainer(container) {
+                container.classList.remove('hidden');
+                container.classList.add('flex');
+            }
+
+            function collapseContainer(container) {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+            }
+
+            // Password Eye Toggle Logic
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+            passwordToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const input = this.previousElementSibling;
+                    const isPassword = input.type === 'password';
+
+                    // Toggle Input Type
+                    input.type = isPassword ? 'text' : 'password';
+
+                    // Toggle SVG Path
+                    if (isPassword) {
+                        this.innerHTML = `
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        `;
+                    } else {
+                        this.innerHTML = `
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        `;
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- Datalists for Country & State Autocomplete -->
+    <datalist id="country-list">
+        <option value="India">
+        <option value="United States">
+        <option value="United Kingdom">
+        <option value="Canada">
+        <option value="Australia">
+        <option value="United Arab Emirates">
+    </datalist>
+    <datalist id="state-list">
+        <!-- Will be populated dynamically based on country -->
+    </datalist>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/app.js"></script>
+
+</body>
+
+</html>
+

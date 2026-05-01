@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | Category Banners</title>
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
+        .sidebar-item { transition: all 0.3s ease; border-radius: 5px; }
+        .sidebar-item.active { background-color: #FFD9D9; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item.active img { filter: brightness(0) saturate(100%) invert(18%) sepia(87%) saturate(2716%) hue-rotate(345deg) brightness(91%) contrast(97%); }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+	<script src="../../assets/js/config.js"></script>
+</head>
+<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]" data-banner-type="category">
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden transition-opacity"></div>
+    <aside id="sidebar" class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
+        <button id="close-sidebar" class="xl:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div class="px-11 mb-10 w-full flex justify-start">
+            <img src="../../assets/images/header.png" alt="Springwala Admin Logo" class="h-[43px] w-auto">
+        </div>
+        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
+            <a href="../dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <div class="w-full flex flex-col group relative">
+                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Products</span>
+                    </div>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="products-submenu" class="hidden flex-col pl-[60px] py-3 gap-3">
+                    <a href="../products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
+                    <a href="../products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
+            </a>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <div class="w-full flex flex-col group relative">
+                <button id="banners-menu-btn" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0" style="filter: brightness(0) saturate(100%) invert(18%) sepia(87%) saturate(2716%) hue-rotate(345deg) brightness(91%) contrast(97%);">
+                        <span class="font-['Poppins'] text-[19px] leading-[28px]">Banners</span>
+                    </div>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="banners-submenu" class="flex flex-col pl-[60px] py-3 gap-3">
+                    <a href="homepage.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Homepage</a>
+                    <a href="category.html" class="font-['Poppins'] text-[18px] text-[#BE2229] leading-[27px] hover:text-[#BE2229]">Category</a>
+                    <a href="promotional.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Promotional</a>
+                    <a href="features.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Features</a>
+                    <a href="advertisement.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Advertisement</a>
+                    <a href="section.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Section</a>
+                    <a href="informational.html" class="font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]">Informational</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-black/15"></div>
+            <a href="../settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+                <img src="../../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
+            </a>
+        
+            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
+
+            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
+                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
+        <div class="px-4 sm:px-[24px] xl:px-8 pt-6 xl:pt-8 flex items-center justify-between">
+            <div class="flex items-center gap-4 flex-1">
+                <button id="open-sidebar" class="xl:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="font-['Roboto'] font-medium text-[26px] leading-[30px] text-black shrink-0 admin-name">Master Admin</h2>
+                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[532px] h-[43px] px-3 ml-6 focus-within:border-black transition-colors">
+                    <img src="../../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                    <input type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[15px] bg-transparent">
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-3">
+                <a href="../products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition shadow-sm">+ Add Product</a>
+                <a href="../orders.html" class="border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition">View Orders</a>
+            </div>
+        </div>
+
+        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mt-8 flex flex-col">
+            <div class="flex items-center gap-3 mb-6">
+                <a href="../dashboard.html" class="w-10 h-10 bg-white border border-[#E9E9E9] rounded-[5px] flex items-center justify-center hover:bg-gray-50 transition shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+                <h1 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Category Banners</h1>
+            </div>
+
+            <div class="bg-white border border-[#E9E9E9] rounded-[10px] p-4 mb-6 shadow-sm flex flex-wrap items-end gap-6">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block font-['Roboto'] font-medium text-[16px] mb-2">Search Banner</label>
+                    <div class="bg-[#EDEDED] rounded-[5px] h-[40px] px-3 flex items-center">
+                        <input id="banner-search" type="text" placeholder="Banner Name" class="w-full outline-none bg-transparent text-[#656565] font-['Roboto'] text-[15px]">
+                    </div>
+                </div>
+                <div class="w-[200px]">
+                    <label class="block font-['Roboto'] font-medium text-[16px] mb-2">Status</label>
+                    <div class="relative">
+                        <select id="banner-status-filter" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer text-[#656565] font-['Roboto'] text-[15px]">
+                            <option value="">Select Status</option>
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-black transform rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-[200px]">
+                    <label class="block font-['Roboto'] font-medium text-[16px] mb-2">Sort By</label>
+                    <div class="relative">
+                        <select id="banner-sort" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer text-[#656565] font-['Roboto'] text-[15px]">
+                            <option value="">Sort By</option>
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="position-high">Position: High to Low</option>
+                            <option value="position-low">Position: Low to High</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-black transform rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <button id="refresh-banners" class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <img src="../../assets/icons/admin/refresh.svg" class="w-6 h-6 opacity-60">
+                </button>
+            </div>
+
+            <button id="add-banner-btn" class="w-full h-[40px] bg-[#BE2229] hover:bg-red-800 text-white rounded-[10px] font-['Roboto'] font-medium text-[18px] transition mb-8 shadow-sm">+ Add a new Banner</button>
+
+            <div id="banners-grid" class="flex flex-col gap-4"></div>
+        </div>
+    </main>
+
+    <div id="banner-modal-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center px-4 backdrop-blur-sm overflow-y-auto">
+        <div id="banner-modal" class="bg-white w-full max-w-[550px] rounded-[15px] shadow-2xl overflow-hidden my-8 relative">
+            <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50/50">
+                <h3 id="banner-modal-title" class="font-['Poppins'] font-semibold text-[20px] text-black">Add New Banner</h3>
+                <button id="cancel-banner-btn" class="text-gray-400 hover:text-red-500 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-[15px] font-medium text-gray-700">Desktop Banner</label>
+                        <div id="banner-file-preview" class="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hidden">
+                            <img id="banner-preview-img" src="" class="w-full h-full object-contain">
+                        </div>
+                        <label class="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition">
+                            <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+                            <span class="text-xs text-gray-500 font-medium">Desktop (1920x600)</span>
+                            <input type="file" id="banner-file-input" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[15px] font-medium text-gray-700">Mobile Banner</label>
+                        <div id="banner-mobile-preview" class="w-full aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden border border-gray-200 hidden">
+                            <img id="banner-mobile-preview-img" src="" class="w-full h-full object-contain">
+                        </div>
+                        <label class="w-full h-32 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition">
+                            <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+                            <span class="text-xs text-gray-500 font-medium">Mobile (600x800)</span>
+                            <input type="file" id="banner-mobile-input" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[15px] font-medium text-gray-700 mb-1">Banner Title</label>
+                            <input id="banner-title-input" type="text" placeholder="Title" class="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[15px] font-medium text-gray-700 mb-1">Position</label>
+                            <input id="banner-position-input" type="number" placeholder="0" class="w-full h-10 bg-gray-50 border border-gray-100 rounded-lg px-4 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[15px] font-medium text-gray-700 mb-1">Redirect Link</label>
+                        <input id="banner-link-input" type="text" placeholder="https://" class="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[15px] font-medium text-gray-700 mb-1">Alt Text (SEO)</label>
+                        <input id="banner-alt-input" type="text" placeholder="Alt text" class="w-full h-10 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                <button onclick="closeBannerModal()" class="px-6 h-10 bg-white border border-gray-200 rounded-lg font-medium hover:bg-gray-100 transition">Cancel</button>
+                <button id="save-banner-btn" class="px-8 h-10 bg-[#BE2229] text-white rounded-lg font-semibold hover:bg-red-700 transition shadow-lg">Save Banner</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../assets/js/auth.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/banners.js"></script>
+    <script>
+        Auth.requireAuth();
+        initSidebar();
+        initAdminHeader();
+    </script>
+</body>
+</html>
+
+
