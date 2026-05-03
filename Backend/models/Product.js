@@ -75,9 +75,9 @@ ProductSchema.pre('save', function (next) {
     this.price = this.basePrice;
   }
 
-  const base = Number(this.basePrice || this.price || 0);
-  const discount = Number(this.discountPercent || 0);
-  const gst = Number(this.gstPercent || 0);
+  const base = Number(this.basePrice || this.price || 0) || 0;
+  const discount = Number(this.discountPercent || 0) || 0;
+  const gst = Number(this.gstPercent || 0) || 0;
 
   // 1. Calculate Discounted Price (After Discount, Before GST)
   const afterDiscount = base * (1 - discount / 100);

@@ -71,7 +71,7 @@ exports.addToCart = async (req, res) => {
     } else {
       // Add new item
       // Use finalPrice from request if valid, otherwise fallback to product.finalPrice
-      const unitPrice = parseFloat(finalPrice) || product.finalPrice;
+      const unitPrice = parseFloat(finalPrice) || product.finalPrice || 0;
 
       cart.items.push({
         product:    product._id,

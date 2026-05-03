@@ -39,10 +39,10 @@ const Pricing = {
     let finalPrice = parseFloat(product.finalPrice);
     if (isNaN(finalPrice)) {
       // Fallback for older products
-      const base = parseFloat(product.price || product.basePrice || 0);
-      const gst = parseFloat(product.gstPercent || 0);
+      const base = parseFloat(product.price || product.basePrice || 0) || 0;
+      const gst = parseFloat(product.gstPercent || 0) || 0;
       const afterDiscount = base * (1 - discount / 100);
-      finalPrice = afterDiscount * (1 + gst / 100);
+      finalPrice = afterDiscount * (1 + gst / 100) || 0;
     }
 
     let batch = "N/A";
@@ -528,7 +528,7 @@ async function loadCartCount() {
         itemId: item._id,
         name: item.name,
         image: item.image,
-        finalPrice: Number(item.finalPrice || item.pricePerUnit || 0),
+        finalPrice: Number(item.finalPrice || item.pricePerUnit || 0) || 0,
         quantity: item.quantity,
         batchQuantity: item.batchQuantity || 1,
       }));
@@ -557,8 +557,8 @@ function calculateCartTotals(cart) {
   let totalQuantity = 0;
 
   cart.forEach(item => {
-    const unitPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
-    const qty = Number(item.quantity || 1);
+    const unitPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
+    const qty = Number(item.quantity || 1) || 0;
     itemsTotal += unitPrice * qty;
     totalQuantity += qty;
   });
@@ -1972,7 +1972,7 @@ async function renderCart() {
       itemsDesktop.innerHTML = items.map(item => {
         const name = item.name || 'Product';
         const image = item.image;
-        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
+        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
         const fullImg = getImageUrl(image);
 
         return `
@@ -2001,7 +2001,7 @@ async function renderCart() {
       itemsMobile.innerHTML = items.map(item => {
         const name = item.name || 'Product';
         const image = item.image;
-        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
+        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
         const fullImg = getImageUrl(image);
 
         return `
