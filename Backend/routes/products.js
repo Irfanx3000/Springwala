@@ -8,9 +8,9 @@ const {
 const { protect } = require('../middleware/auth');
 const { uploadProduct, uploadBulk } = require('../middleware/upload');
 
-router.get('/', protect, getProducts);
-router.get('/public', getPublicProducts); // 🌍 Public route (NO auth)
-router.get('/:id', protect, getProduct);
+router.get('/', getProducts);
+router.get('/:id', getProduct);// 🌍 Public route (NO auth)
+
 router.post('/', protect, uploadProduct.array('images', 10), createProduct);
 router.post('/bulk-upload', protect, uploadBulk.fields([{ name: 'file', maxCount: 1 }, { name: 'images', maxCount: 1 }]), bulkUpload);
 router.post('/bulk-delete', protect, bulkDelete);

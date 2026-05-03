@@ -7,9 +7,9 @@ const {
 const { protect } = require('../middleware/auth');
 const { uploadCategory } = require('../middleware/upload');
 
-router.get('/dropdown', protect, getCategoriesDropdown);
-router.get('/', protect, getCategories);
-router.get('/:id', protect, getCategory);
+router.get('/dropdown', getCategoriesDropdown);
+router.get('/', getCategories);
+router.get('/:id', getCategory);
 router.post('/', protect, uploadCategory.single('banner'), createCategory);
 router.put('/:id', protect, uploadCategory.single('banner'), updateCategory);
 router.delete('/:id', protect, deleteCategory);
