@@ -57,8 +57,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static file serving for uploaded images
-app.use('/uploads', express.static('uploads'));
+// Static file serving for uploaded images (mounted under /api to work with Nginx proxy)
+app.use('/api/uploads', express.static('uploads'));
+app.use('/uploads',     express.static('uploads')); // Fallback for local/legacy
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  ADMIN ROUTES
