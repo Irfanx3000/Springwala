@@ -15,6 +15,9 @@
         .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .input-field { width: 100%; border: 1px solid #E4E4E4; border-radius: 8px; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
         .input-field:focus { border-color: #BE2229; }
+        .checkout-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .back-btn { background: none; border: none; color: #BE2229; font-weight: 600; cursor: pointer; font-size: 14px; padding: 8px 12px; transition: opacity 0.2s; }
+        .back-btn:hover { opacity: 0.7; }
     </style>
 	<script src="assets/js/config.js"></script>
 </head>
@@ -32,6 +35,11 @@
     </header>
 
     <div class="checkout-container py-8">
+        <div class="checkout-header">
+            <button class="back-btn" onclick="goBackToCart()">
+                ← Back to Cart
+            </button>
+        </div>
         <h1 class="text-[28px] font-bold text-[#242323] mb-8">Checkout</h1>
 
         <div class="flex flex-col lg:flex-row gap-8">
@@ -102,7 +110,7 @@
                                 <p class="font-semibold text-gray-700">Online Payment</p>
                                 <p class="text-[12px] text-gray-500">Pay securely via UPI, Card, or Netbanking</p>
                             </div>
-                            <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" class="h-6 opacity-60">
+                            <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" class="h-5">
                         </div>
                     </div>
                 </div>
@@ -123,20 +131,20 @@
                     <!-- Price Details -->
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-[#525252]">
-                            <span>Items Total (MRP)</span>
-                            <span id="summary-mrp">₹0.00</span>
+                            <span>Items Total (incl. GST)</span>
+                            <span id="summary-items-total">₹0.00</span>
                         </div>
-                        <div class="flex justify-between text-[#2E7D32]">
+                        <div class="flex justify-between text-[#2E7D32]" style="display: none;">
                             <span>Discount</span>
-                            <span id="summary-discount">- ₹0.00</span>
+                            <span id="summary-discount">0%</span>
                         </div>
-                        <div class="flex justify-between text-[#525252]">
-                            <span>GST Amount</span>
+                        <div class="flex justify-between text-[#525252]" style="display: none;">
+                            <span>GST (on final price)</span>
                             <span id="summary-gst">₹0.00</span>
                         </div>
                         <div class="flex justify-between text-[#525252]">
                             <span>Delivery Charges</span>
-                            <span id="summary-delivery">₹0.00</span>
+                            <span id="summary-delivery">Free</span>
                         </div>
                         <div class="h-[1px] bg-[#E4E4E4] my-2"></div>
                         <div class="flex justify-between text-[18px] font-bold text-[#242323]">

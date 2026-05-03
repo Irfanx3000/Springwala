@@ -6,8 +6,11 @@ const OrderItemSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   variant: { name: String, value: String },
   quantity: { type: Number, required: true, min: 1 },
-  price: { type: Number, required: true },
-  discountedPrice: { type: Number, default: 0 },
+  price: { type: Number },
+  subtotal: { type: Number },
+  finalPrice: { type: Number, required: true }, // The finalPrice (incl. GST) at time of order
+  total: { type: Number, required: true },        // finalPrice * quantity
+  hsn: { type: String, default: '' }
 });
 
 const OrderSchema = new mongoose.Schema({
@@ -29,8 +32,10 @@ const OrderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   gstAmount: { type: Number, default: 0 },
   shippingCharge: { type: Number, default: 0 },
+  deliveryCharges: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   totalAmount: { type: Number, required: true },
+  finalAmount: { type: Number },
   orderStatus: {
     type: String,
     enum: ['Pending', 'Ordered', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
@@ -44,6 +49,13 @@ const OrderSchema = new mongoose.Schema({
   paymentMethod: { type: String, required: true, enum: ['COD', 'Online', 'UPI', 'Card', 'Wallet'], default: 'COD' },
   paymentDetails: { transactionId: String, gateway: String, paidAt: Date },
   trackingNumber: { type: String, default: '' },
+  awb: { type: String, default: '' },
+  trackingUrl: { type: String, default: '' },
+  shipmentStatus: {
+    type: String,
+    enum: ['Pending', 'Ready to Ship', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'],
+    default: 'Pending'
+  },
   courier: { type: String, default: '' },
   notes: { type: String, default: '' },
   cancelReason: { type: String, default: '' },
@@ -54,7 +66,5 @@ const OrderSchema = new mongoose.Schema({
     note: String,
   }],
 }, { timestamps: true });
-
-// Note: orderNumber generation is now handled in the controller to ensure it's not null and unique before creation.
 
 module.exports = mongoose.model('Order', OrderSchema);

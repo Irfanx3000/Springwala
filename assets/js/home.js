@@ -135,6 +135,7 @@ function renderCategories() {
 
 // ─── Products Logic (Reusable) ───────────────────────────────────────────────
 async function loadProductSection(endpoint, sectionKey, containerId, paginationId) {
+    console.log(`[Home] Fetching products for ${sectionKey}...`);
     try {
         const params = {
             page: state[sectionKey].page,

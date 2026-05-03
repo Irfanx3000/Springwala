@@ -8,13 +8,114 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSidebar(); initAdminHeader();
   await loadProfile();
   const admin = Auth.getAdmin();
-  if (admin?.role === 'superadmin') { await loadAdminsList(); bindAddAdmin(); }
+  if (admin?.role === 'superadmin') { 
+    await loadAdminsList(); 
+    await loadRequestsList();
+    bindAddAdmin(); 
+    document.getElementById('refresh-requests-btn')?.addEventListener('click', loadRequestsList);
+  }
   bindSettingsEvents();
 });
 
+async function loadRequestsList() {
+  const tbody = document.getElementById('requests-tbody');
+  if (!tbody) return;
+  try {
+    const data = await api.get('/admin/requests');
+    if (!data || !data.requests) return;
+    
+    // Show all except completed/rejected
+    const active = data.requests.filter(r => ['pending', 'approved', 'verified'].includes(r.status));
+    
+    if (active.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No active access requests.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = active.map(r => {
+      let statusBadge = '';
+      let actions = '';
+      let roleDisplay = `<span class="text-sm text-gray-500 capitalize">${r.role}</span>`;
+
+      if (r.status === 'pending') {
+        statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">Pending</span>`;
+        roleDisplay = `
+          <select id="role-select-${r._id}" class="bg-gray-100 border-none rounded px-2 py-1 text-sm outline-none">
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="superadmin">Superadmin</option>
+          </select>`;
+        actions = `
+          <button onclick="approveRequest('${r._id}')" class="text-green-600 font-semibold text-sm hover:underline">Approve</button>
+          <button onclick="rejectRequest('${r._id}')" class="text-red-500 font-semibold text-sm hover:underline">Reject</button>`;
+      } 
+      else if (r.status === 'approved' || r.status === 'verified') {
+        if (!r.adminExists) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">Waiting for Setup</span>`;
+          actions = `<button onclick="rejectRequest('${r._id}')" class="text-red-400 text-xs hover:underline">Cancel Request</button>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">Onboarded</span>`;
+          actions = `<span class="text-gray-400 text-xs italic">Manage in Admin List</span>`;
+        }
+      }
+
+      return `
+        <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+          <td class="px-4 py-4">
+            <p class="font-medium text-gray-800">${r.name}</p>
+            <p class="text-xs text-gray-500">${new Date(r.createdAt).toLocaleString()}</p>
+          </td>
+          <td class="px-4 py-4 text-gray-600 text-sm">${r.email}</td>
+          <td class="px-4 py-4">${statusBadge}</td>
+          <td class="px-4 py-4">${roleDisplay}</td>
+          <td class="px-4 py-4">
+            <div class="flex gap-3 items-center">
+              ${actions}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) { 
+    console.error('Failed to load requests:', err); 
+    tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-400">Failed to load requests.</td></tr>';
+  }
+}
+
+async function approveRequest(requestId) {
+  const role = document.getElementById(`role-select-${requestId}`)?.value || 'admin';
+  try {
+    const res = await api.post('/admin/approve', { requestId, role });
+    if (res.success) {
+      showToast('Admin approved successfully', 'success');
+      await loadRequestsList();
+      await loadAdminsList();
+    } else {
+      showToast(res.message, 'error');
+    }
+  } catch (err) {
+    showToast('Approval failed: ' + err.message, 'error');
+  }
+}
+
+async function rejectRequest(requestId) {
+  if (!confirm('Are you sure you want to reject this request?')) return;
+  try {
+    const res = await api.post('/admin/reject', { requestId });
+    if (res.success) {
+      showToast('Request rejected', 'info');
+      await loadRequestsList();
+    } else {
+      showToast(res.message, 'error');
+    }
+  } catch (err) {
+    showToast('Rejection failed: ' + err.message, 'error');
+  }
+}
+
 async function loadProfile() {
   try {
-    const data = await api.get('/auth/me');
+    const data = await api.get('/auth/admin/me');
     if (!data) return;
     const a = data.admin;
     setText('profile-name', a.name);
@@ -31,7 +132,7 @@ async function loadAdminsList() {
   const tbody = document.getElementById('admins-tbody');
   if (!tbody) return;
   try {
-    const data = await api.get('/settings/admins');
+    const data = await api.get('/admin/all');
     if (!data) return;
     const me = Auth.getAdmin();
     tbody.innerHTML = data.admins.map(a => `
@@ -75,7 +176,7 @@ function bindAddAdmin() {
     if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
 
     try {
-      await api.post('/auth/register', { name, email, password, role });
+      await api.post('/admin/create', { name, email, password, role });
       showToast('Admin created!', 'success');
       ['add-admin-name','add-admin-email','add-admin-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       await loadAdminsList();
@@ -86,14 +187,14 @@ function bindAddAdmin() {
 
 async function toggleAdminById(id, name) {
   showConfirm(`Toggle status for admin "<strong>${name}</strong>"?`, async () => {
-    try { await api.patch(`/settings/admins/${id}/toggle`); showToast('Status updated', 'success'); await loadAdminsList(); }
+    try { await api.patch(`/admin/${id}/toggle`); showToast('Status updated', 'success'); await loadAdminsList(); }
     catch (err) { showToast(err.message, 'error'); }
   });
 }
 
 function deleteAdminById(id, name) {
   showConfirm(`Permanently delete admin "<strong>${name}</strong>"?`, async () => {
-    try { await api.delete(`/settings/admins/${id}`); showToast('Admin deleted', 'success'); await loadAdminsList(); }
+    try { await api.delete(`/admin/${id}`); showToast('Admin deleted', 'success'); await loadAdminsList(); }
     catch (err) { showToast(err.message, 'error'); }
   });
 }
@@ -122,7 +223,7 @@ function bindSettingsEvents() {
     if (newPass !== confirm) { showToast('New passwords do not match', 'error'); return; }
     if (newPass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
     try {
-      await api.put('/auth/change-password', { currentPassword: curr, newPassword: newPass });
+      await api.put('/auth/admin/change-password', { currentPassword: curr, newPassword: newPass });
       showToast('Password changed!', 'success');
       ['current-password','new-password','confirm-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     } catch (err) { showToast('Failed: ' + err.message, 'error'); }

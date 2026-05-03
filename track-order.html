@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Order | Springwala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; min-height: 100vh; }
+        .track-card { max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #e5e7eb; position: relative; z-index: 2; }
+        .status-dot.active { background: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2); }
+        .status-line { position: absolute; left: 5px; top: 12px; bottom: -28px; width: 2px; background: #e5e7eb; z-index: 1; }
+        .status-line.active { background: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="p-4 md:p-8">
+        <div class="max-w-4xl mx-auto">
+            <a href="index.html" class="inline-flex items-center text-gray-600 hover:text-red-600 mb-6 transition">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Home
+            </a>
+
+            <div class="track-card">
+                <div class="bg-red-600 p-6 text-white text-center">
+                    <h1 class="text-2xl font-bold font-['Poppins']">Track Shipment</h1>
+                    <p class="text-red-100 text-sm mt-1" id="display-awb-header">Loading tracking details...</p>
+                </div>
+
+                <div class="p-6 md:p-10">
+                    <div id="loading-state" class="text-center py-10">
+                        <div class="inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="mt-4 text-gray-500">Searching for your shipment...</p>
+                    </div>
+
+                    <div id="error-state" class="hidden text-center py-10">
+                        <div class="bg-red-50 text-red-600 p-4 rounded-lg inline-block mb-4">
+                            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-gray-800">No Tracking Found</h2>
+                        <p class="text-gray-500 mt-2">We couldn't find any shipment matching this ID.</p>
+                        <a href="index.html" class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-lg font-semibold">Contact Support</a>
+                    </div>
+
+                    <div id="tracking-content" class="hidden">
+                        <div class="flex justify-between items-center mb-10 pb-6 border-bottom border-gray-100">
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Status</p>
+                                <p id="current-status-text" class="text-lg font-bold text-gray-800">Pending</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Last Updated</p>
+                                <p id="last-updated-text" class="text-sm font-semibold text-gray-600">---</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-10 relative">
+                            <!-- Step: Ordered -->
+                            <div class="flex gap-4">
+                                <div class="relative">
+                                    <div id="dot-ordered" class="status-dot active"></div>
+                                    <div id="line-ordered" class="status-line"></div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Order Placed</h3>
+                                    <p class="text-sm text-gray-500">Your order has been received and confirmed.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step: Processing -->
+                            <div class="flex gap-4">
+                                <div class="relative">
+                                    <div id="dot-processing" class="status-dot"></div>
+                                    <div id="line-processing" class="status-line"></div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Processing</h3>
+                                    <p class="text-sm text-gray-500">We are preparing your items for shipment.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step: Shipped -->
+                            <div class="flex gap-4">
+                                <div class="relative">
+                                    <div id="dot-shipped" class="status-dot"></div>
+                                    <div id="line-shipped" class="status-line"></div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Shipped</h3>
+                                    <p class="text-sm text-gray-500">Package has been handed over to courier.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step: Delivered -->
+                            <div class="flex gap-4">
+                                <div class="relative">
+                                    <div id="dot-delivered" class="status-dot"></div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">Delivered</h3>
+                                    <p class="text-sm text-gray-500">Shipment has been delivered successfully.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script>
+        async function initTracking() {
+            const params = new URLSearchParams(window.location.search);
+            const awb = params.get('awb');
+
+            if (!awb) {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('display-awb-header').textContent = `Tracking ID: ${awb}`;
+
+            try {
+                // Use centralized config for API base
+                const apiUrl = `${CONFIG.API_BASE_URL}/user/orders/track/${awb}`;
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                updateUI(data.tracking);
+            } catch (err) {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+            }
+        }
+
+        function updateUI(tracking) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('tracking-content').classList.remove('hidden');
+
+            document.getElementById('current-status-text').textContent = tracking.status;
+            document.getElementById('last-updated-text').textContent = new Date(tracking.lastUpdated).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
+
+            const status = tracking.status;
+            const steps = ['Pending', 'Ready to Ship', 'Shipped', 'Delivered'];
+            const currentIndex = steps.indexOf(status);
+
+            // Logic to activate dots and lines
+            if (currentIndex >= 0) {
+                 activate('ordered'); // Always active if order exists
+            }
+            if (currentIndex >= 1) { // Ready to Ship / Processing
+                 activate('processing');
+            }
+            if (currentIndex >= 2) { // Shipped
+                 activate('shipped');
+            }
+            if (currentIndex >= 3) { // Delivered
+                 activate('delivered');
+            }
+        }
+
+        function activate(id) {
+            document.getElementById(`dot-${id}`)?.classList.add('active');
+            document.getElementById(`line-${id}`)?.classList.add('active');
+        }
+
+        window.onload = initTracking;
+    </script>
+</body>
+</html>

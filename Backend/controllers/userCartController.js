@@ -1,9 +1,9 @@
-const Cart    = require('../models/Cart');
+const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
 // ─── Helper: fetch or create cart for user ────────────────────────────────────
 async function getOrCreateCart(userId) {
-  let cart = await Cart.findOne({ user: userId }).populate('items.product', 'name images price discountedPrice stock isActive');
+  let cart = await Cart.findOne({ user: userId }).populate('items.product', 'name images basePrice finalPrice stock isActive');
   if (!cart) cart = await Cart.create({ user: userId, items: [] });
   return cart;
 }
@@ -22,7 +22,7 @@ exports.getCart = async (req, res) => {
 // Body: { productId, quantity?, batchQuantity?, batchPrice?, variantName?, variantValue? }
 exports.addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1, batchQuantity, batchPrice, variantName, variantValue } = req.body;
+    const { productId, quantity = 1, batchQuantity, finalPrice, variantName, variantValue } = req.body;
 
     if (!productId) {
       return res.status(400).json({ success: false, message: 'productId is required.' });
@@ -70,21 +70,22 @@ exports.addToCart = async (req, res) => {
       cart.items[existingIndex].quantity = newPacks;
     } else {
       // Add new item
+      // Use finalPrice from request if valid, otherwise fallback to product.finalPrice
+      const unitPrice = parseFloat(finalPrice) || product.finalPrice;
+
       cart.items.push({
-        product:         product._id,
-        name:            product.name,
-        image:           product.images?.[0] || '',
-        price:           product.price,
-        discountedPrice: product.discountedPrice || 0,
-        quantity:        qty,
-        batchQuantity:   bQty,
-        batchPrice:      Number(batchPrice || product.discountedPrice || product.price),
-        variant: variantName ? { name: variantName, value: variantValue } : undefined,
+        product:    product._id,
+        name:       product.name,
+        image:      product.images?.[0] || '/uploads/default-product.png',
+        finalPrice: unitPrice,
+        quantity:   qty,
+        batchQuantity: bQty,
+        variant:    variantName ? { name: variantName, value: variantValue } : undefined,
       });
     }
 
     await cart.save();
-    await cart.populate('items.product', 'name images price discountedPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
 
     res.json({ success: true, message: 'Item added to cart.', cart });
   } catch (err) {
@@ -120,7 +121,7 @@ exports.updateCartItem = async (req, res) => {
 
     item.quantity = qty;
     await cart.save();
-    await cart.populate('items.product', 'name images price discountedPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
 
     res.json({ success: true, message: 'Cart updated.', cart });
   } catch (err) {
@@ -184,18 +185,17 @@ exports.mergeCart = async (req, res) => {
         cart.items[existingIndex].quantity = Math.min(newQty, product.stock);
       } else {
         cart.items.push({
-          product:         product._id,
-          name:            product.name,
-          image:           product.images?.[0] || '',
-          price:           product.price,
-          discountedPrice: product.discountedPrice || 0,
-          quantity:        Math.min(qty, product.stock),
+          product:    product._id,
+          name:       product.name,
+          image:      product.images?.[0] || '/uploads/default-product.png',
+          finalPrice: product.finalPrice,
+          quantity:   Math.min(qty, product.stock),
         });
       }
     }
 
     await cart.save();
-    await cart.populate('items.product', 'name images price discountedPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
 
     res.json({ success: true, message: 'Cart merged successfully.', cart });
   } catch (err) {

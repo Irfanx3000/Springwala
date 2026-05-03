@@ -216,7 +216,7 @@ exports.searchProducts = async (req, res) => {
         { tags: regex }
       ]
     })
-      .select('name images price discountedPrice discountPercent slug')
+      .select('name images price discountedPrice finalPrice discountPercent slug')
       .limit(10);
 
     res.json({ success: true, products });

@@ -200,7 +200,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-transparent rounded-full"></span>
-                    <a href="#">Your Wishlist</a>
+                    <a href="wishlist.html" class="nav-link">Your Wishlist</a>
                 </li>
                 <li class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-transparent rounded-full"></span>
@@ -596,20 +596,20 @@
 
                             <div class="flex flex-col gap-3 px-1">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Price (Batch)</span>
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">Final Price (incl. GST)</span>
                                     <span id="summary-price" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center" style="display: none;">
                                     <span class="text-[#000000] text-[13px] font-['Roboto']">Discount</span>
-                                    <span id="summary-discount" class="text-[#000000] text-[13px] font-['Roboto'] text-right">- ₹0.00</span>
+                                    <span id="summary-discount" class="text-[#000000] text-[13px] font-['Roboto'] text-right">0%</span>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[#000000] text-[13px] font-['Roboto']">GST</span>
+                                <div class="flex justify-between items-center" style="display: none;">
+                                    <span class="text-[#000000] text-[13px] font-['Roboto']">GST (on final price)</span>
                                     <span id="summary-gst" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-[#000000] text-[13px] font-['Roboto']">Delivery Charges</span>
-                                    <span id="summary-delivery" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                                    <span id="summary-delivery" class="text-[#000000] text-[13px] font-['Roboto'] text-right">Free</span>
                                 </div>
                             </div>
                         </div>
@@ -710,20 +710,20 @@
 
                 <div class="flex flex-col gap-3 px-1">
                     <div class="flex justify-between items-center">
-                        <span class="text-[#000000] text-[13px] font-['Roboto']">Price (Batch)</span>
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">Price (After Discount)</span>
                         <span id="summary-price-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-[#000000] text-[13px] font-['Roboto']">Discount</span>
-                        <span id="summary-discount-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">- ₹0.00</span>
+                        <span id="summary-discount-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">0%</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-[#000000] text-[13px] font-['Roboto']">GST</span>
+                        <span class="text-[#000000] text-[13px] font-['Roboto']">GST (on final price)</span>
                         <span id="summary-gst-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-[#000000] text-[13px] font-['Roboto']">Delivery Charges</span>
-                        <span id="summary-delivery-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">₹0.00</span>
+                        <span id="summary-delivery-mobile" class="text-[#000000] text-[13px] font-['Roboto'] text-right">Free</span>
                     </div>
                 </div>
 
@@ -1636,23 +1636,28 @@
         </div>
     </div>
 
-    <!-- Mobile Navigation Bar (Fixed Bottom) -->
+    <!-- Mobile Navigation Bar -->
     <nav class="mobile-navbar">
-        <a href="index.html" class="nav-item cursor-pointer">
+        <div class="nav-item" data-page="home">
             <img src="assets/icons/mobile/home.svg" alt="Home">
-        </a>
-        <a href="categories.html" class="nav-item cursor-pointer">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="categories">
             <img src="assets/icons/mobile/categories.svg" alt="Categories">
-        </a>
-        <a href="orders.html" class="nav-item cursor-pointer">
-            <img src="assets/icons/mobile/orders.svg" alt="Orders">
-        </a>
-        <a href="wishlist.html" class="nav-item cursor-pointer">
-            <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 grayscale brightness-0 invert-[0.3]">
-        </a>
-        <a href="login.html" class="nav-item cursor-pointer">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile">
             <img src="assets/icons/mobile/profile.svg" alt="Profile">
-        </a>
+            <div class="active-indicator"></div>
+        </div>
     </nav>
     <!-- Add padding to body for the double sticky bars -->
     <style>

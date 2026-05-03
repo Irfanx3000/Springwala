@@ -20,15 +20,84 @@
     <script src="assets/js/config.js"></script>
 </head>
 
-<body class="bg-[#F8F9FA] text-gray-900 font-['Roboto']" data-page="wishlist">
+<body class="bg-white text-gray-900 font-['Roboto']" data-page="wishlist">
 
-    <!-- Navbar Snippet (Standard Header) -->
-    <header class="bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+        <span class="text-white text-[13px]">Get discount on every selected product</span>
+    </div>
+
+    <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
+
+        <!-- Mobile Main Header -->
+        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
+            <!-- Hamburger -->
+            <button id="menu-btn" class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
+                <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
+            </button>
+
+            <!-- Logo -->
+            <img src="assets/images/header.png" alt="Springwala Logo" class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
+
+            <!-- Cart & Wishlist -->
+            <div class="absolute right-[16px] top-[11px] flex items-center gap-3">
+                <a href="wishlist.html" class="w-[26px] h-[26px] relative flex items-center justify-center">
+                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-full h-full object-contain">
+                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+                <a href="cart.html" class="w-[29px] h-[29px] relative flex items-center justify-center">
+                    <svg class="w-full h-full text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Sub Header -->
+        <div id="mobile-sub-header" class="md:hidden flex flex-col w-full origin-top">
+            <div class="px-[14px] py-[5px] bg-[#BE2229] flex items-center gap-3">
+                <div class="bg-white rounded-[6px] flex-1 flex items-center px-[11px] h-[30px]">
+                    <img src="assets/icons/mobile/search.svg" alt="Search" class="w-4 h-4 text-[#797979]">
+                    <input type="text" placeholder="Search..." class="ml-2 outline-none text-[14px] w-full">
+                </div>
+
+                <a href="login.html" class="cursor-pointer flex-shrink-0">
+                    <img src="assets/icons/mobile/account.svg" alt="Account" class="w-[26px] h-[26px]">
+                </a>
+            </div>
+
+            <!-- Deliver to Sub-header -->
+            <div class="flex flex-row justify-between items-center px-[15px] py-[6px] bg-[#F6D6D6] h-[30px] w-full gap-2">
+                <div class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap">Shop by Categories</div>
+
+                <div class="flex items-center gap-1 cursor-pointer min-w-0" id="location-btn">
+                    <span class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap">Deliver to</span>
+                    <img src="assets/icons/mobile/location.svg" alt="Location" class="w-[10px] sm:w-[12px] h-[14px] sm:h-[16px] flex-shrink-0" style="transform: scaleX(-1); filter: brightness(0) saturate(100%) invert(18%) sepia(90%) saturate(2687%) hue-rotate(338deg) brightness(91%) contrast(92%);">
+                    <span class="text-[#BD2830] text-[12px] sm:text-[14px] underline truncate max-w-[100px] sm:max-w-[130px]" id="location-text">Thane, Maharashtra</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Main Header -->
         <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
-            <a href="index.html"><img src="assets/images/header.png" alt="Logo" class="h-[40px] w-auto"></a>
+            <a href="index.html"><img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto"></a>
+
+            <div class="flex items-start gap-2 ml-8">
+                <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
+                <div class="flex flex-col">
+                    <span class="text-[#747474] text-[10px]">Location</span>
+                    <span class="text-[#242323] text-[12px] font-medium location-display">Thane, Maharashtra</span>
+                </div>
+            </div>
 
             <div class="flex-1 max-w-[519px] mx-10 flex h-[40px]">
-                <div class="flex-1 border border-[#D7D9D9] rounded-[6px] flex items-center px-3 bg-white">
+                <div class="border border-[#BE2229] rounded-l-[6px] px-3 flex items-center gap-2 cursor-pointer bg-white">
+                    <span class="text-[#BE2229] text-[13px]">All Categories</span>
+                    <svg class="w-3 h-3 text-[#BE2229]" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1 border border-[#D7D9D9] border-l-0 rounded-r-[6px] flex items-center px-3 bg-white">
                     <input type="text" class="flex-1 outline-none text-[13px]" placeholder="Search Products...">
                     <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979]">
                 </div>
@@ -37,7 +106,7 @@
             <div class="flex items-center gap-7">
                 <a href="login.html" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
                     <img src="assets/icons/desktop/profile.svg" alt="Account" class="w-6 h-6 text-[#525252]">
-                    <span class="text-[#525252] text-[15px]">Account</span>
+                    <span class="text-[#525252] text-[15px] header-account-text">Your Account</span>
                 </a>
                 <a href="cart.html" class="cursor-pointer hover:opacity-80 transition relative">
                     <img src="assets/icons/desktop/cart.svg" alt="Cart" class="w-6 h-6 text-[#525252]">
@@ -49,22 +118,69 @@
                 </a>
             </div>
         </div>
-        
-        <!-- Mobile Header -->
-        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] items-center px-4">
-            <a href="index.html" class="w-[120px]"><img src="assets/images/header.png" alt="Logo" class="w-full object-contain"></a>
-            <div class="ml-auto flex gap-4">
-                <a href="wishlist.html" class="relative">
-                    <img src="assets/icons/desktop/saved-items.svg" class="w-6 h-6" alt="Wishlist">
-                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-                <a href="cart.html" class="relative">
-                    <img src="assets/icons/mobile/cart.svg" class="w-6 h-6" alt="Cart">
-                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
+    </header>
+
+    <!-- Desktop Sub Header Nav -->
+    <div class="hidden md:flex max-w-[1440px] mx-auto items-center h-[56px] px-[80px]">
+        <a href="categories.html" class="border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-50 transition">
+            <img src="assets/icons/mobile/categories-red.svg" alt="Categories" class="w-4 h-4">
+            <span class="text-[#BE2229] text-[12px] font-medium uppercase">Browse All Categories</span>
+        </a>
+
+        <ul class="flex items-center gap-8 ml-10 text-[15px] text-[#525252]">
+            <li class="cursor-pointer hover:text-[#BE2229]"><a href="index.html">Home</a></li>
+            <li class="cursor-pointer hover:text-[#BE2229]"><a href="allproducts.html">All Products</a></li>
+            <li class="cursor-pointer hover:text-[#BE2229]"><a href="orders.html">Orders</a></li>
+            <li class="cursor-pointer hover:text-[#BE2229]">Knowledge Centre</li>
+            <li class="cursor-pointer hover:text-[#BE2229]">Contact Us</li>
+        </ul>
+
+        <div class="ml-auto hidden lg:flex items-center gap-3">
+            <div class="bg-[#7F171B] rounded-full p-2">
+                <i class="fa-solid fa-headset text-white text-[18px]"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] text-[#525252]">Customer Support</span>
+                <span class="text-[13px] font-bold text-[#BE2229]">+91 7208120335</span>
             </div>
         </div>
-    </header>
+    </div>
+
+    <!-- Mobile Hamburger Menu -->
+    <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-50 hidden-menu md:hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <img src="assets/images/header.png" alt="Logo" class="h-8">
+                <button id="close-menu" class="text-gray-500 text-2xl">&times;</button>
+            </div>
+            <ul class="space-y-6 text-[#525252] font-['Poppins'] text-lg">
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="index.html">Home</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="categories.html">Categories</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="allproducts.html">All Products</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="orders.html">Your Orders</a>
+                </li>
+                <li class="flex items-center gap-3 text-[#BE2229] font-medium">
+                    <span class="w-2 h-2 bg-[#BE2229] rounded-full"></span>
+                    <a href="wishlist.html" class="nav-link">Your Wishlist</a>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="login.html">Your Account</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 
     <main class="max-w-[1440px] mx-auto px-4 md:px-[80px] py-10 min-h-[600px]">
         <div class="flex flex-col gap-2 mb-8">
@@ -73,7 +189,7 @@
         </div>
 
         <!-- Wishlist Grid -->
-        <div id="wishlist-grid" class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+        <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             <!-- Products will be injected here -->
             <div class="col-span-full py-20 flex flex-col items-center justify-center text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#BE2229] mb-4"></div>
@@ -83,44 +199,142 @@
 
         <!-- Empty State (hidden by default) -->
         <div id="wishlist-empty" class="hidden col-span-full py-20 flex flex-col items-center justify-center text-center">
-            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <img src="assets/icons/desktop/saved-items.svg" class="w-12 h-12 opacity-30" alt="Empty">
+            <div class="w-24 h-24 bg-[#FFF4F4] rounded-full flex items-center justify-center mb-6">
+                <img src="assets/icons/desktop/saved-items.svg" class="w-12 h-12 opacity-80" alt="Empty" style="filter: invert(21%) sepia(91%) saturate(2971%) hue-rotate(346deg) brightness(89%) contrast(98%);">
             </div>
-            <h2 class="text-xl font-bold mb-2">Your Wishlist is Empty</h2>
-            <p class="text-gray-500 mb-8 max-w-xs">Looks like you haven't saved any items yet. Start exploring our categories!</p>
-            <a href="allproducts.html" class="bg-[#BE2229] text-white px-8 py-3 rounded-md font-medium hover:bg-opacity-90 transition shadow-lg">Start Shopping</a>
+            <h2 class="text-2xl font-bold mb-2">Your Wishlist is Empty</h2>
+            <p class="text-gray-500 mb-8 max-w-xs mx-auto text-center">Start exploring and save your favorite products to see them here.</p>
+            <a href="allproducts.html" class="bg-[#BE2229] text-white px-10 py-3 rounded-[8px] font-bold hover:bg-opacity-95 transition shadow-md">
+                Start Shopping
+            </a>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-[#E8E8E8] pt-12 pb-24 md:pb-12 mt-20">
-        <div class="max-w-[1440px] mx-auto px-4 md:px-[80px] text-center">
-            <img src="assets/images/header.png" alt="Logo" class="h-10 mx-auto mb-6 opacity-80">
-            <p class="text-gray-500 text-sm">© 2026 Springwala. All rights reserved.</p>
+    <!-- New Responsive Footer -->
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 relative mt-20">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex flex-row justify-between items-start gap-8 mb-10">
+                <!-- Col 1: Brand & Contact -->
+                <div class="flex flex-col gap-4 w-[253px]">
+                    <img src="assets/images/header.png" alt="Springwala" class="w-[200px]">
+                    <div class="w-full h-[1px] bg-[#525252] my-2"></div>
+                    <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                        <p>Mumbai, Maharashtra (India)</p>
+                        <p>Phone: +91 8879 241085</p>
+                        <p>Email: <a href="mailto:support@springwala.in">support@springwala.in</a></p>
+                    </div>
+                </div>
+
+                <!-- Links Cols -->
+                <div class="flex flex-col gap-4">
+                    <a href="index.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="profile.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Account</a>
+                    <a href="orders.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Orders</a>
+                    <a href="cart.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Cart</a>
+                    <a href="wishlist.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Saved Items</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col gap-4 w-[300px]">
+                    <h3 class="font-['Poppins'] font-semibold text-[18px]">Stay Updated with Springwala</h3>
+                    <p class="text-[14px]">Get E-mail updates about latest shop and special offers</p>
+                    <div class="flex h-[35px] w-full">
+                        <input type="email" placeholder="Enter your email here..." class="flex-1 border border-[#BE2229] rounded-l-[5px] px-3 outline-none text-[14px]">
+                        <button class="bg-[#BE2229] text-white px-4 rounded-r-[5px] font-medium text-[14px]">Subscribe</button>
+                    </div>
+                    <!-- Social Icons -->
+                    <div class="flex gap-4 mt-2">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6 cursor-pointer"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden flex flex-col items-center text-center gap-6 pb-20 relative">
+                <img src="assets/images/header.png" alt="Springwala" class="w-[200px] mb-2">
+                <div class="w-[90%] h-[1px] bg-[#525252]"></div>
+                <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                    <p>Mumbai, Maharashtra (India)</p>
+                    <p>Phone: +91 8879 241085</p>
+                    <p>Email: support@springwala.in</p>
+                </div>
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+                <div class="flex flex-col items-center gap-3 w-full px-2">
+                    <h3 class="font-['Poppins'] font-semibold text-[16px] text-center">Join Our Newsletter Now</h3>
+                    <div class="flex h-[35px] w-full max-w-[350px]">
+                        <input type="email" placeholder="Enter your email here..." class="flex-1 min-w-0 border border-[#BE2229] rounded-l-[5px] px-2 outline-none text-[13px]">
+                        <button class="bg-[#BE2229] text-white px-3 rounded-r-[5px] font-medium text-[13px] whitespace-nowrap">Subscribe</button>
+                    </div>
+                </div>
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+                <div class="flex flex-row justify-between w-full px-4 mt-4 text-[13px] text-[#525252]">
+                    <div class="flex flex-col gap-4 text-left">
+                        <a href="index.html">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="#">Contact Us</a>
+                    </div>
+                    <div class="flex flex-col gap-4 text-right">
+                        <a href="profile.html">My Account</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="wishlist.html">Saved Items</a>
+                    </div>
+                </div>
+                <p class="text-[14px] mt-2 mb-0">Copyright © 2026 All rights reserved</p>
+            </div>
+
+            <!-- Desktop Bottom Divider & Links -->
+            <div class="hidden md:block w-full h-[1px] bg-[#525252] my-6"></div>
+            <div class="hidden md:flex justify-center gap-8 text-[14px] text-[#666] mb-2">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Return Policy</a>
+                <a href="#">Vendor Agreement</a>
+            </div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 All rights reserved</div>
         </div>
     </footer>
 
-    <!-- Mobile Navbar -->
+    <!-- Mobile Navigation Bar -->
     <nav class="mobile-navbar">
-        <a href="index.html" class="nav-item">
+        <div class="nav-item" data-page="home">
             <img src="assets/icons/mobile/home.svg" alt="Home">
-        </a>
-        <a href="categories.html" class="nav-item">
-            <img src="assets/icons/mobile/categories.svg" alt="Categories">
-        </a>
-        <a href="wishlist.html" class="nav-item active">
-            <img src="assets/icons/desktop/saved-items.svg" class="w-6 h-6 grayscale brightness-0 invert-[0.3]" alt="Wishlist">
             <div class="active-indicator"></div>
-        </a>
-        <a href="orders.html" class="nav-item">
-            <img src="assets/icons/mobile/orders.svg" alt="Orders">
-        </a>
-        <a href="login.html" class="nav-item">
+        </div>
+        <div class="nav-item" data-page="categories">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile">
             <img src="assets/icons/mobile/profile.svg" alt="Profile">
-        </a>
+            <div class="active-indicator"></div>
+        </div>
     </nav>
 
-    <script src="assets/js/script.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 

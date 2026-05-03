@@ -83,19 +83,14 @@ exports.createProduct = async (req, res) => {
 
     const images = req.files ? req.files.map(f => `/uploads/products/${f.filename}`) : [];
 
-    // Calculate discounted price from discountPercent if not provided
-    const rawPrice      = Number(price);
-    const rawDiscount   = Number(discountPercent || 0);
-    const rawDiscounted = discountedPrice ? Number(discountedPrice) : rawPrice - (rawPrice * rawDiscount / 100);
-
     const product = await Product.create({
       name, description, shortDescription,
       category,
       subcategory: subcategory || null,
       brand, sku, images,
-      price: rawPrice,
-      discountedPrice: rawDiscounted,
-      discountPercent: rawDiscount,
+      price: Number(price),
+      basePrice: Number(price),
+      discountPercent: Number(discountPercent || 0),
       gstPercent: Number(gstPercent || 0),
       hsnCode: hsnCode || '',
       stock: Number(stock || 0),
@@ -144,8 +139,8 @@ exports.updateProduct = async (req, res) => {
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
     const scalarFields = [
-      'name','description','shortDescription','brand','sku','price',
-      'discountedPrice','discountPercent','gstPercent','hsnCode','stock',
+      'name','description','shortDescription','brand','sku','price', 'basePrice',
+      'discountPercent','gstPercent','hsnCode','stock',
       'lowStockThreshold','weight','weightUnit','isFeatured','isActive','batchNumber','type', 'deliveryCharge',
     ];
     scalarFields.forEach(f => {
@@ -354,13 +349,12 @@ exports.bulkUpload = async (req, res) => {
       const updateData = {
         name,
         price: parseFloat(unitPrice),
+        basePrice: parseFloat(unitPrice),
         discountPercent: parseFloat(discountPercent || 0),
         gstPercent: parseFloat(gstPercent || 0),
         batches,
         sku: sku.toString(),
-        stock: batches.reduce((sum, b) => sum + b.quantity, 0), // Default stock to sum of 1 of each batch? No, wait.
-        // Actually stock in CSV should be explicit? User didn't specify stock in CSV mapping.
-        // I'll use sum of batches as a placeholder or 0.
+        stock: batches.reduce((sum, b) => sum + b.quantity, 0),
         isActive: true
       };
 

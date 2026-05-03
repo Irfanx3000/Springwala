@@ -65,7 +65,7 @@
                         <img src="../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
                         <span class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]">Products</span>
                     </div>
-                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
                     <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
@@ -107,7 +107,7 @@
                         <img src="../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
                         <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
                     </div>
-                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
                 <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
                     <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
@@ -274,35 +274,11 @@
 
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/admin-sidebar.js"></script>
     <script>
         Auth.requireAuth();
     </script>
     <script src="../assets/js/users.js"></script>
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const openBtn = document.getElementById('open-sidebar');
-        const closeBtn = document.getElementById('close-sidebar');
-
-        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
-        openBtn?.addEventListener('click', toggleSidebar);
-        closeBtn?.addEventListener('click', toggleSidebar);
-        overlay?.addEventListener('click', toggleSidebar);
-
-        const productsMenuBtn = document.getElementById('products-menu-btn');
-        const productsSubmenu = document.getElementById('products-submenu');
-        const productsChevron = document.getElementById('products-menu-chevron');
-
-        productsMenuBtn?.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isHidden = productsSubmenu.classList.contains('hidden');
-            if (isHidden) {
-                productsSubmenu.classList.remove('hidden'); productsSubmenu.classList.add('flex'); productsChevron.classList.add('rotate-180');
-            } else {
-                productsSubmenu.classList.add('hidden'); productsSubmenu.classList.remove('flex'); productsChevron.classList.remove('rotate-180');
-            }
-        });
-    </script>
 </body>
 </html>
 

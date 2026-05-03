@@ -7,8 +7,12 @@ const AdminSchema = new mongoose.Schema({
   password: { type: String, required: [true, 'Password is required'], minlength: 6, select: false },
   role: { type: String, enum: ['superadmin', 'admin', 'manager'], default: 'admin' },
   avatar: { type: String, default: '' },
+  isApproved: { type: Boolean, default: true },
   isActive: { type: Boolean, default: true },
   lastLogin: { type: Date },
+  loginOtp: { type: String },
+  loginOtpExpiry: { type: Date },
+  otpType: { type: String, default: 'login' },
 }, { timestamps: true });
 
 // Hash password before saving

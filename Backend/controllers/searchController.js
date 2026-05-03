@@ -19,7 +19,7 @@ exports.globalSearch = async (req, res) => {
           { sku:  searchRegex },
           { brand: searchRegex }
         ]
-      }).limit(5).select('name images sku price'),
+      }).limit(5).select('name images sku price finalPrice'),
 
       // Search Orders: orderID (if stored as string), shipping address name
       Order.find({

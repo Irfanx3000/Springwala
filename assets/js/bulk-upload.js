@@ -302,21 +302,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setStep(num) {
         steps.forEach((s, i) => s.classList.toggle('hidden', i !== num - 1));
+        
+        const progressLine = document.getElementById('step-progress-line');
+        if (progressLine) {
+            const width = ((num - 1) / 2) * 100;
+            progressLine.style.width = `${width}%`;
+        }
+
         for (let i = 1; i <= 3; i++) {
             const circle = document.getElementById(`step-${i}-circle`);
-            const line = document.getElementById(`step-${i}-line`);
+            const label = circle?.nextElementSibling;
+            
             if (i < num) {
                 circle.className = "step-circle completed";
                 circle.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
-                if (line) line.classList.add('active');
+                if (label) {
+                    label.classList.remove('text-slate-400');
+                    label.classList.add('text-slate-600');
+                }
             } else if (i === num) {
                 circle.className = "step-circle active";
                 circle.textContent = i;
-                if (line) line.classList.remove('active');
+                if (label) {
+                    label.classList.remove('text-slate-400');
+                    label.classList.add('text-slate-600');
+                }
             } else {
                 circle.className = "step-circle";
                 circle.textContent = i;
-                if (line) line.classList.remove('active');
+                if (label) {
+                    label.classList.remove('text-slate-600');
+                    label.classList.add('text-slate-400');
+                }
             }
         }
     }

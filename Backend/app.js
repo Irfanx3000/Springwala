@@ -17,9 +17,29 @@ const app = express();
 connectDB();
 
 // ── Core middleware ───────────────────────────────────────────────────────────
+const allowedOrigins = [
+  "http://localhost:5500",
+  "http://localhost:5503",
+  process.env.CLIENT_URL
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // In development, allow all localhost origins
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
+  credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -55,6 +75,7 @@ app.use('/api/banners',    require('./routes/banners'));
 app.use('/api/inventory',  require('./routes/inventory'));
 app.use('/api/settings',   require('./routes/settings'));
 app.use('/api/search',     require('./routes/search'));
+app.use('/api/admin',      require('./routes/adminManageRoutes'));
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  USER AUTH ROUTES

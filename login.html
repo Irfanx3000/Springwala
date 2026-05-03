@@ -229,20 +229,7 @@
                                     class="w-full bg-transparent border-none outline-none text-[15px] text-[#000000] font-['Poppins'] placeholder-black placeholder-opacity-40">
                             </div>
 
-                            <!-- OTP Preference Selection -->
-                            <div class="w-full flex gap-[10px] items-center justify-between mt-[5px]">
-                                <label class="text-[12px] text-gray-600">Receive OTP via:</label>
-                                <div class="flex gap-[15px]">
-                                    <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="otpPreference" value="email" checked class="w-4 h-4 accent-[#BE2229]">
-                                        <span class="text-[12px]">Email</span>
-                                    </label>
-                                    <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="radio" name="otpPreference" value="sms" class="w-4 h-4 accent-[#BE2229]">
-                                        <span class="text-[12px]">SMS</span>
-                                    </label>
-                                </div>
-                            </div>
+                             <!-- OTP Preference Removed - Defaulting to Email -->
                             
                             <div
                                 class="w-full h-[50px] bg-[#EDEDED] rounded-[8px] flex items-center px-[20px] relative">
@@ -375,21 +362,19 @@
         // Store token in localStorage
         function storeToken(token, user = null) {
             localStorage.setItem('token', token);
-            localStorage.setItem('userToken', token); // Compatibility
             if (user) {
                 localStorage.setItem('user', JSON.stringify(user));
-                localStorage.setItem('springwalaUser', JSON.stringify(user)); // Compatibility
             }
         }
         
         function getToken() {
-            return localStorage.getItem('token') || localStorage.getItem('userToken');
+            return localStorage.getItem('token');
         }
         
         function clearToken() {
             localStorage.removeItem('token');
-            localStorage.removeItem('userToken');
             localStorage.removeItem('user');
+            localStorage.removeItem('userToken');
             localStorage.removeItem('springwalaUser');
         }
         
@@ -509,12 +494,8 @@
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
             
-            // Get OTP preference
-            let otpPreference = 'email';
-            const smsRadio = document.querySelector('input[name="otpPreference"][value="sms"]');
-            if (smsRadio && smsRadio.checked) {
-                otpPreference = 'sms';
-            }
+            // OTP preference defaults to email
+            const otpPreference = 'email';
             
             // Validation
             if (!firstName || !lastName || !password) {
@@ -522,8 +503,8 @@
                 return;
             }
             
-            if (!email && !phoneNumber) {
-                showNotification('Missing Contact', 'Please provide either email OR phone number', 'error');
+            if (!email) {
+                showNotification('Missing Email', 'Email address is required for verification', 'error');
                 return;
             }
             

@@ -14,7 +14,7 @@ async function initOrdersPage() {
 
     const container = document.getElementById('orders-container');
     const mobileContainer = document.getElementById('mobile-orders-container');
-    
+
     if (!container && !mobileContainer) return;
 
     // Show loading state
@@ -31,10 +31,10 @@ async function initOrdersPage() {
             renderEmptyState();
         } else {
             // 5. STATUS SEGREGATION
-            const undelivered = orders.filter(o => 
+            const undelivered = orders.filter(o =>
                 ['pending', 'processing', 'shipped', 'ordered'].includes(o.orderStatus?.toLowerCase())
             );
-            const delivered = orders.filter(o => 
+            const delivered = orders.filter(o =>
                 ['delivered', 'completed'].includes(o.orderStatus?.toLowerCase())
             );
 
@@ -88,9 +88,9 @@ function renderMobileOrders(undelivered, delivered) {
             <span class="text-[#000000] text-[18px] font-normal font-['Roboto'] flex items-end">(${undelivered.length} Items)</span>
         </div>
         <div class="flex flex-col gap-4 mb-8">
-            ${undelivered.length > 0 
-                ? undelivered.flatMap(o => o.items.map(i => buildMobileOrderCard(o, i))).join('')
-                : '<div class="text-center py-4 text-gray-400 bg-white rounded-lg border border-gray-100">No undelivered items</div>'}
+            ${undelivered.length > 0
+            ? undelivered.flatMap(o => o.items.map(i => buildMobileOrderCard(o, i))).join('')
+            : '<div class="text-center py-4 text-gray-400 bg-white rounded-lg border border-gray-100">No undelivered items</div>'}
         </div>
         <div class="w-full h-[1px] border-b border-[rgba(0,0,0,0.14)] mb-8"></div>
     `;
@@ -102,9 +102,9 @@ function renderMobileOrders(undelivered, delivered) {
             <span class="text-[#000000] text-[18px] font-normal font-['Roboto'] flex items-end">(${delivered.length} Items)</span>
         </div>
         <div class="flex flex-col gap-4">
-            ${delivered.length > 0 
-                ? delivered.flatMap(o => o.items.map(i => buildMobileOrderCard(o, i))).join('')
-                : '<div class="text-center py-4 text-gray-400 bg-white rounded-lg border border-gray-100">No delivered items</div>'}
+            ${delivered.length > 0
+            ? delivered.flatMap(o => o.items.map(i => buildMobileOrderCard(o, i))).join('')
+            : '<div class="text-center py-4 text-gray-400 bg-white rounded-lg border border-gray-100">No delivered items</div>'}
         </div>
     `;
 
@@ -213,7 +213,7 @@ function setupTabs(undelivered, delivered) {
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.dataset.tab;
-            
+
             // UI Update
             tabs.forEach(t => {
                 t.classList.remove('active');
@@ -223,7 +223,7 @@ function setupTabs(undelivered, delivered) {
                 div.style.borderBottom = "1px solid rgba(0,0,0,0.28)";
                 div.style.backgroundColor = "transparent";
             });
-            
+
             tab.classList.add('active');
             tab.querySelector('span').className = "text-[#BE2229] text-[20px] font-semibold font-['Poppins'] leading-[30px]";
             const activeDiv = tab.querySelector('div');
@@ -259,7 +259,7 @@ async function loadRelatedProducts() {
     try {
         const data = await apiCall('/user/products/latest?limit=6', 'GET');
         const products = data.products || [];
-        
+
         if (products.length === 0) {
             slider.innerHTML = '<div class="text-center w-full py-10 text-gray-400">No related products found</div>';
             return;
@@ -278,22 +278,22 @@ function initSliderControls(totalCards) {
     const prevBtn = document.getElementById('orders-slider-prev');
     const nextBtn = document.getElementById('orders-slider-next');
     const pageInfo = document.getElementById('orders-slider-info');
-    
+
     if (!slider || !prevBtn || !nextBtn) return;
-    
+
     const scrollStep = 194;
     const visibleCards = 6;
-    
+
     function updatePageInfo() {
         const firstVisible = Math.round(slider.scrollLeft / scrollStep) + 1;
         const lastVisible = Math.min(firstVisible + visibleCards - 1, totalCards);
         if (pageInfo) pageInfo.textContent = firstVisible + '–' + lastVisible + ' of ' + totalCards;
     }
-    
+
     nextBtn.onclick = () => { slider.scrollBy({ left: scrollStep, behavior: 'smooth' }); setTimeout(updatePageInfo, 350); };
     prevBtn.onclick = () => { slider.scrollBy({ left: -scrollStep, behavior: 'smooth' }); setTimeout(updatePageInfo, 350); };
     slider.onscroll = () => { clearTimeout(slider._t); slider._t = setTimeout(updatePageInfo, 100); };
-    
+
     updatePageInfo();
 }
 
@@ -312,11 +312,11 @@ async function orderAgain(productId) {
         const product = await apiCall(`/products/${productId}`, 'GET');
         if (product) {
             handleAddToCart(
-                product._id, 
-                product.name, 
-                productImg(product), 
-                product.price, 
-                product.discountedPrice, 
+                product._id,
+                product.name,
+                productImg(product),
+                product.price,
+                product.discountedPrice,
                 product.gstPercent || 18
             );
         }

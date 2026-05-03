@@ -22,10 +22,12 @@ const ProductSchema = new mongoose.Schema({
   images:           [{ type: String }],
 
   // Pricing
-  price:            { type: Number, required: true },
-  discountedPrice:  { type: Number, default: 0 },
+  price:            { type: Number, required: true }, // Legacy field, kept for compatibility as basePrice
+  basePrice:        { type: Number },                // Original price before discount/GST
+  discountedPrice:  { type: Number, default: 0 },   // Legacy field
   discountPercent:  { type: Number, default: 0 },   // stored for display
   gstPercent:       { type: Number, default: 0 },   // GST % field from form
+  finalPrice:       { type: Number },                // FINAL PER UNIT PRICE (after discount, incl. GST)
   hsnCode:          { type: String, default: '' },  // HSN code for taxation
   deliveryCharge:   { type: Number, default: 0 },
 
@@ -55,7 +57,7 @@ const ProductSchema = new mongoose.Schema({
   totalReviews:     { type: Number, default: 0 },
 }, { timestamps: true });
 
-// Auto-generate slug from name
+// Auto-generate slug and compute Final Price
 ProductSchema.pre('save', function (next) {
   if (this.isModified('name')) {
     this.slug = this.name.toLowerCase()
@@ -64,12 +66,28 @@ ProductSchema.pre('save', function (next) {
       .replace(/\s+/g, '-')
       + '-' + Date.now();
   }
-  // Auto-compute discountPercent from price & discountedPrice
-  if (this.price && this.discountedPrice) {
-    this.discountPercent = Math.round(((this.price - this.discountedPrice) / this.price) * 100);
-  } else {
-    this.discountPercent = 0;
+
+  // PRICING ENGINE (BACKEND - SINGLE SOURCE OF TRUTH)
+  // Ensure basePrice is synced with price
+  if (this.isModified('price')) {
+    this.basePrice = this.price;
+  } else if (this.isModified('basePrice')) {
+    this.price = this.basePrice;
   }
+
+  const base = Number(this.basePrice || this.price || 0);
+  const discount = Number(this.discountPercent || 0);
+  const gst = Number(this.gstPercent || 0);
+
+  // 1. Calculate Discounted Price (After Discount, Before GST)
+  const afterDiscount = base * (1 - discount / 100);
+  
+  // 2. Calculate Final Price (After Discount, Including GST)
+  this.finalPrice = afterDiscount * (1 + gst / 100);
+  
+  // 3. Sync legacy discountedPrice for internal use if needed
+  this.discountedPrice = afterDiscount;
+
   next();
 });
 

@@ -153,7 +153,7 @@ const sendOrderConfirmationEmail = async ({ email, name, order, invoicePath }) =
             
             <div class="order-details">
               <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-              <p><strong>Total Amount:</strong> <span class="amount">₹${order.totalAmount.toFixed(2)}</span></p>
+              <p><strong>Total Payable:</strong> <span class="amount">₹${(order.finalAmount || order.totalAmount || 0).toFixed(2)}</span></p>
               <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
             </div>
 

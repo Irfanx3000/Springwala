@@ -59,13 +59,19 @@ const generateInvoice = async (order) => {
       doc.moveTo(50, tableTop + 15).lineTo(560, tableTop + 15).stroke();
       doc.font('Helvetica');
 
+      const safe = (val) => Number(val || 0).toFixed(2);
+
       let i = 0;
       order.items.forEach(item => {
         const y = tableTop + 25 + (i * 25);
+        const price = item.price || item.finalPrice || 0;
+        const quantity = item.quantity || 1;
+        const subtotal = item.subtotal || item.total || (price * quantity);
+
         doc.text(item.name, 50, y, { width: 200 });
-        doc.text(item.quantity.toString(), 280, y, { width: 90, align: 'right' });
-        doc.text(`₹${item.discountedPrice.toFixed(2)}`, 370, y, { width: 90, align: 'right' });
-        doc.text(`₹${(item.discountedPrice * item.quantity).toFixed(2)}`, 480, y, { width: 70, align: 'right' });
+        doc.text(quantity.toString(), 280, y, { width: 90, align: 'right' });
+        doc.text(`₹${safe(price)}`, 370, y, { width: 90, align: 'right' });
+        doc.text(`₹${safe(subtotal)}`, 480, y, { width: 70, align: 'right' });
         i++;
       });
 
@@ -75,17 +81,18 @@ const generateInvoice = async (order) => {
       // --- Financials ---
       const finalY = subtotalY + 20;
       doc.text('Subtotal:', 380, finalY, { width: 100, align: 'right' });
-      doc.text(`₹${order.subtotal.toFixed(2)}`, 480, finalY, { width: 70, align: 'right' });
+      doc.text(`₹${safe(order.subtotal)}`, 480, finalY, { width: 70, align: 'right' });
 
       doc.text('GST Amount:', 380, finalY + 15, { width: 100, align: 'right' });
-      doc.text(`₹${order.gstAmount.toFixed(2)}`, 480, finalY + 15, { width: 70, align: 'right' });
+      doc.text(`₹${safe(order.gstAmount)}`, 480, finalY + 15, { width: 70, align: 'right' });
 
       doc.text('Shipping:', 380, finalY + 30, { width: 100, align: 'right' });
-      doc.text(order.shippingCharge === 0 ? 'FREE' : `₹${order.shippingCharge.toFixed(2)}`, 480, finalY + 30, { width: 70, align: 'right' });
+      const shipping = order.deliveryCharges || order.shippingCharge || 0;
+      doc.text(shipping === 0 ? 'FREE' : `₹${safe(shipping)}`, 480, finalY + 30, { width: 70, align: 'right' });
 
       doc.font('Helvetica-Bold')
          .text('Grand Total:', 380, finalY + 50, { width: 100, align: 'right' })
-         .text(`₹${order.totalAmount.toFixed(2)}`, 480, finalY + 50, { width: 70, align: 'right' });
+         .text(`₹${safe(order.finalAmount || order.totalAmount)}`, 480, finalY + 50, { width: 70, align: 'right' });
 
       // --- Footer ---
       doc.font('Helvetica')

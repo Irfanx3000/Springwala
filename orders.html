@@ -185,7 +185,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-transparent rounded-full"></span>
-                    <a href="#">Your Wishlist</a>
+                    <a href="wishlist.html" class="nav-link">Your Wishlist</a>
                 </li>
                 <li class="flex items-center gap-3">
                     <span class="w-2 h-2 bg-transparent rounded-full"></span>
@@ -563,23 +563,26 @@
 
     <!-- Mobile Navigation Bar -->
     <nav class="mobile-navbar">
-        <a href="index.html" class="nav-item cursor-pointer">
+        <div class="nav-item" data-page="home">
             <img src="assets/icons/mobile/home.svg" alt="Home">
-        </a>
-        <a href="categories.html" class="nav-item cursor-pointer">
-            <img src="assets/icons/mobile/categories.svg" alt="Categories">
-        </a>
-        <div class="nav-item active">
-            <!-- Using the actual orders-red icon provided by user -->
-            <img src="assets/icons/mobile/orders-red.svg" alt="Orders">
             <div class="active-indicator"></div>
         </div>
-        <a href="wishlist.html" class="nav-item cursor-pointer">
-            <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 grayscale brightness-0 invert-[0.3]">
-        </a>
-        <a href="login.html" class="nav-item cursor-pointer">
+        <div class="nav-item" data-page="categories">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile">
             <img src="assets/icons/mobile/profile.svg" alt="Profile">
-        </a>
+            <div class="active-indicator"></div>
+        </div>
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

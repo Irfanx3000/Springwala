@@ -20,9 +20,17 @@ var Auth = window.Auth = {
         }
     },
 
-    setSession: function(token, admin) {
+    setToken: function(token) {
         localStorage.setItem(this.TOKEN_KEY, token);
+    },
+
+    setAdmin: function(admin) {
         localStorage.setItem(this.USER_KEY, JSON.stringify(admin));
+    },
+
+    setSession: function(token, admin) {
+        this.setToken(token);
+        this.setAdmin(admin);
     },
 
     clearSession: function() {

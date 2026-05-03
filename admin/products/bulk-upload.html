@@ -28,11 +28,12 @@
         .box-shadow-card { box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.03); }
         
         /* Stepper Styles - Fixed Alignment */
-        .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; border: 2px solid #E2E8F0; color: #94A3B8; background: #fff; transition: all 0.3s; position: relative; z-index: 2; }
+        .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; border: 2px solid #E2E8F0; color: #94A3B8; background: #fff; transition: all 0.3s; position: relative; z-index: 2; font-size: 14px; }
         .step-circle.active { border-color: #BE2229; color: #BE2229; background: #FFF5F5; box-shadow: 0 0 0 4px rgba(190, 34, 41, 0.1); }
         .step-circle.completed { border-color: #BE2229; background: #BE2229; color: #fff; }
-        .step-line { height: 2px; flex: 1; background: #E2E8F0; transition: all 0.3s; margin-top: 20px; position: relative; z-index: 1; margin-left: -20px; margin-right: -20px; }
-        .step-line.active { background: #BE2229; }
+        
+        .step-progress-container { position: absolute; top: 18px; left: 50px; right: 50px; height: 2px; background: #E2E8F0; z-index: 1; }
+        #step-progress-line { height: 100%; background: #BE2229; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
         /* Dropzone */
         .dropzone { border: 2px dashed #CBD5E1; transition: all 0.3s; background: #fff; cursor: pointer; }
@@ -84,7 +85,7 @@
                         <img src="../../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0" style="filter: invert(21%) sepia(85%) saturate(3015%) hue-rotate(342deg) brightness(88%) contrast(96%);">
                         <span class="font-['Poppins'] text-[18px] leading-[28px] text-[#BE2229] font-medium">Products</span>
                     </div>
-                    <svg id="products-menu-chevron" class="w-4 h-4 text-[#BE2229] transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg id="products-menu-chevron" class="w-4 h-4 text-[#BE2229] transition-transform duration-300 transform rotate-180 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
 
                 <div id="products-submenu" class="flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
@@ -92,6 +93,21 @@
                     <a href="product-list.html" class="font-['Poppins'] text-[17px] text-slate-500 hover:text-[#BE2229] leading-[27px]">Product List</a>
                     <a href="add-product.html" class="font-['Poppins'] text-[17px] text-slate-500 hover:text-[#BE2229] leading-[27px]">Add a Product</a>
                     <a href="bulk-upload.html" class="font-['Poppins'] text-[17px] text-[#BE2229] font-medium leading-[27px]">Bulk Upload</a>
+                </div>
+            </div>
+            <div class="w-full h-[1px] bg-slate-100 my-1"></div>
+
+            <div class="w-full flex flex-col group relative">
+                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                    <div class="flex items-center gap-[15px]">
+                        <img src="../../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0 opacity-60">
+                        <span class="font-['Poppins'] text-[18px] leading-[28px] text-slate-600 group-hover:text-[#BE2229]">Banners</span>
+                    </div>
+                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="banners-submenu" class="hidden flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-slate-200"></div>
+                    <a href="../banners.html" class="font-['Poppins'] text-[18px] text-slate-500 hover:text-[#BE2229] leading-[27px]">All Banners</a>
                 </div>
             </div>
             <div class="w-full h-[1px] bg-slate-100 my-1"></div>
@@ -153,33 +169,28 @@
             </div>
         </div>
 
-        <div class="w-full px-4 sm:px-10 mt-10">
-            <!-- Stepper - Improved Centering & Alignment -->
-            <div class="max-w-[700px] mx-auto mb-16 flex items-center relative">
-                <!-- Line 1 -->
-                <div id="step-1-line" class="step-line"></div>
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center gap-3 relative z-10">
-                    <div id="step-1-circle" class="step-circle active">1</div>
-                    <span class="text-[11px] font-bold text-slate-600 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Upload Files</span>
-                </div>
-                <!-- Line 2 -->
-                <div id="step-2-line" class="step-line"></div>
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center gap-3 relative z-10">
-                    <div id="step-2-circle" class="step-circle">2</div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Validate & Preview</span>
-                </div>
-                <!-- Line 3 -->
-                <div id="step-3-line" class="step-line"></div>
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center gap-3 relative z-10">
-                    <div id="step-3-circle" class="step-circle">3</div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest absolute -bottom-8 whitespace-nowrap">Import Data</span>
-                </div>
-                <!-- Line 4 -->
-                <div id="step-4-line" class="step-line invisible"></div>
+        <div class="max-w-[700px] mx-auto mb-16 flex items-start justify-between relative px-2">
+            <!-- Continuous Line -->
+            <div class="step-progress-container">
+                <div id="step-progress-line"></div>
             </div>
+
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
+                <div id="step-1-circle" class="step-circle active">1</div>
+                <span class="text-[9px] md:text-[11px] font-bold text-slate-600 uppercase tracking-widest text-center">Upload Files</span>
+            </div>
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
+                <div id="step-2-circle" class="step-circle">2</div>
+                <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Validate & Preview</span>
+            </div>
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
+                <div id="step-3-circle" class="step-circle">3</div>
+                <span class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Import Data</span>
+            </div>
+        </div>
 
             <!-- Main Content Card -->
             <div class="max-w-[1000px] mx-auto bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden min-h-[500px] flex flex-col">
@@ -419,25 +430,10 @@
 
     <script src="../../assets/js/auth.js"></script>
     <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/admin-sidebar.js"></script>
     <script src="../../assets/js/bulk-upload.js"></script>
     <script>
-        // Sidebar logic
-        const sidebar = document.getElementById('sidebar');
-        const openBtn = document.getElementById('open-sidebar');
-        const closeBtn = document.getElementById('close-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
-        openBtn?.addEventListener('click', toggleSidebar);
-        closeBtn?.addEventListener('click', toggleSidebar);
-        overlay?.addEventListener('click', toggleSidebar);
-
-        document.getElementById('products-menu-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            const sub = document.getElementById('products-submenu');
-            const chev = document.getElementById('products-menu-chevron');
-            if (sub.classList.contains('hidden')) { sub.classList.remove('hidden'); sub.classList.add('flex'); chev.classList.add('rotate-180'); }
-            else { sub.classList.add('hidden'); sub.classList.remove('flex'); chev.classList.remove('rotate-180'); }
-        });
+        Auth.requireAuth();
     </script>
 </body>
 </html>

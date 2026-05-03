@@ -320,6 +320,19 @@
                         </svg>
                     </div>
 
+                    <!-- Menu Item: My Wishlist -->
+                    <div class="sidebar-tab flex items-center justify-between px-6 py-4 border-b border-[#Eaeaea] cursor-pointer hover:bg-gray-50 transition-colors" onclick="goTo('wishlist.html')">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/icons/mobile/star.svg" alt="Wishlist" class="w-5 h-5 opacity-70 tab-icon">
+                            <span class="text-[16px] text-black tab-text">My Wishlist</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="transition-transform duration-300 tab-chevron">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+
                     <!-- Menu Item: Manage Password -->
                     <div id="sidebar-tab-password" data-target="manage-password-form-container"
                         data-default-icon="assets/icons/mobile/paas.svg"
@@ -491,12 +504,13 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
                             <div
                                 class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-country" type="text" placeholder="Country" list="country-list"
+                                <input id="profile-country" type="text" placeholder="Country"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                     class="ml-2 flex-shrink-0">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                    <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
                             </div>
                         </div>
@@ -505,12 +519,13 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State</label>
                             <div
                                 class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-state" type="text" placeholder="State" list="state-list"
+                                <input id="profile-state" type="text" placeholder="State"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                     class="ml-2 flex-shrink-0">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
                             </div>
                         </div>
@@ -1175,18 +1190,26 @@
         </div>
     </footer>
 
+    <!-- Mobile Navigation Bar -->
     <nav class="mobile-navbar">
-        <a href="index.html" class="nav-item cursor-pointer">
+        <div class="nav-item" data-page="home">
             <img src="assets/icons/mobile/home.svg" alt="Home">
-        </a>
-        <a href="categories.html" class="nav-item cursor-pointer">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="categories">
             <img src="assets/icons/mobile/categories.svg" alt="Categories">
-        </a>
-        <a href="orders.html" class="nav-item cursor-pointer">
-            <img src="assets/icons/mobile/orders.svg" alt="Orders">
-        </a>
-        <div class="nav-item active">
-            <img src="assets/icons/mobile/profile-red.svg" alt="Profile">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile">
+            <img src="assets/icons/mobile/profile.svg" alt="Profile">
             <div class="active-indicator"></div>
         </div>
     </nav>

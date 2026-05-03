@@ -4,8 +4,8 @@
  * Include on EVERY admin page BEFORE page scripts.
  */
 
-const API_BASE = CONFIG.API_BASE_URL;
-const BASE_URL = CONFIG.IMAGE_BASE_URL;
+var API_BASE = CONFIG.API_BASE_URL;
+var BASE_URL = CONFIG.IMAGE_BASE_URL;
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 // Auth is now handled by auth.js. 
@@ -13,6 +13,8 @@ const BASE_URL = CONFIG.IMAGE_BASE_URL;
 
 // ─── Core Fetch ───────────────────────────────────────────────────────────────
 async function apiFetch(endpoint, opts = {}) {
+  const url = `${API_BASE}${endpoint}`;
+  console.log(`[API-DEBUG] Fetching: ${url}`);
   const headers = { ...opts.headers };
   const token = Auth.getToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -20,8 +22,9 @@ async function apiFetch(endpoint, opts = {}) {
 
   let res;
   try {
-    res = await fetch(`${API_BASE}${endpoint}`, { ...opts, headers });
+    res = await fetch(url, { ...opts, headers });
   } catch (e) {
+    console.error(`[API-ERROR] Fetch failed for ${url}:`, e);
     throw new Error('Cannot reach server. Is the backend running on port 5000?');
   }
 
@@ -42,8 +45,10 @@ const api = {
   patch: (url, body) => apiFetch(url, { method: 'PATCH', body: JSON.stringify(body || {}) }),
   delete: (url, body) => apiFetch(url, { method: 'DELETE', body: body ? JSON.stringify(body) : undefined }),
   download: async (url, filename) => {
+    const fullUrl = `${API_BASE}${url}`;
+    console.log(`[API-DEBUG] Downloading: ${fullUrl}`);
     const token = Auth.getToken();
-    const res = await fetch(`${API_BASE}${url}`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Download failed');
     const blob = await res.blob();
     const a = document.createElement('a');
@@ -207,11 +212,20 @@ function initGlobalSearch() {
     allInputs.forEach(input => {
       const p = input.getAttribute('placeholder').toLowerCase();
       if (p.includes('search orders') || p.includes('search, products')) {
-        if (window.innerWidth > 768 && !desktopSearch) desktopSearch = input;
-        else if (window.innerWidth <= 768 && !mobileSearch) mobileSearch = input;
+        // Correctly identify based on container visibility classes instead of just window width
+        const isDesktopContainer = input.closest('.hidden.sm\\:flex');
+        const isMobileContainer = input.closest('.md\\:hidden');
 
-        // Ensure it has an ID for consistency
-        if (!input.id) input.id = (window.innerWidth > 768) ? 'desktop-search-input' : 'mobile-search-input';
+        if (isDesktopContainer && !desktopSearch) {
+          desktopSearch = input;
+          if (!input.id) input.id = 'desktop-search-input';
+        } else if (isMobileContainer && !mobileSearch) {
+          mobileSearch = input;
+          if (!input.id) input.id = 'mobile-search-input';
+        } else if (!input.id) {
+            // Last resort fallback
+            input.id = 'search-input-' + Math.random().toString(36).substr(2, 5);
+        }
       }
     });
   }

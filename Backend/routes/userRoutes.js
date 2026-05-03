@@ -26,7 +26,7 @@ const {
 } = require('../controllers/userCartController');
 
 const {
-  placeOrder, getMyOrders, getOrder, cancelOrder,
+  placeOrder, getMyOrders, getOrder, cancelOrder, getOrderSummary, trackOrder,
 } = require('../controllers/userOrderController');
 
 const {
@@ -50,10 +50,12 @@ router.delete('/cart/clear', protectUser, clearCart);
 router.delete('/cart/:itemId', protectUser, removeFromCart);
 
 // ── User orders ───────────────────────────────────────────────────────────────
+router.post('/orders/summary', getOrderSummary);
 router.post('/orders', protectUser, placeOrder);
 router.get('/orders', protectUser, getMyOrders);
 router.get('/orders/:id', protectUser, getOrder);
 router.post('/orders/:id/cancel', protectUser, cancelOrder);
+router.get('/orders/track/:awb', trackOrder);
 
 // ── Wishlist ──────────────────────────────────────────────────────────────────
 const { getWishlist, toggleWishlist } = require('../controllers/userWishlistController');

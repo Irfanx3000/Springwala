@@ -12,17 +12,13 @@ exports.getWishlist = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      wishlist: user.wishlist || []
+      products: user.wishlist || []
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/**
- * POST /api/user/wishlist/toggle
- * Adds/Removes a product from the wishlist.
- */
 exports.toggleWishlist = async (req, res) => {
   try {
     const { productId } = req.body;
@@ -31,15 +27,14 @@ exports.toggleWishlist = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    const index = user.wishlist.indexOf(productId);
+    // Use string comparison for safety with ObjectIds
+    const index = user.wishlist.findIndex(id => id.toString() === productId.toString());
     let action = 'added';
 
     if (index > -1) {
-      // Remove
       user.wishlist.splice(index, 1);
       action = 'removed';
     } else {
-      // Add
       user.wishlist.push(productId);
       action = 'added';
     }
@@ -50,7 +45,7 @@ exports.toggleWishlist = async (req, res) => {
       success: true,
       message: `Product ${action} to wishlist`,
       action,
-      wishlistCount: user.wishlist.length
+      wishlist: user.wishlist
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

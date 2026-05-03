@@ -8,59 +8,71 @@
  *  - Product rendering helpers
  *  - Mobile menu
  */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // ─── API Configuration ────────────────────────────────────────────────────────
-const API_BASE = CONFIG.API_BASE_URL;
-const BASE_URL = CONFIG.IMAGE_BASE_URL;
-const IMAGE_BASE = CONFIG.IMAGE_BASE_URL;
+var API_BASE = CONFIG.API_BASE_URL;
+var BASE_URL = CONFIG.IMAGE_BASE_URL;
+var IMAGE_BASE = CONFIG.IMAGE_BASE_URL;
 
 // ─── Pricing Engine ───────────────────────────────────────────────────────────
 const Pricing = {
-  calculate: (product, selectedBatch = null) => {
+  /**
+   * Pricing Engine (Frontend)
+   * Single Source of Truth: backend pre-calculated product.finalPrice
+   */
+  calculate: (product, quantity = 1, selectedBatch = null) => {
     const isBatchProduct = product.batches && product.batches.length > 0;
-    const unitPrice = parseFloat(product.price) || 0; // MRP
-    const discountPercent = parseFloat(product.discountPercent) || 0;
-    const gstPercent = parseFloat(product.gstPercent) || 0;
+    const discount = parseFloat(product.discountPercent) || 0;
 
-    // 1. Common Unit Price Calculation
-    const discountAmount = (unitPrice * discountPercent) / 100;
-    const discountedUnit = unitPrice - discountAmount;
-    const gstAmount = (discountedUnit * gstPercent) / 100;
-    const finalUnitPrice = discountedUnit + gstAmount;
-
-    let mainPrice = 0;
-    let batchPrice = 0;
-    let unitsPerPack = 1;
-
-    if (isBatchProduct) {
-      const batch = selectedBatch || product.batches[0];
-      batchPrice = parseFloat(batch.price) || 0;
-      mainPrice = batchPrice;
-      unitsPerPack = parseInt(batch.quantity) || 1;
-    } else {
-      mainPrice = finalUnitPrice;
-      unitsPerPack = 1;
+    // Use backend finalPrice if available, otherwise calculate fallback
+    let finalPrice = parseFloat(product.finalPrice);
+    if (isNaN(finalPrice)) {
+      // Fallback for older products
+      const base = parseFloat(product.price || product.basePrice || 0);
+      const gst = parseFloat(product.gstPercent || 0);
+      const afterDiscount = base * (1 - discount / 100);
+      finalPrice = afterDiscount * (1 + gst / 100);
     }
 
-    // DEBUG SAFETY
-    console.log('[Pricing Debug]:', {
-      isBatchProduct,
-      unitPrice,
-      finalUnitPrice,
-      batchPrice,
-      mainPrice
-    });
+    let batch = "N/A";
+    let hsn = product.hsn || product.hsnCode || "N/A";
+
+    if (isBatchProduct) {
+      const b = selectedBatch || (product.batches && product.batches.length > 0 ? product.batches[0] : null);
+      if (b) {
+        // For batches, the price in DB is currently the 'base' price
+        const bBase = parseFloat(b.price) || 0;
+        const gst = parseFloat(product.gstPercent || 0);
+        finalPrice = (bBase * (1 - discount / 100)) * (1 + gst / 100);
+        batch = b.quantity ? `Pack of ${b.quantity}` : "N/A";
+      }
+    }
+
+    const subtotal = finalPrice * quantity;
+    const unitsPerPack = isBatchProduct ? (selectedBatch || (product.batches && product.batches.length > 0 ? product.batches[0] : { quantity: 1 })).quantity || 1 : 1;
+    const perUnitPrice = finalPrice / unitsPerPack;
 
     return {
-      isBatchProduct,
-      unitPrice, // Strike price (MRP)
-      finalUnitPrice, // Per unit price (with GST & Discount)
-      batchPrice, // Total for the pack
-      mainPrice, // Either batchPrice or finalUnitPrice
-      unitsPerPack,
-      gstPercent,
-      discountPercent,
-      deliveryCharge: parseFloat(product.deliveryCharge) || 0
+      quantity,
+      batch,
+      hsn,
+      finalPrice: Number(finalPrice || 0),
+      perUnitPrice: Number(perUnitPrice || 0),
+      discount,
+      gst: 0,
+      deliveryCharges: 0,
+      subtotal: Number((finalPrice * quantity).toFixed(2))
     };
   }
 };
@@ -68,29 +80,25 @@ const Pricing = {
 
 // ─── Auth Helpers ─────────────────────────────────────────────────────────────
 const Auth = {
-  getToken: () => localStorage.getItem('token') || localStorage.getItem('userToken'),
+  getToken: () => localStorage.getItem('token'),
   setToken: (t) => {
     localStorage.setItem('token', t);
-    localStorage.setItem('userToken', t); // Keep for backward compatibility
   },
   clearToken: () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userToken');
   },
   getUser: () => {
     try {
-      return JSON.parse(localStorage.getItem('user') || localStorage.getItem('springwalaUser') || 'null');
+      return JSON.parse(localStorage.getItem('user') || 'null');
     } catch { return null; }
   },
   setUser: (u) => {
     localStorage.setItem('user', JSON.stringify(u));
-    localStorage.setItem('springwalaUser', JSON.stringify(u)); // Keep for backward compatibility
   },
   clearUser: () => {
     localStorage.removeItem('user');
-    localStorage.removeItem('springwalaUser');
   },
-  isLoggedIn: () => !!(localStorage.getItem('token') || localStorage.getItem('userToken')),
+  isLoggedIn: () => !!localStorage.getItem('token'),
   logout: () => {
     // Clear all auth and user data
     const keysToRemove = [
@@ -130,11 +138,16 @@ async function validateUser() {
     const data = await res.json();
     if (data.user) {
       Auth.setUser(data.user);
-      updateHeaderUser(data.user);
+      updateHeaderUser(data.user); // Restore UI update
+      console.log("[Auth] Session validated successfully.");
     }
   } catch (err) {
     console.warn("Auth validation failed:", err.message);
-    Auth.logout();
+    // ONLY logout if it's a definitive auth failure (401)
+    if (err.message.includes('expired') || err.message.includes('401') || err.message.includes('Unauthorized')) {
+      console.error('[Auth] Unauthorized access - clearing session');
+      Auth.logout();
+    }
   }
 }
 
@@ -146,7 +159,8 @@ function isUserLoggedIn() {
 // ─── API Helper ───────────────────────────────────────────────────────────────
 async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   const url = API_BASE + endpoint;
-  console.log(`[API-TRACE] Initiating ${method} to ${url}`);
+  console.log(`[API] Fetching: ${url} (${method})`);
+  console.log("Fetching products..."); // Specific log as requested by user
 
   const opts = {
     method,
@@ -167,7 +181,6 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
       throw new Error('Session expired. Please login again.');
     }
 
-    console.log(`[API-TRACE] Parsing JSON body...`);
     const data = await res.json();
     console.log(`[API-TRACE] JSON parsed successfully:`, data);
 
@@ -176,6 +189,22 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   } catch (err) {
     console.error(`[API-TRACE] Fetch/Parse Error for ${endpoint}:`, err);
     throw err;
+  }
+}
+
+/**
+ * UTILITY: Navigate to Profile or Login
+ * Shared by both mobile and desktop nav elements.
+ */
+function navigateToAccount() {
+  const token = Auth.getToken();
+  console.log("User clicked profile/account");
+  console.log("Token exists:", !!token);
+
+  if (token) {
+    window.location.href = "profile.html";
+  } else {
+    window.location.href = "login.html";
   }
 }
 
@@ -204,28 +233,23 @@ const Cart = {
   },
 
   // Add item
-  async add(productId, name, image, price, discountedPrice, quantity = 1, gstPercent = 18, discountPercent = 0, deliveryCharge = 0, variantId = null, batchQuantity = 1, batchPrice = 0) {
+  async add(productId, name, image, finalPrice, quantity = 1, batchQuantity = 1) {
+    const unitPrice = Number(finalPrice);
     if (!Auth.isLoggedIn()) {
       const items = Cart.getGuestCart();
       const bQty = Number(batchQuantity || 1);
-      const bPrice = Number(batchPrice || discountedPrice || price);
 
-      const idx = items.findIndex(i => i.productId === productId && i.variantId === variantId && i.batchQuantity === bQty);
+      const idx = items.findIndex(i => i.productId === productId && i.batchQuantity === bQty);
       if (idx > -1) {
         items[idx].quantity += quantity;
       } else {
         items.push({
           productId,
-          quantity, // packs
+          quantity,
           batchQuantity: bQty,
-          batchPrice: bPrice,
+          finalPrice: unitPrice,
           nameSnapshot: name,
-          priceSnapshot: bPrice,
           imageSnapshot: image,
-          variantId,
-          gstPercent: gstPercent || 18,
-          discountPercent: discountPercent || 0,
-          deliveryCharge: deliveryCharge || 0
         });
       }
       Cart.saveGuestCart(items);
@@ -235,9 +259,8 @@ const Cart = {
         const res = await apiCall('/user/cart/add', 'POST', {
           productId,
           quantity,
-          batchQuantity,
-          batchPrice: batchPrice || discountedPrice || price,
-          variantId
+          batchQuantity: Number(batchQuantity || 1),
+          finalPrice: unitPrice
         }, true);
         if (res.success) {
           showToast('Added to cart!', 'success');
@@ -279,6 +302,7 @@ const Cart = {
       if (idx > -1) {
         items[idx].quantity = qty;
         Cart.saveGuestCart(items);
+        if (typeof renderCart === 'function' && window.location.pathname.includes('cart.html')) renderCart();
       }
     } else {
       try {
@@ -327,7 +351,7 @@ const Cart = {
     return serverCart.reduce((s, i) => s + i.quantity, 0);
   },
 
-  totals: () => calculateCartTotals(Auth.isLoggedIn() ? Cart.get() : Cart.getGuestCart()),
+  totals: () => calculateCartTotals(Cart.get()),
 
   updateBadge() {
     loadCartCount();
@@ -352,8 +376,11 @@ const Wishlist = {
     if (Auth.isLoggedIn()) {
       try {
         const data = await apiCall('/user/wishlist', 'GET', null, true);
+        console.log("Wishlist API Response:", data);
         if (data.success) {
-          this.items = (data.wishlist || []).map(p => String(p._id || p));
+          this.items = (data.products || [])
+            .map(p => String(p._id || p))
+            .filter(id => id && id !== 'undefined' && id !== 'null' && id !== '[object Object]');
           localStorage.setItem('wishlist_cache', JSON.stringify(this.items));
           this.updateUI();
         }
@@ -367,16 +394,16 @@ const Wishlist = {
   async toggle(productId, btn) {
     if (!productId) return;
     const pid = String(productId);
-    
+
     const isCurrentlyIn = this.items.includes(pid);
-    
+
     // 1. OPTIMISTIC UPDATE: Update state immediately
     if (isCurrentlyIn) {
       this.items = this.items.filter(id => id !== pid);
     } else {
       if (!this.items.includes(pid)) this.items.push(pid);
     }
-    
+
     // Immediate UI feedback
     if (btn) this.updateIcon(pid, btn);
     this.updateUIForProduct(pid);
@@ -408,6 +435,10 @@ const Wishlist = {
       // Guest logic
       localStorage.setItem('wishlist', JSON.stringify(this.items));
       showToast(isCurrentlyIn ? 'Removed from Wishlist' : 'Added to Wishlist', isCurrentlyIn ? 'info' : 'success');
+    }
+    // Handle page re-render if on wishlist page
+    if (document.body.dataset.page === 'wishlist') {
+      if (typeof initWishlistPage === 'function') initWishlistPage();
     }
   },
 
@@ -455,11 +486,26 @@ const Wishlist = {
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   if (token) {
-    localStorage.setItem("userToken", token);
+    localStorage.setItem("token", token);
     // Remove token from URL for clean look
     window.history.replaceState({}, document.title, window.location.pathname);
     console.log("✅ Google Auth Token stored successfully");
     // Merge guest cart if any
+    // Auto-migrate legacy cart data to ensure finalPrice exists
+    try {
+      ['cart', 'guestCart'].forEach(key => {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const items = JSON.parse(raw);
+          const migrated = items.map(item => ({
+            ...item,
+            finalPrice: Number(item.finalPrice || item.price || item.pricePerUnit || 0)
+          }));
+          localStorage.setItem(key, JSON.stringify(migrated));
+        }
+      });
+    } catch (e) { console.warn("Cart migration failed:", e); }
+
     setTimeout(() => {
       if (typeof Cart !== 'undefined' && Cart.mergeGuestCart) Cart.mergeGuestCart();
     }, 800);
@@ -479,16 +525,12 @@ async function loadCartCount() {
       // Map server items to match our local structure for Cart.get()
       const mappedItems = (data.cart?.items || []).map(item => ({
         productId: item.product?._id || item.product,
-        itemId: item._id, // Store server item ID for updates
+        itemId: item._id,
         name: item.name,
         image: item.image,
-        price: item.price,
-        discountedPrice: item.discountedPrice,
+        finalPrice: Number(item.finalPrice || item.pricePerUnit || 0),
         quantity: item.quantity,
         batchQuantity: item.batchQuantity || 1,
-        batchPrice: item.batchPrice || item.discountedPrice || item.price,
-        gstPercent: item.product?.gstPercent || 18,
-        discountPercent: item.product?.discountPercent || 0
       }));
 
       // Cache server cart in 'cart' key
@@ -512,75 +554,67 @@ async function loadCartCount() {
 
 function calculateCartTotals(cart) {
   let itemsTotal = 0;
-  let totalGST = 0;
-  let totalDiscount = 0;
   let totalQuantity = 0;
-  let mrpTotal = 0;
-  let maxDeliveryCharge = 0;
 
   cart.forEach(item => {
-    // We treat every item as a product for the pricing engine
-    const pricing = Pricing.calculate({
-      price: item.price,
-      discountPercent: item.discountPercent,
-      gstPercent: item.gstPercent,
-      deliveryCharge: item.deliveryCharge,
-      batches: (item.batchQuantity > 1) ? [{ quantity: item.batchQuantity, price: item.batchPrice || item.discountedPrice }] : []
-    });
-
-    const quantity = parseInt(item.quantity) || 1; // Packs or Units
-    const packPrice = pricing.mainPrice;
-    const packMRP = pricing.unitPrice * pricing.unitsPerPack;
-
-    // GST extraction from packPrice
-    const packWithoutGST = packPrice / (1 + pricing.gstPercent / 100);
-    const packGST = packPrice - packWithoutGST;
-
-    // Totals
-    itemsTotal += packWithoutGST * quantity;
-    totalGST += packGST * quantity;
-    totalDiscount += (packMRP - packWithoutGST) * quantity;
-    totalQuantity += quantity;
-    mrpTotal += packMRP * quantity;
-
-    // Track max delivery charge (Rule: use product value, no hardcoding)
-    if (pricing.deliveryCharge > maxDeliveryCharge) {
-      maxDeliveryCharge = pricing.deliveryCharge;
-    }
+    const unitPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
+    const qty = Number(item.quantity || 1);
+    itemsTotal += unitPrice * qty;
+    totalQuantity += qty;
   });
 
-  // Delivery rule: Free above ₹500, else use max item charge
-  const totalWithGST = itemsTotal + totalGST;
-  const deliveryCharge = (totalWithGST > 500 || itemsTotal === 0) ? 0 : maxDeliveryCharge;
+  // Basic fallback calculation
+  const deliveryCharge = itemsTotal < 1000 && itemsTotal > 0 ? 120 : 0;
+  const totalPayable = itemsTotal + deliveryCharge;
 
   return {
     itemCount: cart.length,
     totalQuantity,
     itemsTotal,
-    totalDiscount,
-    totalGST,
     deliveryCharge,
-    totalPayable: itemsTotal + totalGST + deliveryCharge,
-    mrpTotal,
-    grandTotal: itemsTotal + totalGST + deliveryCharge
+    totalPayable
   };
 }
 
 // ─── Image helper ─────────────────────────────────────────────────────────────
+function goBackToCart() {
+  if (document.referrer.includes("cart")) {
+    window.history.back();
+  } else {
+    window.location.href = "cart.html";
+  }
+}
+
+function getImageUrl(image) {
+  if (!image || image === "" || image === "undefined" || image === "null") {
+    return "assets/images/deafult.png";
+  }
+
+  if (image.startsWith("http")) {
+    return image;
+  }
+
+  // Ensure leading slash if not present and not starting with http
+  const path = image.startsWith('/') ? image : '/' + image;
+  
+  // If it's already a full assets path, return it
+  if (image.startsWith('assets/')) return image;
+
+  return `${IMAGE_BASE}${path}`;
+}
+
 function productImg(product) {
-  const img = product.images?.[0];
-  if (!img) return 'assets/images/deafult.png';
-  if (img.startsWith('http')) return img;
-  if (img.startsWith('/')) return IMAGE_BASE + img;
-  return IMAGE_BASE + '/uploads/' + img;
+  const img = product?.images?.[0] || product?.image;
+  return getImageUrl(img);
 }
 
 // ─── Product Card HTML ────────────────────────────────────────────────────────
-function buildProductCard(p, className = '') {
+function buildProductCard(p, className = '', showRemove = false) {
   const pricing = Pricing.calculate(p);
-  const price = pricing.mainPrice;
-  const oldPrice = pricing.unitPrice * pricing.unitsPerPack;
-  const discount = oldPrice > price ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
+  const finalPrice = Number(pricing.finalPrice || 0);
+  const basePrice = Number(p.basePrice || p.price || finalPrice);
+  const discount = Number(pricing.discount || 0);
+
   const img = productImg(p);
   const link = `product.html?id=${p._id}`;
   const isOutOfStock = (p.stock || 0) <= 0;
@@ -589,10 +623,10 @@ function buildProductCard(p, className = '') {
   const catSlug = p.category?.name ? p.category.name.toLowerCase().replace(/\s+/g, '-') : '';
 
   return `
-    <div class="fo-card product-card ${className} ${isOutOfStock ? 'opacity-75' : ''}" data-product-id="${p._id}" data-price="${oldPrice}" data-category="${catSlug}">
+    <div class="fo-card product-card ${className} ${isOutOfStock ? 'opacity-75' : ''}" data-product-id="${p._id}" data-price="${finalPrice}" data-category="${catSlug}">
       ${isOutOfStock ? `<span class="fo-badge !bg-gray-600 !text-white">OUT OF STOCK</span>` : (discount > 0 ? `<span class="fo-badge">Save ${discount}%</span>` : '')}
       <a href="${isOutOfStock ? '#' : link}" class="fo-image-box ${isOutOfStock ? 'pointer-events-none' : ''}">
-        <img src="${img}" alt="${p.name}" onerror="this.src='assets/images/deafult.png'">
+        <img src="${img}" alt="${p.name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
         ${!isOutOfStock ? `
         <button class="fo-wishlist ${isInWishlist ? 'active' : ''}" data-product-id="${p._id}" onclick="event.preventDefault();toggleWishlist('${p._id}',this)">
           <img src="assets/icons/mobile/${isInWishlist ? 'star-gold.svg' : 'star.svg'}" alt="Wishlist" class="w-6 h-6 wishlist-icon">
@@ -601,27 +635,26 @@ function buildProductCard(p, className = '') {
       <div class="fo-details">
         <a href="${isOutOfStock ? '#' : link}" class="fo-prod-name ${isOutOfStock ? 'pointer-events-none' : ''}">${p.name}</a>
         <div class="fo-pricing">
-          <span class="fo-price">₹${price.toFixed(2)}</span>
-          ${oldPrice > price ? `<span class="fo-old-price">₹${oldPrice.toFixed(2)}</span>` : ''}
+          <span class="fo-price">₹${finalPrice.toFixed(2)}</span>
+          ${basePrice > finalPrice ? `<span class="fo-old-price">₹${basePrice.toFixed(2)}</span>` : ''}
         </div>
         ${isOutOfStock ? `
         <button class="fo-cart-btn !bg-gray-400 cursor-not-allowed" disabled>
           Out of Stock
         </button>` : `
-        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${p.name.replace(/'/g, "\\'")}','${img}',${oldPrice},${price},${p.gstPercent || 18},${p.discountPercent || 0},this, ${pricing.unitsPerPack}, ${pricing.deliveryCharge})">
+        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${p.name.replace(/'/g, "\\'")}','${img}',${finalPrice},${pricing.unitsPerPack},this)">
           Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart" class="w-4 h-4 ml-2">
         </button>`}
+        ${showRemove ? `
+        <button class="w-full mt-2 py-2 text-[13px] font-bold text-[#BE2229] border border-[#BE2229] rounded-[6px] hover:bg-red-50 transition" onclick="event.preventDefault();toggleWishlist('${p._id}')">
+          Remove Item
+        </button>` : ''}
       </div>
     </div>`;
 }
 
-function handleAddToCart(productId, name, image, price, discountedPrice, gstPercent, quantity = 1, discountPercent = 0) {
-  Cart.add(productId, name, image, price, discountedPrice, quantity, gstPercent, discountPercent);
-}
-
-// ─── Add to Cart from Card ────────────────────────────────────────────────────
-function addToCartFromCard(productId, name, image, price, discountedPrice, gstPercent, discountPercent, btn, batchQuantity = 1, deliveryCharge = 0) {
-  Cart.add(productId, name, image, price, discountedPrice, 1, gstPercent, discountPercent, deliveryCharge, null, batchQuantity, discountedPrice);
+function addToCartFromCard(productId, name, image, finalPrice, batchQuantity = 1, btn) {
+  Cart.add(productId, name, image, finalPrice, 1, batchQuantity);
 
   if (btn) {
     const orig = btn.innerHTML;
@@ -727,37 +760,53 @@ function updateNavbarLocation(location) {
 /**
  * Triggered ONLY on Profile Page
  */
+/**
+ * Triggered ONLY on Profile Page
+ */
 async function requestLocationPermission() {
-  if (localStorage.getItem('locationAsked')) return;
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    console.warn("Geolocation is not supported by this browser.");
+    return;
+  }
 
-  navigator.geolocation.getCurrentPosition(async pos => {
-    localStorage.setItem('locationAsked', 'true');
-    try {
-      const { latitude, longitude } = pos.coords;
-      // Using Nominatim (No API key required) but structured as requested
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-      const data = await res.json();
+  navigator.geolocation.getCurrentPosition(
+    handleLocationSuccess,
+    handleLocationError
+  );
+}
 
-      const location = {
-        country: data.address?.country || "India",
-        state: data.address?.state || data.address?.county || ""
-      };
+async function handleLocationSuccess(position) {
+  const lat = position.coords.latitude;
+  const lng = position.coords.longitude;
 
-      localStorage.setItem('userLocation', JSON.stringify(location));
-      updateNavbarLocation(location);
+  try {
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+    );
 
-      // If we are on profile page, also fill the fields
-      if (typeof fillProfileLocationFields === 'function') {
-        fillProfileLocationFields(location);
-      }
-    } catch (e) {
-      console.error("Location fetch failed", e);
+    const data = await res.json();
+    console.log("Geo Data:", data);
+
+    const location = {
+      country: data.countryName || "",
+      state: data.principalSubdivision || ""
+    };
+
+    // Update navbar and storage
+    localStorage.setItem('userLocation', JSON.stringify(location));
+    updateNavbarLocation(location);
+
+    // If we are on profile page, also fill the fields
+    if (typeof fillProfileLocationFields === 'function') {
+      fillProfileLocationFields(location);
     }
-  }, (err) => {
-    localStorage.setItem('locationAsked', 'true');
-    console.warn("Location access denied", err);
-  });
+  } catch (err) {
+    console.error("Location fetch failed:", err);
+  }
+}
+
+function handleLocationError(error) {
+  console.warn("Location permission denied or failed:", error.message);
 }
 
 // ─── Mobile Menu ──────────────────────────────────────────────────────────────
@@ -767,16 +816,106 @@ function initMobileMenu() {
   const menu = document.getElementById('mobile-menu');
   if (!menu) return;
 
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:49;display:none;';
-  document.body.appendChild(overlay);
+  let overlay = document.getElementById('menu-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'menu-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:49;display:none;';
+    document.body.appendChild(overlay);
+  }
 
-  const open = () => { menu.classList.remove('hidden-menu'); menu.classList.add('show-menu'); overlay.style.display = 'block'; };
-  const closeM = () => { menu.classList.add('hidden-menu'); menu.classList.remove('show-menu'); overlay.style.display = 'none'; };
+  const open = () => {
+    menu.classList.remove('hidden-menu');
+    menu.classList.add('show-menu');
+    overlay.style.display = 'block';
+    document.body.classList.add('overflow-hidden');
+  };
 
-  btn?.addEventListener('click', open);
+  const closeM = () => {
+    menu.classList.add('hidden-menu');
+    menu.classList.remove('show-menu');
+    overlay.style.display = 'none';
+    document.body.classList.remove('overflow-hidden');
+  };
+
+  // Use reliable click listeners
+  btn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    open();
+  });
   close?.addEventListener('click', closeM);
   overlay.addEventListener('click', closeM);
+
+  // Close menu when any link inside is clicked (Event Delegation)
+  menu.addEventListener('click', (e) => {
+    if (e.target.closest('a')) {
+      closeM();
+    }
+  });
+}
+
+// ─── Mobile Sticky Header ─────────────────────────────────────────────────────
+function initStickyHeader() {
+  const subHeader = document.getElementById('mobile-sub-header');
+  if (!subHeader) return;
+
+  let lastScrollTop = 0;
+  let scrollDelta = 0;
+  let isAnimating = false;
+
+  window.addEventListener('scroll', () => {
+    if (isAnimating) return;
+
+    let st = window.pageYOffset || document.documentElement.scrollTop;
+    if (st < 0) return;
+
+    let diff = st - lastScrollTop;
+    if ((diff > 0 && scrollDelta < 0) || (diff < 0 && scrollDelta > 0)) scrollDelta = 0;
+    scrollDelta += diff;
+
+    if (scrollDelta > 15 && st > 50 && !subHeader.classList.contains('hide-sub')) {
+      subHeader.classList.add('hide-sub');
+      isAnimating = true;
+      setTimeout(() => { isAnimating = false; scrollDelta = 0; }, 350);
+    } else if (scrollDelta < -15 && subHeader.classList.contains('hide-sub')) {
+      subHeader.classList.remove('hide-sub');
+      isAnimating = true;
+      setTimeout(() => { isAnimating = false; scrollDelta = 0; }, 350);
+    }
+    lastScrollTop = st;
+  }, { passive: true });
+}
+
+// ─── Mobile Filter Drawer ─────────────────────────────────────────────────────
+function initFilterDrawer() {
+  const filterBtns = document.querySelectorAll('.filter-btn-mobile, button:has(svg path[d="M4 6H20M6 12H18M8 18H16"])');
+  const drawer = document.getElementById('filter-drawer');
+  const overlay = document.getElementById('filter-overlay');
+  const closeBtn = document.getElementById('close-filter');
+  const applyBtn = document.getElementById('apply-filter');
+
+  if (!drawer || !overlay) return;
+
+  const open = () => {
+    overlay.classList.remove('hidden');
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+      drawer.classList.remove('translate-x-full');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const close = () => {
+    overlay.classList.add('opacity-0');
+    drawer.classList.add('translate-x-full');
+    setTimeout(() => { overlay.classList.add('hidden'); }, 300);
+    document.body.style.overflow = '';
+  };
+
+  filterBtns.forEach(btn => btn.addEventListener('click', open));
+  closeBtn?.addEventListener('click', close);
+  overlay.addEventListener('click', close);
+  applyBtn?.addEventListener('click', close);
 }
 
 // ─── Search Functionality ─────────────────────────────────────────────────────
@@ -830,7 +969,7 @@ async function initHomePage() {
  * No looping/appending; strictly replaces src of existing fixed slots.
  */
 async function loadBanners() {
-  const prefix = 'http://localhost:5000';
+  const prefix = CONFIG.IMAGE_BASE_URL;
   const getUrl = (path) => (path && path.startsWith('/uploads')) ? prefix + path : path;
   const isMobile = window.innerWidth < 768;
 
@@ -1249,7 +1388,7 @@ async function initAllProductsPage() {
     try {
       state.filteredProducts = state.products.filter(p => {
         const pricing = Pricing.calculate(p);
-        const price = Number(pricing.mainPrice || 0);
+        const price = Number(pricing.finalPrice || 0);
         const priceMatch = price >= state.filters.priceMin && price <= state.filters.priceMax;
 
         const catId = p.category?._id || p.category;
@@ -1290,11 +1429,23 @@ async function initAllProductsPage() {
 
   function updatePaginationUI() {
     const total = state.filteredProducts.length;
+    const totalPages = Math.ceil(total / state.itemsPerPage);
     const start = total === 0 ? 0 : (state.currentPage - 1) * state.itemsPerPage + 1;
     const end = Math.min(state.currentPage * state.itemsPerPage, total);
     const text = `${start}–${end} of ${total}`;
+
     if (pageInfoTop) pageInfoTop.textContent = text;
     if (pageInfoBottom) pageInfoBottom.textContent = text;
+
+    // Enable/Disable buttons
+    document.querySelectorAll('.prev-btn').forEach(btn => {
+      btn.disabled = state.currentPage === 1;
+      btn.style.opacity = state.currentPage === 1 ? '0.5' : '1';
+    });
+    document.querySelectorAll('.next-btn').forEach(btn => {
+      btn.disabled = state.currentPage >= totalPages;
+      btn.style.opacity = state.currentPage >= totalPages ? '0.5' : '1';
+    });
   }
 
   function renderCategories() {
@@ -1375,8 +1526,14 @@ async function initAllProductsPage() {
 
     thumbMin?.addEventListener('mousedown', () => isDraggingMin = true);
     thumbMax?.addEventListener('mousedown', () => isDraggingMax = true);
+    thumbMin?.addEventListener('touchstart', (e) => { isDraggingMin = true; e.preventDefault(); }, { passive: false });
+    thumbMax?.addEventListener('touchstart', (e) => { isDraggingMax = true; e.preventDefault(); }, { passive: false });
+
     window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', (e) => { if (isDraggingMin || isDraggingMax) { handleMove(e); e.preventDefault(); } }, { passive: false });
+
     window.addEventListener('mouseup', () => { isDraggingMin = false; isDraggingMax = false; });
+    window.addEventListener('touchend', () => { isDraggingMin = false; isDraggingMax = false; });
 
     window.performReset = () => {
       state.filters = { search: '', category: '', subcategory: '', priceMin: 0, priceMax: SLIDER_LIMIT, inStockOnly: false };
@@ -1384,6 +1541,54 @@ async function initAllProductsPage() {
       renderCategories();
       applyFilters();
     };
+
+    // Mobile Filter Panel Toggle
+    const mobileFilterBtn = document.getElementById('mobile-filter-btn');
+    const closeFilterBtn = document.getElementById('close-filter-btn');
+    const filterSidebar = document.getElementById('filter-sidebar');
+    const filterOverlay = document.getElementById('filter-overlay');
+
+    const toggleFilter = (show) => {
+      if (!filterSidebar) return;
+      if (show) {
+        filterSidebar.classList.remove('hidden', '-translate-x-full');
+        filterSidebar.classList.add('flex', 'translate-x-0');
+        filterOverlay?.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      } else {
+        filterSidebar.classList.add('-translate-x-full');
+        filterSidebar.classList.remove('translate-x-0');
+        filterOverlay?.classList.add('hidden');
+        document.body.style.overflow = '';
+        setTimeout(() => filterSidebar.classList.add('hidden'), 300);
+      }
+    };
+
+    mobileFilterBtn?.addEventListener('click', () => toggleFilter(true));
+    closeFilterBtn?.addEventListener('click', () => toggleFilter(false));
+    filterOverlay?.addEventListener('click', () => toggleFilter(false));
+
+    // Pagination Listeners
+    document.querySelectorAll('.prev-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.currentPage > 1) {
+          state.currentPage--;
+          renderProducts();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.next-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const totalPages = Math.ceil(state.filteredProducts.length / state.itemsPerPage);
+        if (state.currentPage < totalPages) {
+          state.currentPage++;
+          renderProducts();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
   }
 
   function updatePriceUI() {
@@ -1414,38 +1619,39 @@ async function initWishlistPage() {
   const empty = document.getElementById('wishlist-empty');
   if (!grid) return;
 
-  async function render() {
-    if (Wishlist.items.length === 0) {
-      if (grid) grid.classList.add('hidden');
-      if (empty) empty.classList.remove('hidden');
-      return;
-    }
-    if (grid) grid.classList.remove('hidden');
-    if (empty) empty.classList.add('hidden');
-    
-    try {
-      let products = [];
-      if (Auth.isLoggedIn()) {
-        const data = await apiCall('/user/wishlist', 'GET', null, true);
-        products = data.wishlist || [];
-      } else {
-        const data = await apiCall('/user/products?limit=1000');
-        const all = data.products || [];
-        products = all.filter(p => Wishlist.items.includes(String(p._id)));
-      }
-      if (products.length === 0) {
-        if (grid) grid.classList.add('hidden');
-        if (empty) empty.classList.remove('hidden');
-        return;
-      }
-      grid.innerHTML = products.map(p => buildProductCard(p, 'product-card')).join('');
+    async function render() {
+      if (grid) grid.classList.remove('hidden');
+      if (empty) empty.classList.add('hidden');
+
+      try {
+        let products = [];
+        if (Auth.isLoggedIn()) {
+          const data = await apiCall('/user/wishlist', 'GET', null, true);
+          console.log("Wishlist page load response:", data);
+          products = data.products || [];
+          console.log("Rendering products:", products);
+          // Sync items array from full objects
+          Wishlist.items = products.map(p => String(p._id));
+        } else {
+          const data = await apiCall('/user/products?limit=1000');
+          const all = data.products || [];
+          products = all.filter(p => Wishlist.items.includes(String(p._id)));
+        }
+
+        if (products.length === 0) {
+          if (grid) grid.classList.add('hidden');
+          if (empty) empty.classList.remove('hidden');
+          Wishlist.updateBadge();
+          return;
+        }
+      grid.innerHTML = products.map(p => buildProductCard(p, 'product-card', true)).join('');
     } catch (err) {
       grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Failed to load wishlist.</div>`;
     }
   }
 
   const originalToggle = Wishlist.toggle;
-  Wishlist.toggle = async function(id, btn) {
+  Wishlist.toggle = async function (id, btn) {
     const p = originalToggle.call(Wishlist, id, btn);
     if (document.body.dataset.page === 'wishlist') render();
     await p;
@@ -1558,106 +1764,58 @@ async function initProductPage() {
     let qty = 1;
 
     const updateSummary = () => {
-      if (!selectedBatch && hasBatches) return;
-
-      const pricing = Pricing.calculate(p, selectedBatch);
-      const packs = qty;
-      const unitsPerPack = pricing.unitsPerPack;
-      const totalUnits = packs * unitsPerPack;
-
-      const packPrice = pricing.mainPrice;
-      const packWithoutGST = packPrice / (1 + pricing.gstPercent / 100);
-      const packGST = packPrice - packWithoutGST;
-
-      const totalFinalWithGST = packPrice * packs;
-      const totalWithoutGST = packWithoutGST * packs;
-      const totalGST = packGST * packs;
-      const totalMRP = pricing.unitPrice * totalUnits;
-      const totalDiscount = Math.max(0, totalMRP - totalWithoutGST);
-
-      const subtotal = totalFinalWithGST + (totalFinalWithGST > 500 ? 0 : pricing.deliveryCharge);
-      const deliveryChargeValue = totalFinalWithGST > 500 ? 0 : pricing.deliveryCharge;
-
-      const isDisplayBatch = pricing.isBatchProduct && pricing.unitsPerPack > 1;
-
+      const data = Pricing.calculate(p, qty, selectedBatch);
       const suffixes = ['', '-mobile'];
+
       suffixes.forEach(s => {
-        setVal(`qty-value${s}`, packs);
+        setVal(`qty-value${s}`, data.quantity);
+        setVal(`summary-batch${s}`, data.batch);
+        setVal(`summary-hsn${s}`, data.hsn);
+        setVal(`summary-unit-price${s}`, `₹${data.perUnitPrice.toFixed(2)}`);
+        setVal(`summary-price${s}`, `₹${data.finalPrice.toFixed(2)}`);
+        setVal(`summary-discount${s}`, `${data.discount}%`);
+        setVal(`summary-delivery${s}`, 'Free');
+        setVal(`summary-subtotal${s}`, `₹${data.subtotal.toFixed(2)}`);
 
-        // UI Rules: Batch vs Unit
-        const batchRow = document.getElementById(`summary-batch${s}`);
-        const totalUnitsRow = document.getElementById(`summary-total-units${s}`);
+        // Update Labels for Clarity
+        const priceRow = document.getElementById(`summary-price${s}`)?.parentElement;
+        if (priceRow) priceRow.querySelector('span:first-child').textContent = 'Per Pack (incl. GST)';
 
-        if (isDisplayBatch) {
-          setVal(`summary-batch${s}`, `Pack of ${unitsPerPack}`);
-          setVal(`summary-total-units${s}`, totalUnits);
-          if (batchRow) batchRow.parentElement.style.display = 'flex';
-          if (totalUnitsRow) totalUnitsRow.parentElement.style.display = 'flex';
-        } else {
-          if (batchRow) batchRow.parentElement.style.display = 'none';
-          if (totalUnitsRow) totalUnitsRow.parentElement.style.display = 'none';
-        }
+        const gstRow = document.getElementById(`summary-gst${s}`)?.parentElement;
+        if (gstRow) gstRow.style.display = 'none'; // Hide separate GST row
 
-        setVal(`summary-unit-price${s}`, `₹${pricing.finalUnitPrice.toFixed(2)}`);
-        setVal(`summary-price${s}`, `₹${totalWithoutGST.toFixed(2)}`);
-        setVal(`summary-discount${s}`, `- ₹${totalDiscount.toFixed(2)}`);
-        setVal(`summary-gst${s}`, `₹${totalGST.toFixed(2)}`);
-        setVal(`summary-delivery${s}`, deliveryChargeValue === 0 ? 'Free' : `₹${deliveryChargeValue.toFixed(2)}`);
-        setVal(`summary-subtotal${s}`, `₹${subtotal.toFixed(2)}`);
+        const deliveryRow = document.getElementById(`summary-delivery${s}`)?.parentElement;
+        if (deliveryRow) deliveryRow.querySelector('span:first-child').textContent = 'Delivery';
 
-        // Label swap for unit products
-        const pEl = document.getElementById(`summary-price${s}`);
-        if (pEl) pEl.previousElementSibling.textContent = isDisplayBatch ? 'Price (Excl. GST)' : 'Price';
+        // Toggle Batch Visibility
+        const bRow = document.getElementById(`summary-batch${s}`)?.parentElement;
+        if (bRow) bRow.style.display = hasBatches ? 'flex' : 'none';
+
+        const uRow = document.getElementById(`summary-total-units${s}`)?.parentElement;
+        if (uRow) uRow.style.display = hasBatches ? 'flex' : 'none';
+        if (uRow) setVal(`summary-total-units${s}`, qty * (selectedBatch?.quantity || 1));
       });
 
-      // Main Price Display Logic
-      const mainPriceDisplay = `₹${packPrice.toFixed(2)}`;
-      setVal('product-price-desktop', mainPriceDisplay);
-      setVal('product-price-mobile', mainPriceDisplay);
-
-      const packSizeEl = document.getElementById('product-pack-size-desktop');
-      if (packSizeEl) {
-        packSizeEl.textContent = isDisplayBatch ? `(Pack of ${unitsPerPack})` : '';
-        packSizeEl.classList.toggle('hidden', !isDisplayBatch);
-      }
-
-      // Per Unit Price Logic (Show both if batch, else only unit)
-      const unitPriceEl = document.getElementById('product-unit-price-desktop');
-      const unitPriceMob = document.getElementById('product-unit-price-mobile');
-      if (unitPriceEl) unitPriceEl.style.display = isDisplayBatch ? 'block' : 'none';
-      if (unitPriceMob) unitPriceMob.style.display = isDisplayBatch ? 'block' : 'none';
-
-      setVal('product-unit-price-desktop', `₹${pricing.finalUnitPrice.toFixed(2)} per unit`);
-      setVal('product-unit-price-mobile', `₹${pricing.finalUnitPrice.toFixed(2)} per unit`);
-
-      const updateStrikePrice = (id) => {
+      // Main Display Updates
+      const displayPrice = `₹${data.finalPrice.toFixed(2)}`;
+      setVal('product-price-desktop', displayPrice);
+      setVal('product-price-mobile', displayPrice);
+      ['product-pack-size-desktop', 'product-pack-size-mobile'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-          if (pricing.unitPrice > (pricing.finalUnitPrice / pricing.unitsPerPack)) {
-            el.textContent = `₹${pricing.unitPrice.toFixed(2)} per unit`;
-            el.classList.remove('hidden');
-          } else {
-            el.classList.add('hidden');
-          }
-        }
-      };
-      updateStrikePrice('product-old-unit-price-desktop');
-      updateStrikePrice('product-old-unit-price-mobile');
+        if (el) el.textContent = hasBatches ? `(${data.batch})` : '';
+      });
+      const displayPerUnit = `₹${data.perUnitPrice.toFixed(2)}`;
+      setVal('product-unit-price-desktop', `${displayPerUnit} per unit`);
+      setVal('product-unit-price-mobile', `${displayPerUnit} per unit`);
 
-      // Indicators
       const tUnits = document.getElementById('total-units-display');
-      if (tUnits) {
-        tUnits.textContent = `Total: ${totalUnits} units`;
-        tUnits.parentElement.classList.toggle('hidden', !isDisplayBatch);
-      }
+      if (tUnits) tUnits.textContent = `Total: ${qty * (selectedBatch?.quantity || 1)} units`;
+
       const tUnitsMob = document.getElementById('total-units-display-mobile-text');
-      if (tUnitsMob) {
-        tUnitsMob.textContent = `Total: ${totalUnits} units`;
-        tUnitsMob.parentElement.classList.toggle('hidden', !isDisplayBatch);
-      }
+      if (tUnitsMob) tUnitsMob.textContent = `Total: ${qty * (selectedBatch?.quantity || 1)} units`;
 
       const mobStickyPrice = document.querySelector('.md\\:hidden.fixed.bottom-\\[57px\\] #product-price-mobile');
-      if (mobStickyPrice) mobStickyPrice.textContent = `₹${subtotal.toFixed(2)}`;
+      if (mobStickyPrice) mobStickyPrice.textContent = `₹${data.subtotal}`;
     };
 
     if (hasBatches) {
@@ -1718,14 +1876,9 @@ async function initProductPage() {
         setTimeout(() => { window.location.href = 'login.html'; }, 1200);
         return;
       }
-      if (!selectedBatch) return showToast("Please select a batch", "warning");
+      const pricing = Pricing.calculate(p, qty, selectedBatch);
 
-      const batchMRP = (p.price || 0) * selectedBatch.quantity;
-      const batchFinalPrice = selectedBatch.price;
-
-      Cart.add(p._id, p.name, mainImg, batchMRP, batchFinalPrice,
-        qty, p.gstPercent || 18, p.discountPercent || 0, p.deliveryCharge || 0,
-        null, selectedBatch.quantity, batchFinalPrice);
+      Cart.add(p._id, p.name, mainImg, pricing.finalPrice, qty, selectedBatch.quantity);
 
       if (redirect) window.location.href = 'cart.html';
       else showToast('Added to cart!', 'success');
@@ -1781,9 +1934,6 @@ async function initCartPage() {
 }
 
 async function renderCart() {
-  const BASE_URL = IMAGE_BASE;
-
-  // If logged in, ensure we have fresh data
   if (Auth.isLoggedIn()) {
     await loadCartCount();
   }
@@ -1791,7 +1941,6 @@ async function renderCart() {
   const items = Cart.get();
   const totals = Cart.totals();
 
-  // Toggle Empty State
   const emptyDesktop = document.getElementById('empty-cart-desktop');
   const emptyMobile = document.getElementById('empty-cart-mobile');
   const itemsDesktop = document.getElementById('cart-items-desktop');
@@ -1808,7 +1957,6 @@ async function renderCart() {
     itemsDesktop?.classList.remove('hidden');
     itemsMobile?.classList.remove('hidden');
 
-    // Guest Mode Notice
     if (!Auth.isLoggedIn()) {
       const noticeHtml = `
         <div class="w-full bg-[#FFF4F4] border border-[#FFDADA] rounded-[8px] p-4 mb-6 flex items-center justify-between">
@@ -1817,77 +1965,85 @@ async function renderCart() {
         </div>
       `;
       if (itemsDesktop) itemsDesktop.insertAdjacentHTML('afterbegin', noticeHtml);
-      // For mobile, maybe just a simpler banner at top
       if (itemsMobile) itemsMobile.insertAdjacentHTML('afterbegin', noticeHtml);
     }
 
-    // Render Desktop Items
     if (itemsDesktop) {
       itemsDesktop.innerHTML = items.map(item => {
-        const name = item.nameSnapshot || item.name || 'Product';
-        const image = item.imageSnapshot || item.image || 'assets/images/deafult.png';
-        const price = item.priceSnapshot || item.discountedPrice || item.price;
-        const originalPrice = item.price || price;
-        const fullImg = image.startsWith('http') ? image : BASE_URL + image;
+        const name = item.name || 'Product';
+        const image = item.image;
+        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
+        const fullImg = getImageUrl(image);
 
         return `
-        <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[20px] mb-[16px] flex gap-[16px] items-center" data-pid="${item.productId}">
-          <a href="product.html?id=${item.productId}" class="w-[100px] h-[100px] flex-shrink-0 flex items-center justify-center cursor-pointer">
-            <img src="${fullImg}" alt="${name}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-          </a>
-          <div class="flex-1 min-w-0">
-            <a href="product.html?id=${item.productId}" class="text-[16px] font-medium font-['Poppins'] mb-1 line-clamp-2 hover:text-[#BE2229] transition-colors">${name}</a>
-            <div class="flex items-center gap-4 mt-3">
-              <div class="flex items-center w-[84px] h-[24px]">
-                <button class="cart-minus w-[20px] h-[24px] bg-[#CACACA] text-white flex items-center justify-center text-[14px] font-bold" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1}); renderCart();">-</button>
-                <div class="flex-1 flex justify-center items-center text-[14px] font-bold">${item.quantity}</div>
-                <button class="cart-plus w-[20px] h-[24px] bg-[#BE2229] text-white flex items-center justify-center text-[14px] font-bold" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity + 1}); renderCart();">+</button>
+        <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0">
+          <div class="flex items-center gap-4">
+            <img src="${fullImg}" class="w-[80px] h-[80px] object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            <div>
+              <h4 class="font-bold text-[16px] text-black">${name}</h4>
+              <div class="flex items-center gap-2 mt-2">
+                <button class="w-[24px] h-[24px] border border-gray-300 flex items-center justify-center rounded" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1})">-</button>
+                <span class="text-[14px]">${item.quantity}</span>
+                <button class="w-[24px] h-[24px] border border-gray-300 flex items-center justify-center rounded" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity + 1})">+</button>
+                <button class="text-[12px] text-[#BE2229] ml-4 hover:underline" onclick="Cart.remove('${item.itemId || item.productId}')">Remove</button>
               </div>
-              <button class="text-[12px] text-[#BE2229] underline" onclick="Cart.remove('${item.itemId || item.productId}'); renderCart();">Remove</button>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-[18px] font-bold text-black">₹${(price * item.quantity).toFixed(2)}</p>
-            ${originalPrice > price ? `<p class="text-[14px] text-[#808080] line-through">₹${(originalPrice * item.quantity).toFixed(2)}</p>` : ''}
+            <p class="text-[18px] font-bold text-black">₹${(finalPrice * item.quantity).toFixed(2)}</p>
           </div>
         </div>
       `;
       }).join('');
     }
 
-    // Render Mobile Items
     if (itemsMobile) {
       itemsMobile.innerHTML = items.map(item => {
-        const name = item.nameSnapshot || item.name || 'Product';
-        const image = item.imageSnapshot || item.image || 'assets/images/deafult.png';
-        const price = item.priceSnapshot || item.discountedPrice || item.price;
-        const originalPrice = item.price || price;
-        const fullImg = image.startsWith('http') ? image : BASE_URL + image;
+        const name = item.name || 'Product';
+        const image = item.image;
+        const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0);
+        const fullImg = getImageUrl(image);
 
         return `
-        <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[12px] flex gap-[12px] items-start" data-pid="${item.productId}">
-          <a href="product.html?id=${item.productId}" class="w-[80px] h-[80px] flex-shrink-0 flex items-center justify-center cursor-pointer">
-            <img src="${fullImg}" alt="${name}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-          </a>
-          <div class="flex-1 min-w-0">
-            <a href="product.html?id=${item.productId}" class="text-[14px] font-medium font-['Poppins'] mb-1 line-clamp-2 hover:text-[#BE2229] transition-colors">${name}</a>
-            <div class="flex items-center justify-between mt-2">
-              <div class="flex items-center w-[74px] h-[22px]">
-                <button class="w-[20px] h-[22px] bg-[#CACACA] text-white flex items-center justify-center text-[12px] font-bold" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1}); renderCart();">-</button>
-                <div class="flex-1 flex justify-center items-center text-[12px] font-bold">${item.quantity}</div>
-                <button class="w-[20px] h-[22px] bg-[#BE2229] text-white flex items-center justify-center text-[12px] font-bold" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity + 1}); renderCart();">+</button>
+        <div class="bg-white p-4 rounded-lg border border-gray-100 mb-2">
+          <div class="flex gap-4">
+            <img src="${fullImg}" class="w-[64px] h-[64px] object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            <div class="flex-1">
+              <h4 class="font-bold text-[14px] text-black">${name}</h4>
+              <div class="flex items-center justify-between mt-3">
+                <div class="flex items-center border border-gray-200 rounded overflow-hidden">
+                  <button class="w-[20px] h-[22px] bg-gray-100 flex items-center justify-center text-[14px]" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1})">-</button>
+                  <span class="px-2 text-[12px]">${item.quantity}</span>
+                  <button class="w-[20px] h-[22px] bg-[#BE2229] text-white flex items-center justify-center text-[12px] font-bold" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity + 1})">+</button>
+                </div>
+                <div class="text-right">
+                  <p class="text-[15px] font-bold text-black">₹${(finalPrice * item.quantity).toFixed(2)}</p>
+                </div>
               </div>
-              <div class="text-right">
-                <p class="text-[15px] font-bold text-black">₹${(price * item.quantity).toFixed(2)}</p>
-                ${originalPrice > price ? `<p class="text-[12px] text-[#808080] line-through">₹${(originalPrice * item.quantity).toFixed(2)}</p>` : ''}
-              </div>
+              <button class="text-[11px] text-[#BE2229] underline mt-1" onclick="Cart.remove('${item.itemId || item.productId}')">Remove</button>
             </div>
-            <button class="text-[11px] text-[#BE2229] underline mt-1" onclick="Cart.remove('${item.itemId || item.productId}'); renderCart();">Remove</button>
           </div>
         </div>
       `;
       }).join('');
     }
+  }
+
+  // ─── Fetch Summary from Backend (Source of Truth) ───
+  try {
+    const userLoc = JSON.parse(localStorage.getItem('userLocation') || '{}');
+    const summaryRes = await apiCall('/user/orders/summary', 'POST', {
+      items: items.map(i => ({ product: i.productId, quantity: i.quantity })),
+      pincode: userLoc.pincode || "" // Pass pincode if available
+    }, Auth.isLoggedIn());
+
+    if (summaryRes.success) {
+      totals.itemsTotal = summaryRes.totalAmount;
+      totals.deliveryCharge = summaryRes.deliveryCharges;
+      totals.totalPayable = summaryRes.finalAmount;
+    }
+  } catch (err) {
+    console.warn('[CART SUMMARY] Using local fallback:', err.message);
   }
 
   // Update Summary Fields
@@ -1900,19 +2056,25 @@ async function renderCart() {
   setVal('cart-count-mobile', `(${totals.itemCount} Item${totals.itemCount !== 1 ? 's' : ''})`);
   setVal('summary-items-count', totals.itemCount);
   setVal('summary-quantity-total', `${totals.totalQuantity} Units`);
-  // Use mrpTotal for "Price" row to match product.html summary style (Price -> Discount -> GST)
-  setVal('summary-items-total', `₹${totals.mrpTotal.toFixed(2)}`);
-  setVal('summary-total-discount', `-₹${totals.totalDiscount.toFixed(2)}`);
-  setVal('summary-total-gst', `₹${totals.totalGST.toFixed(2)}`);
-  setVal('summary-delivery-charges', totals.deliveryCharge === 0 ? 'Free' : `₹${totals.deliveryCharge.toFixed(2)}`);
+
+  setVal('summary-items-total', `₹${totals.itemsTotal.toFixed(2)}`);
+  setVal('summary-total-discount', `Applied`);
+
+  const gstRow = document.getElementById('summary-total-gst')?.parentElement;
+  if (gstRow) gstRow.style.display = 'none';
+
+  setVal('summary-delivery-charges', totals.deliveryCharge > 0 ? `₹${totals.deliveryCharge.toFixed(2)}` : 'Free');
   setVal('summary-total-payable', `₹${totals.totalPayable.toFixed(2)}`);
 
   // Mobile Summary Panel
-  setVal('mobile-summary-items-label', `Price (${totals.itemCount} Items):`);
-  setVal('mobile-summary-items-total', `₹${totals.mrpTotal.toFixed(2)}`);
-  setVal('mobile-summary-discount', `-₹${totals.totalDiscount.toFixed(2)}`);
-  setVal('mobile-summary-delivery', totals.deliveryCharge === 0 ? 'Free' : `₹${totals.deliveryCharge.toFixed(2)}`);
-  setVal('mobile-summary-gst', `₹${totals.totalGST.toFixed(2)}`);
+  setVal('mobile-summary-items-label', `Items Total (incl. GST):`);
+  setVal('mobile-summary-items-total', `₹${totals.itemsTotal.toFixed(2)}`);
+  setVal('mobile-summary-discount', `Applied`);
+  setVal('mobile-summary-delivery', totals.deliveryCharge > 0 ? `₹${totals.deliveryCharge.toFixed(2)}` : 'Free');
+
+  const mobGstRow = document.getElementById('mobile-summary-gst')?.parentElement;
+  if (mobGstRow) mobGstRow.style.display = 'none';
+
   setVal('mobile-summary-grand-total', `₹${totals.totalPayable.toFixed(2)}`);
 
   // Checkout Buttons state
@@ -1989,24 +2151,54 @@ async function initCheckoutPage() {
     itemsContainer.innerHTML = cart.map(item => `
       <div class="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0">
         <div class="w-[60px] h-[60px] bg-gray-50 rounded flex-shrink-0">
-          <img src="${item.image || 'assets/images/deafult.png'}" class="w-full h-full object-contain">
+          <img src="${productImg({ images: [item.image] })}" class="w-full h-full object-contain" onerror="this.src='assets/images/deafult.png'">
         </div>
         <div class="flex-1 min-w-0">
           <h4 class="text-[14px] font-medium text-[#242323] truncate">${item.name}</h4>
           <p class="text-[12px] text-[#A8A3A3]">Qty: ${item.quantity}</p>
         </div>
-        <div class="text-[14px] font-bold text-[#BE2229]">₹${(item.discountedPrice * item.quantity).toFixed(2)}</div>
+        <div class="text-[14px] font-bold text-[#BE2229]">₹${(Number(item.finalPrice || 0) * item.quantity).toFixed(2)}</div>
       </div>
     `).join('');
   }
 
-  // Update Summary
-  const setVal = (id, val) => { if (document.getElementById(id)) document.getElementById(id).textContent = val; };
-  setVal('summary-mrp', `₹${totals.mrpTotal.toFixed(2)}`);
-  setVal('summary-discount', `- ₹${totals.totalDiscount.toFixed(2)}`);
-  setVal('summary-gst', `₹${totals.totalGST.toFixed(2)}`);
-  setVal('summary-delivery', totals.deliveryCharge === 0 ? 'FREE' : `₹${totals.deliveryCharge.toFixed(2)}`);
-  setVal('summary-total', `₹${totals.totalPayable.toFixed(2)}`);
+  const totalsContainer = {
+    items: document.getElementById('summary-items-total'),
+    delivery: document.getElementById('summary-delivery'),
+    total: document.getElementById('summary-total')
+  };
+
+  const fetchSummary = async (pincode = "") => {
+    try {
+      const summaryRes = await apiCall('/user/orders/summary', 'POST', {
+        items: cart.map(i => ({ product: i.productId, quantity: i.quantity })),
+        pincode: pincode
+      }, true);
+      
+      if (summaryRes.success) {
+        if (totalsContainer.items) totalsContainer.items.textContent = `₹${summaryRes.totalAmount.toFixed(2)}`;
+        if (totalsContainer.delivery) totalsContainer.delivery.textContent = summaryRes.deliveryCharges > 0 ? `₹${summaryRes.deliveryCharges.toFixed(2)}` : 'Free';
+        if (totalsContainer.total) totalsContainer.total.textContent = `₹${summaryRes.finalAmount.toFixed(2)}`;
+        
+        return summaryRes;
+      }
+    } catch (err) {
+      console.error('[SUMMARY ERROR]', err);
+    }
+    return null;
+  };
+
+  const pincodeInput = document.getElementById('ship-pincode');
+  let backendSummary = await fetchSummary(pincodeInput?.value || "");
+
+  // Listen for pincode changes to update delivery charges
+  pincodeInput?.addEventListener('input', debounce(async (e) => {
+    const pin = e.target.value;
+    if (pin.length === 6) {
+      console.log('[CHECKOUT] Updating totals for pincode:', pin);
+      backendSummary = await fetchSummary(pin);
+    }
+  }, 500));
 
   // Auto-fill address
   const user = Auth.getUser();
@@ -2071,12 +2263,16 @@ async function initCheckoutPage() {
       placeBtn.innerHTML = '<span class="flex items-center gap-2"><div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...</span>';
 
       try {
+        // Re-fetch summary to ensure latest pricing from backend
+        backendSummary = await fetchSummary();
+        if (!backendSummary) throw new Error('Could not verify order totals');
+
         if (selectedMethod === 'Online') {
           console.log('[CHECKOUT] Starting Online Payment Flow...');
-          await handleOnlinePaymentFlow(shippingAddress, totals.totalPayable);
+          await handleOnlinePaymentFlow(shippingAddress, backendSummary.finalAmount);
         } else {
           console.log('[CHECKOUT] Starting COD Flow...');
-          await handleCODFlow(shippingAddress, totals.totalPayable);
+          await handleCODFlow(shippingAddress, backendSummary.finalAmount);
         }
       } catch (err) {
         console.error('[CHECKOUT ERROR]', err);
@@ -2100,13 +2296,19 @@ async function handleCODFlow(shippingAddress, amount) {
     paymentStatus: 'Pending'
   };
 
-  const res = await apiCall('/user/orders', 'POST', payload, true);
-  if (res.success) {
-    Cart.save([]);
-    showToast('Order placed successfully!', 'success');
-    window.location.href = `order-success.html?id=${res.orderNumber}&amount=${amount}`;
-  } else {
-    throw new Error(res.message);
+  try {
+    const res = await apiCall('/user/orders', 'POST', payload, true);
+    if (res.success) {
+      Cart.save([]);
+      showToast('Order placed successfully!', 'success');
+      const redirectUrl = `order-success.html?id=${res.orderNumber}&amount=${amount}&awb=${res.tracking?.awb || ''}&tracking=${encodeURIComponent(res.tracking?.url || '')}`;
+      window.location.href = redirectUrl;
+    } else {
+      throw new Error(res.message);
+    }
+  } catch (err) {
+    console.error('[COD ERROR]', err);
+    showToast(err.message || 'Failed to place order', 'error');
   }
 }
 
@@ -2158,7 +2360,9 @@ async function handleOnlinePaymentFlow(shippingAddress, amount) {
             const finalRes = await apiCall('/user/orders', 'POST', orderPayload, true);
             if (finalRes.success) {
               Cart.save([]);
-              window.location.href = `order-success.html?id=${finalRes.orderNumber}&amount=${amount}&payment=success`;
+              showToast('Payment successful!', 'success');
+              const redirectUrl = `order-success.html?id=${finalRes.orderNumber}&amount=${amount}&payment=success&awb=${finalRes.tracking?.awb || ''}&tracking=${encodeURIComponent(finalRes.tracking?.url || '')}`;
+              window.location.href = redirectUrl;
             } else {
               throw new Error('Payment verified but order creation failed. Please contact support.');
             }
@@ -2727,14 +2931,17 @@ window.loadProfileImage = loadProfileImage;
 
 function fillProfileLocationFields(location) {
   if (!location) return;
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.tagName === 'INPUT') el.value = val || '';
-    else el.textContent = val || '';
-  };
-  setVal('profile-country', location.country);
-  setVal('profile-state', location.state);
+  
+  const countryEl = document.getElementById('profile-country');
+  const stateEl = document.getElementById('profile-state');
+
+  // Only fill if empty to avoid overriding user input
+  if (countryEl && (!countryEl.value || countryEl.value === 'Your Country')) {
+    countryEl.value = location.country || "";
+  }
+  if (stateEl && (!stateEl.value || stateEl.value === 'Your State')) {
+    stateEl.value = location.state || "";
+  }
 }
 window.fillProfileLocationFields = fillProfileLocationFields;
 
@@ -2762,15 +2969,25 @@ async function initCategoriesPage() {
 
 // ─── Initialise ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  // Inject CSS for spin animation
+  // DEBUG MODE: Log auth state for mobile troubleshooting
+  console.log("--- [Springwala Auth Debug] ---");
+  console.log("Page:", window.location.pathname);
+  console.log("Token exists:", !!Auth.getToken());
+  console.log("User cached:", !!Auth.getUser());
+  console.log("------------------------------");
+
+  // Inject CSS for animations and mobile states
   if (!document.getElementById('sw-styles')) {
     const style = document.createElement('style');
     style.id = 'sw-styles';
     style.textContent = `
       @keyframes spin { to { transform: rotate(360deg); } }
-      .hidden-menu { transform: translateX(-100%); transition: transform 0.3s ease; }
-      .show-menu   { transform: translateX(0);     transition: transform 0.3s ease; }
+      .hidden-menu { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+      .show-menu   { transform: translateX(0);     transition: transform 0.3s ease-in-out; }
       .disabled-btn { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
+      .overflow-hidden { overflow: hidden !important; }
+      #mobile-sub-header { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
+      #mobile-sub-header.hide-sub { max-height: 0; opacity: 0; pointer-events: none; }
     `;
     document.head.appendChild(style);
   }
@@ -2791,26 +3008,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => loader.remove(), 300);
   }
 
-  // 2. Patch header "Your Account" links to show first name and go to profile
+  // 2. Patch ALL Account/Profile links (Critical Mobile Fix)
   const user = Auth.getUser();
-  document.querySelectorAll('a[href="login.html"]').forEach(a => {
+  // We target any link going to login.html or having account-related classes/images
+  document.querySelectorAll('a[href="login.html"], a[href="profile.html"], .nav-profile-link, .mobile-account-link').forEach(a => {
     const span = a.querySelector('span');
     const img = a.querySelector('img');
-    if (span && (span.textContent.includes('Your Account') || span.classList.contains('header-account-text'))) {
-      span.classList.add('header-account-text');
-      if (img) img.classList.add('header-user-icon');
+    const text = a.textContent.trim();
+
+    const isProfileLink =
+      text.includes('Your Account') ||
+      text.includes('My Account') ||
+      text.includes('Profile') ||
+      (span && (span.textContent.includes('Your Account') || span.textContent.includes('Profile'))) ||
+      (img && (img.alt.includes('Account') || img.alt.includes('Profile'))) ||
+      a.classList.contains('mobile-account-link');
+
+    if (isProfileLink) {
+      // Prevent default navigation and use our dynamic handler
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateToAccount();
+      });
 
       if (user) {
-        span.textContent = `Hi, ${user.firstName}`;
-        a.href = 'profile.html';
+        const isInsideMobileMenu = a.closest('#mobile-menu');
+        const displayName = isInsideMobileMenu ? "My Profile" : `Hi, ${user.firstName}`;
+
+        if (span && (span.textContent.includes('Your Account') || span.textContent.includes('My Account') || span.classList.contains('header-account-text'))) {
+          span.textContent = displayName;
+          span.classList.add('header-account-text');
+        } else if (text.includes('Your Account') || text.includes('My Account')) {
+          a.textContent = displayName;
+        }
 
         // Update profile image if available
         if (user.profileImage && img) {
           img.src = user.profileImage.startsWith('http') ? user.profileImage : IMAGE_BASE + user.profileImage;
-          img.classList.add('object-cover', 'rounded-full');
+          img.classList.add('header-user-icon', 'object-cover', 'rounded-full');
         }
+
+        a.href = 'profile.html';
       } else {
-        span.textContent = 'Your Account';
         a.href = 'login.html';
       }
     }
@@ -2846,6 +3085,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initLocation();
   initMobileMenu();
+  initStickyHeader();
+  initFilterDrawer();
   initSearch();
   loadCartCount();
 
@@ -2856,25 +3097,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll(`ul.flex li a[href*="${currentPage}"]`).forEach(a => {
       a.parentElement.classList.add('text-[#BE2229]', 'font-medium');
     });
-    // Mobile Navbar
-    document.querySelectorAll('.mobile-navbar .nav-item').forEach(item => {
-      const img = item.querySelector('img');
-      if (img && img.alt.toLowerCase() === currentPage.toLowerCase()) {
-        item.classList.add('active');
-        // If it's the orders page, we might need to swap the icon to the red version if not already there
-        if (currentPage === 'orders' && !img.src.includes('-red')) {
-          img.src = img.src.replace('.svg', '-red.svg');
+    // ─── Mobile Bottom Navigation ──────────────────────────────────────────────
+    const bottomNav = document.querySelector('.mobile-navbar');
+    if (bottomNav) {
+      const pageId = document.body.dataset.page || 'index';
+      bottomNav.querySelectorAll('.nav-item').forEach(item => {
+        const itemPage = item.dataset.page;
+
+        // Active State Logic
+        if (itemPage === pageId || (pageId === 'index' && itemPage === 'home')) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
         }
-      } else if (item.classList.contains('active')) {
-        // Remove active from others if they were statically set
-        item.classList.remove('active');
-        const otherImg = item.querySelector('img');
-        if (otherImg && otherImg.src.includes('-red')) {
-          otherImg.src = otherImg.src.replace('-red.svg', '.svg');
-        }
-      }
-    });
+
+        // Standardized Click Handler
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = item.dataset.page;
+          if (target === 'home') window.location.href = 'index.html';
+          else if (target === 'categories') window.location.href = 'categories.html';
+          else if (target === 'cart') window.location.href = 'cart.html';
+          else if (target === 'wishlist') window.location.href = 'wishlist.html';
+          else if (target === 'profile') {
+            if (Auth.isLoggedIn()) window.location.href = 'profile.html';
+            else window.location.href = 'login.html';
+          }
+        });
+      });
+    }
   }
+
+  // Global Routing Helper
+  window.goTo = function (page) {
+    window.location.href = page;
+  };
 
 
   // Better page detection using data-page attribute or pathname

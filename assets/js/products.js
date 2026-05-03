@@ -35,6 +35,7 @@ const LIMIT = 15;
 let currentStatusTab = 'all'; 
 
 async function loadProducts(page = 1) {
+  console.log("Fetching products...");
   currentPage = page;
   const tbody = document.getElementById('products-tbody');
   const mlist = document.getElementById('products-mobile-list');

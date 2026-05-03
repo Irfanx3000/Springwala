@@ -9,6 +9,8 @@
 /* Custom transitions for the mobile menu */
 #mobile-menu {
     transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    pointer-events: auto;
 }
 
 #mobile-menu.hidden-menu {
@@ -1158,22 +1160,21 @@ ul {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60px;
-    background: #F7F7F7;
-    box-shadow: 0px -2px 5.8px rgba(0, 0, 0, 0.25);
+    height: 65px;
+    background: #FFFFFF;
+    box-shadow: 0px -4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
-    padding: 15px 50px;
+    padding: 0 10px;
     z-index: 1000;
+    border-top: 1px solid #EEEEEE;
 }
-
-/* Hide on Desktop */
 
 /* Hide on Desktop */
 @media (min-width: 900px) {
     .mobile-navbar {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -1184,23 +1185,47 @@ ul {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    flex: 1;
+    height: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-navbar .nav-item img {
-    width: 27px;
-    height: 27px;
+    width: 24px;
+    height: 24px;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.mobile-navbar .nav-item.active {
+    transform: translateY(-4px);
+}
+
+.mobile-navbar .nav-item.active img {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: brightness(0) saturate(100%) invert(21%) sepia(91%) saturate(2971%) hue-rotate(346deg) brightness(89%) contrast(98%);
+}
+
+.mobile-navbar .active-indicator {
+    position: absolute;
+    bottom: 6px;
+    width: 6px;
+    height: 6px;
+    background-color: #BE2229;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .mobile-navbar .nav-item.active .active-indicator {
-    position: absolute;
-    bottom: -15px;
-    width: 30px;
-    height: 3px;
-    background-color: #BE2229;
-    border-radius: 2px 2px 0 0;
+    opacity: 1;
+    transform: scale(1);
 }
 
-/* Wishlist Active State */
+/* Wishlist Active State (for product cards) */
 .fo-wishlist.active, 
 .product-wishlist-btn.active {
     transform: scale(1.1);
@@ -1214,4 +1239,87 @@ ul {
 
 .wishlist-icon {
     transition: all 0.2s ease;
-}
+}
+/* =========================================
+   PRODUCT PAGE RESPONSIVENESS
+   ========================================= */
+.product-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .product-container {
+        grid-template-columns: 1fr; /* Stack on Tablets/Mobiles */
+    }
+
+    .md\:flex-col {
+        flex-direction: column !important;
+    }
+
+    .md\:w-\[915px\], .md\:w-\[435px\], .md\:w-\[461px\], .md\:w-\[340px\] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .md\:gap-5 {
+        gap: 15px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .price-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .batch-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .action-buttons button {
+        width: 100% !important;
+        height: 48px !important;
+        font-size: 16px !important;
+    }
+
+    /* Mobile Sticky Order Summary */
+    .mobile-sticky-summary {
+        position: fixed;
+        bottom: 65px; /* Above mobile navbar */
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 12px 16px;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        z-index: 90;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #eee;
+    }
+}
+
+/* Fix for horizontal scroll on mobile */
+body {
+    overflow-x: hidden;
+}
+
+/* Ensure images don't overflow */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
