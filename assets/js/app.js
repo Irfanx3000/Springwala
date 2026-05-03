@@ -162,11 +162,12 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   console.log(`[API] Fetching: ${url} (${method})`);
   console.log("Fetching products..."); // Specific log as requested by user
 
+  const isProtected = auth || endpoint.startsWith('/user/') || endpoint.startsWith('/payment/');
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
   };
-  if (auth && Auth.getToken()) {
+  if (isProtected && Auth.getToken()) {
     opts.headers['Authorization'] = `Bearer ${Auth.getToken()}`;
   }
   if (body) opts.body = JSON.stringify(body);
@@ -175,8 +176,8 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
     const res = await fetch(url, opts);
     console.log(`[API-TRACE] Response received with status: ${res.status}`);
 
-    if (res.status === 401 && Auth.isLoggedIn()) {
-      console.error('[API] 401 Unauthorized - Logging out');
+    if (res.status === 401 && isProtected) {
+      console.error('[API] 401 Unauthorized - Session expired');
       Auth.logout();
       throw new Error('Session expired. Please login again.');
     }

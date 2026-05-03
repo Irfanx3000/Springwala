@@ -13,7 +13,7 @@ const CONFIG = {
     // Image/Upload Base URL
     IMAGE_BASE_URL: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
         ? "http://localhost:5000"
-        : `${window.location.origin}/api`,
+        : window.location.origin,
 
     // Frontend Configuration
     FRONTEND_BASE_URL: window.location.origin,
