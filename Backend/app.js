@@ -13,6 +13,9 @@ require('./config/passport');
 
 const app = express();
 
+// 🔥 IMPORTANT: Required behind Nginx (fixes session/cookies)
+app.set('trust proxy', 1);
+
 // ── Database ──────────────────────────────────────────────────────────────────
 connectDB();
 
@@ -25,10 +28,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    
-    // In development, allow all localhost origins
+
     if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
       return callback(null, true);
     }
@@ -41,30 +42,31 @@ app.use(cors({
   },
   credentials: true
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Session required for Passport Google OAuth (serializeUser / deserializeUser)
+// ── Session (FIXED for production) ─────────────────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,            // 🔥 required for HTTPS
+    sameSite: 'none',        // 🔥 required for cross-origin
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
   },
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static file serving for uploaded images (mounted under /api to work with Nginx proxy)
-app.use('/api/uploads', express.static('uploads'));
-app.use('/uploads',     express.static('uploads')); // Fallback for local/legacy
+// ── Static file serving (FIXED) ───────────────────────────────────────────────
+app.use('/uploads', express.static('uploads')); // ✅ correct path
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  ADMIN ROUTES
-//  JWT middleware: middleware/auth.js  →  checks Admin model only
-//  Admin login: POST /api/auth/admin/login
 // ══════════════════════════════════════════════════════════════════════════════
 app.use('/api/auth',       require('./routes/adminAuth'));
 app.use('/api/products',   require('./routes/products'));
@@ -80,14 +82,11 @@ app.use('/api/admin',      require('./routes/adminManageRoutes'));
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  USER AUTH ROUTES
-//  Register / OTP / Login / Forgot-password / Google OAuth
-//  JWT middleware: middleware/userAuth.js  →  checks User model only
-//  User login: POST /api/auth/login
 // ══════════════════════════════════════════════════════════════════════════════
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  USER-FACING ROUTES  (profile, cart, orders, product browsing, categories)
+//  USER-FACING ROUTES
 // ══════════════════════════════════════════════════════════════════════════════
 app.use('/api/user', require('./routes/userRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
