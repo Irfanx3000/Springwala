@@ -5,7 +5,6 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
-  initSidebar();
   initAdminHeader();
   await loadUserStats();
   await loadUsers(1);
@@ -194,48 +193,4 @@ function viewUserInfo(id) {
     showToast(`User Details: ${id}`, 'info');
 }
 
-function buildPagination(containerId, currentPage, totalPages, onPage) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
 
-    let html = '';
-    
-    // Previous Button
-    html += `
-    <button class="w-[23px] h-[23px] bg-white border border-[#EEEEEE] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0 transition ${currentPage <= 1 ? 'opacity-30 cursor-not-allowed' : ''}" 
-            ${currentPage <= 1 ? 'disabled' : ''} 
-            onclick="window.onUserPageClick(${currentPage - 1})">
-        <svg class="w-3 h-3 text-[#BDBDBD]" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-    </button>`;
-
-    // Simple current page display if many pages, or simple logic
-    // For this specific design, we keep it minimal to match the original layout
-    
-    // Next Button
-    html += `
-    <button class="w-[23px] h-[23px] bg-white border border-[#E6E6E6] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0 transition ${currentPage >= totalPages ? 'opacity-30 cursor-not-allowed' : ''}" 
-            ${currentPage >= totalPages ? 'disabled' : ''} 
-            onclick="window.onUserPageClick(${currentPage + 1})">
-        <svg class="w-3 h-3 text-[#2B2B2B]" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
-    </button>`;
-
-    el.innerHTML = html;
-    window.onUserPageClick = onPage;
-}
-
-function setText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-}
-
-function initAdminHeader() {
-    const adminName = document.querySelector('.admin-name');
-    const user = Auth.getAdmin();
-    if (adminName && user) {
-        adminName.textContent = user.name || 'Admin';
-    }
-}
-
-function initSidebar() {
-    // Basic sidebar toggle logic is usually in HTML or api.js
-}
