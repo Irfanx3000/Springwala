@@ -162,14 +162,20 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   console.log(`[API] Fetching: ${url} (${method})`);
   console.log("Fetching products..."); // Specific log as requested by user
 
-  const isProtected = auth || endpoint.startsWith('/user/') || endpoint.startsWith('/payment/');
+  const token = localStorage.getItem("token");
+  const isProtected = auth || endpoint.includes('/user/') || endpoint.includes('/payment/');
+
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
   };
-  if (isProtected && Auth.getToken()) {
-    opts.headers['Authorization'] = `Bearer ${Auth.getToken()}`;
+
+  if (token) {
+    opts.headers['Authorization'] = `Bearer ${token}`;
+  } else if (isProtected) {
+    console.warn(`[API-WARN] Protected route requested but token is null: ${endpoint}`);
   }
+
   if (body) opts.body = JSON.stringify(body);
 
   try {

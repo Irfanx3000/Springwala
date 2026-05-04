@@ -16,8 +16,17 @@ async function apiFetch(endpoint, opts = {}) {
   const url = `${API_BASE}${endpoint}`;
   console.log(`[API-DEBUG] Fetching: ${url}`);
   const headers = { ...opts.headers };
-  const token = Auth.getToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const token = localStorage.getItem("token") || Auth.getToken();
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    const isProtected = endpoint.includes('/user/') || endpoint.includes('/payment/');
+    if (isProtected) {
+      console.warn(`[API-WARN] Protected route requested but token is null: ${endpoint}`);
+    }
+  }
+
   if (!(opts.body instanceof FormData)) headers['Content-Type'] = 'application/json';
 
   let res;
