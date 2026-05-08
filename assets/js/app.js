@@ -33,6 +33,9 @@ const Pricing = {
    */
   calculate: (product, quantity = 1, selectedBatch = null) => {
     try {
+      if (typeof PricingEngine === 'undefined') {
+        throw new Error('PricingEngine not loaded');
+      }
       const calc = PricingEngine.calculateCartItem({
         product,
         quantity,
@@ -556,7 +559,20 @@ async function loadCartCount() {
 }
 
 function calculateCartTotals(cart) {
-  // Use PricingEngine to calculate totals
+  // Use PricingEngine to calculate totals with defensive check
+  if (typeof PricingEngine === 'undefined') {
+    console.warn('[PRICING] PricingEngine not found. Using local fallback.');
+    const subtotal = cart.reduce((acc, item) => acc + (Number(item.finalPrice || 0) * item.quantity), 0);
+    return {
+      itemCount: cart.length,
+      totalQuantity: cart.reduce((acc, item) => acc + item.quantity, 0),
+      itemsTotal: subtotal,
+      deliveryCharge: 0,
+      totalPayable: subtotal,
+      totalWeight: 0
+    };
+  }
+
   const totals = PricingEngine.calculateOrderTotals(cart, 0); // deliveryCharge handled separately at checkout
 
   return {
@@ -1759,6 +1775,10 @@ async function initProductPage() {
     let qty = 1;
 
     const updateSummary = () => {
+      if (typeof PricingEngine === 'undefined') {
+        console.error('PricingEngine not defined in updateSummary');
+        return;
+      }
       const data = PricingEngine.calculateCartItem({
         product: p,
         quantity: qty,
@@ -2364,6 +2384,11 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
     }));
   } else {
     // Fallback: Generate from local cart (e.g. for COD if summary check skipped)
+    if (typeof PricingEngine === 'undefined') {
+        console.error('PricingEngine missing during checkout finalization');
+        alert('Pricing engine error. Please refresh the page.');
+        return;
+    }
     const totals = PricingEngine.calculateOrderTotals(cart, 0);
     finalItems = totals.items.map(item => ({
       product: item.productId,
