@@ -1,5 +1,6 @@
 const Product      = require('../models/Product');
 const InventoryLog = require('../models/InventoryLog');
+const Order        = require('../models/Order');
 
 // @desc  Get inventory list (products with stock info)
 // @route GET /api/inventory
@@ -56,12 +57,14 @@ exports.getInventoryStats = async (req, res) => {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [totalProducts, outOfStock, lowStock, stockValue, inventoryAddedThisMonth] = await Promise.all([
+    const [totalProducts, outOfStock, lowStock, stockValue, inventoryAddedThisMonth, ordersPending, ordersCompleted] = await Promise.all([
       Product.countDocuments({ isActive: true }),
       Product.countDocuments({ stock: 0 }),
       Product.countDocuments({ $expr: { $and: [{ $gt: ['$stock', 0] }, { $lte: ['$stock', '$lowStockThreshold'] }] } }),
       Product.aggregate([{ $group: { _id: null, value: { $sum: { $multiply: ['$stock', '$price'] } } } }]),
       InventoryLog.countDocuments({ type: 'stock_in', createdAt: { $gte: startOfMonth } }),
+      Order.countDocuments({ orderStatus: { $in: ['Pending', 'Ordered', 'Processing', 'Shipped'] } }),
+      Order.countDocuments({ orderStatus: 'Delivered' })
     ]);
 
     res.json({
@@ -72,7 +75,9 @@ exports.getInventoryStats = async (req, res) => {
         lowStock,
         inStock: Math.max(0, totalProducts - outOfStock - lowStock),
         totalStockValue: stockValue[0]?.value || 0,
-        inventoryAddedThisMonth
+        inventoryAddedThisMonth,
+        ordersPending: ordersPending || 0,
+        ordersCompleted: ordersCompleted || 0
       },
     });
   } catch (err) {

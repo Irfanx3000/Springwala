@@ -83,6 +83,53 @@
         .btn-loading::after {
             content: " ...";
         }
+
+        /* Back Navigation Styles */
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 50px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .back-btn:hover {
+            background: #f9fafb;
+            transform: translateX(-4px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-color: #d1d5db;
+        }
+
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 640px) {
+            .back-nav {
+                top: 12px;
+                left: 12px;
+            }
+            .back-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
     </style>
 	<script src="assets/js/config.js"></script>
 </head>
@@ -330,6 +377,15 @@
 
     <!-- Full Backend Integration JavaScript -->
     <script>
+        // Back Navigation Logic
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
         // API Configuration
         const API_BASE_URL = CONFIG.API_BASE_URL;
         

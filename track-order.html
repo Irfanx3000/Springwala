@@ -45,64 +45,77 @@
                     </div>
 
                     <div id="tracking-content" class="hidden">
-                        <div class="flex justify-between items-center mb-10 pb-6 border-bottom border-gray-100">
+                        <div class="flex justify-between items-center mb-10 pb-6 border-b border-gray-100">
                             <div>
                                 <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Status</p>
                                 <p id="current-status-text" class="text-lg font-bold text-gray-800">Pending</p>
+                                <p id="expected-delivery" class="text-[12px] text-green-600 font-bold mt-1"></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Last Updated</p>
-                                <p id="last-updated-text" class="text-sm font-semibold text-gray-600">---</p>
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Courier</p>
+                                <p id="courier-name" class="text-sm font-bold text-red-600">Delhivery</p>
+                                <p id="last-updated-text" class="text-[11px] text-gray-400 mt-1">---</p>
                             </div>
                         </div>
 
-                        <div class="space-y-10 relative">
-                            <!-- Step: Ordered -->
+                        <!-- Progress Steps -->
+                        <div class="space-y-10 relative mb-12">
                             <div class="flex gap-4">
                                 <div class="relative">
-                                    <div id="dot-ordered" class="status-dot active"></div>
+                                    <div id="dot-ordered" class="status-dot"></div>
                                     <div id="line-ordered" class="status-line"></div>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-800">Order Placed</h3>
-                                    <p class="text-sm text-gray-500">Your order has been received and confirmed.</p>
+                                    <h3 class="font-bold text-gray-800 text-[15px]">Order Placed</h3>
+                                    <p class="text-[13px] text-gray-500">Your order has been confirmed.</p>
                                 </div>
                             </div>
-
-                            <!-- Step: Processing -->
                             <div class="flex gap-4">
                                 <div class="relative">
                                     <div id="dot-processing" class="status-dot"></div>
                                     <div id="line-processing" class="status-line"></div>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-800">Processing</h3>
-                                    <p class="text-sm text-gray-500">We are preparing your items for shipment.</p>
+                                    <h3 class="font-bold text-gray-800 text-[15px]">Processing</h3>
+                                    <p class="text-[13px] text-gray-500">Items are being packed for shipping.</p>
                                 </div>
                             </div>
-
-                            <!-- Step: Shipped -->
                             <div class="flex gap-4">
                                 <div class="relative">
                                     <div id="dot-shipped" class="status-dot"></div>
                                     <div id="line-shipped" class="status-line"></div>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-800">Shipped</h3>
-                                    <p class="text-sm text-gray-500">Package has been handed over to courier.</p>
+                                    <h3 class="font-bold text-gray-800 text-[15px]">In Transit</h3>
+                                    <p class="text-[13px] text-gray-500">Shipment is on its way to you.</p>
                                 </div>
                             </div>
-
-                            <!-- Step: Delivered -->
                             <div class="flex gap-4">
                                 <div class="relative">
                                     <div id="dot-delivered" class="status-dot"></div>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-800">Delivered</h3>
-                                    <p class="text-sm text-gray-500">Shipment has been delivered successfully.</p>
+                                    <h3 class="font-bold text-gray-800 text-[15px]">Delivered</h3>
+                                    <p class="text-[13px] text-gray-500">Package has been delivered.</p>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Scan History -->
+                        <div id="scan-history-section" class="mt-8 border-t border-gray-100 pt-8 hidden">
+                            <h3 class="text-[16px] font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Detailed Shipment History
+                            </h3>
+                            <div id="scan-list" class="space-y-6">
+                                <!-- Injected Scans -->
+                            </div>
+                        </div>
+
+                        <div class="mt-10">
+                            <a id="full-tracking-url" href="#" target="_blank" class="block w-full py-4 bg-gray-50 border border-gray-200 text-center text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-100 transition">
+                                View Full Tracking on Delhivery Portal
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -126,16 +139,9 @@
             document.getElementById('display-awb-header').textContent = `Tracking ID: ${awb}`;
 
             try {
-                // Use centralized config for API base
-                const apiUrl = `${CONFIG.API_BASE_URL}/user/orders/track/${awb}`;
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
-
-                updateUI(data.tracking);
+                const res = await api.get(`/user/orders/track/${awb}`);
+                if (!res || !res.success) throw new Error("Tracking not found");
+                updateUI(res.tracking);
             } catch (err) {
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('error-state').classList.remove('hidden');
@@ -147,26 +153,58 @@
             document.getElementById('tracking-content').classList.remove('hidden');
 
             document.getElementById('current-status-text').textContent = tracking.status;
-            document.getElementById('last-updated-text').textContent = new Date(tracking.lastUpdated).toLocaleDateString('en-IN', {
-                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-            });
+            document.getElementById('courier-name').textContent = tracking.courier || 'Delhivery';
+            document.getElementById('last-updated-text').textContent = `Updated: ${new Date(tracking.lastUpdated).toLocaleString()}`;
+            
+            if (tracking.expectedDelivery) {
+                document.getElementById('expected-delivery').textContent = `Exp. Delivery: ${new Date(tracking.expectedDelivery).toLocaleDateString()}`;
+            }
 
-            const status = tracking.status;
-            const steps = ['Pending', 'Ready to Ship', 'Shipped', 'Delivered'];
-            const currentIndex = steps.indexOf(status);
+            const trackUrl = tracking.trackingUrl || `https://www.delhivery.com/track/package/${tracking.awb}`;
+            document.getElementById('full-tracking-url').href = trackUrl;
 
-            // Logic to activate dots and lines
-            if (currentIndex >= 0) {
-                 activate('ordered'); // Always active if order exists
+            // Update Progress Steps
+            const status = tracking.status.toLowerCase();
+            activate('ordered');
+            
+            if (status.includes('manifest') || status.includes('ready') || status.includes('process') || status.includes('transit') || status.includes('shipped') || status.includes('delivery') || status.includes('delivered')) {
+                activate('processing');
             }
-            if (currentIndex >= 1) { // Ready to Ship / Processing
-                 activate('processing');
+            if (status.includes('transit') || status.includes('shipped') || status.includes('delivery') || status.includes('delivered')) {
+                activate('shipped');
             }
-            if (currentIndex >= 2) { // Shipped
-                 activate('shipped');
+            if (status.includes('delivered')) {
+                activate('delivered');
             }
-            if (currentIndex >= 3) { // Delivered
-                 activate('delivered');
+
+            // Render Scan History
+            const list = document.getElementById('scan-list');
+            document.getElementById('scan-history-section').classList.remove('hidden');
+
+            if (tracking.scans && tracking.scans.length > 0) {
+                list.innerHTML = tracking.scans.map((scan, index) => `
+                    <div class="flex gap-4 items-start ${index === 0 ? 'opacity-100' : 'opacity-60'}">
+                        <div class="w-2 h-2 rounded-full bg-red-600 mt-2 shrink-0"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-[14px] font-bold text-gray-800">${scan.status}</h4>
+                                <span class="text-[11px] font-medium text-gray-400">${new Date(scan.time).toLocaleDateString()} ${new Date(scan.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <p class="text-[13px] text-gray-500">${scan.location || 'In Transit'}</p>
+                            ${scan.instructions ? `<p class="text-[12px] text-gray-400 mt-1 italic">${scan.instructions}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = `
+                    <div class="text-center py-6">
+                        <div class="bg-blue-50 text-blue-600 p-3 rounded-lg inline-flex mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-sm font-medium text-gray-700">Shipment created</p>
+                        <p class="text-xs text-gray-500 mt-1">Tracking updates may take some time to appear as the package is processed by the courier.</p>
+                    </div>
+                `;
             }
         }
 

@@ -79,6 +79,7 @@ app.use('/api/inventory',  require('./routes/inventory'));
 app.use('/api/settings',   require('./routes/settings'));
 app.use('/api/search',     require('./routes/search'));
 app.use('/api/admin',      require('./routes/adminManageRoutes'));
+app.use('/api/shipping',   require('./routes/shippingRoutes'));
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  USER AUTH ROUTES

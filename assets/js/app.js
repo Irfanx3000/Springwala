@@ -26,55 +26,51 @@ var BASE_URL = CONFIG.IMAGE_BASE_URL;
 var IMAGE_BASE = CONFIG.IMAGE_BASE_URL;
 
 // ─── Pricing Engine ───────────────────────────────────────────────────────────
+// Uses PricingEngine from pricingEngine.js (loaded in HTML)
 const Pricing = {
   /**
-   * Pricing Engine (Frontend)
-   * Single Source of Truth: backend pre-calculated product.finalPrice
+   * Unified Pricing Engine (Frontend Wrapper)
    */
   calculate: (product, quantity = 1, selectedBatch = null) => {
-    const isBatchProduct = product.batches && product.batches.length > 0;
-    const discount = parseFloat(product.discountPercent) || 0;
+    try {
+      const calc = PricingEngine.calculateCartItem({
+        product,
+        quantity,
+        selectedBatch
+      });
 
-    // Use backend finalPrice if available, otherwise calculate fallback
-    let finalPrice = parseFloat(product.finalPrice);
-    if (isNaN(finalPrice)) {
-      // Fallback for older products
-      const base = parseFloat(product.price || product.basePrice || 0) || 0;
-      const gst = parseFloat(product.gstPercent || 0) || 0;
-      const afterDiscount = base * (1 - discount / 100);
-      finalPrice = afterDiscount * (1 + gst / 100) || 0;
+      return {
+        quantity: calc.totalUnits,
+        packs: quantity,
+        batch: calc.isBatchProduct ? `Pack of ${calc.batchQuantity}` : "N/A",
+        hsn: calc.hsn,
+        finalPrice: calc.displayPrice, // Price per unit or per pack
+        perUnitPrice: calc.unitPrice,
+        discount: product.discountPercent || 0,
+        gst: product.gstPercent || 0,
+        deliveryCharges: 0,
+        subtotal: calc.subtotal,
+        unitsPerPack: calc.isBatchProduct ? calc.batchQuantity : 1,
+        isBatchProduct: calc.isBatchProduct
+      };
+    } catch (err) {
+      console.warn('[PRICING ERROR] Failed to calculate for:', product?.name, err);
+      // Absolute safety fallback
+      return {
+        quantity: quantity,
+        packs: quantity,
+        batch: "N/A",
+        finalPrice: Number(product.price || product.basePrice || 0),
+        perUnitPrice: Number(product.price || product.basePrice || 0),
+        discount: 0,
+        gst: 0,
+        subtotal: Number(product.price || product.basePrice || 0) * quantity,
+        unitsPerPack: 1,
+        isBatchProduct: false
+      };
     }
-
-    let batch = "N/A";
-    let hsn = product.hsn || product.hsnCode || "N/A";
-
-    if (isBatchProduct) {
-      const b = selectedBatch || (product.batches && product.batches.length > 0 ? product.batches[0] : null);
-      if (b) {
-        // For batches, the price in DB is currently the 'base' price
-        const bBase = parseFloat(b.price) || 0;
-        const gst = parseFloat(product.gstPercent || 0);
-        finalPrice = (bBase * (1 - discount / 100)) * (1 + gst / 100);
-        batch = b.quantity ? `Pack of ${b.quantity}` : "N/A";
-      }
-    }
-
-    const subtotal = finalPrice * quantity;
-    const unitsPerPack = isBatchProduct ? (selectedBatch || (product.batches && product.batches.length > 0 ? product.batches[0] : { quantity: 1 })).quantity || 1 : 1;
-    const perUnitPrice = finalPrice / unitsPerPack;
-
-    return {
-      quantity,
-      batch,
-      hsn,
-      finalPrice: Number(finalPrice || 0),
-      perUnitPrice: Number(perUnitPrice || 0),
-      discount,
-      gst: 0,
-      deliveryCharges: 0,
-      subtotal: Number((finalPrice * quantity).toFixed(2))
-    };
   }
+
 };
 
 
@@ -335,7 +331,7 @@ const Cart = {
         await apiCall('/user/cart/add', 'POST', {
           productId: item.productId,
           quantity: item.quantity,
-          variantId: item.variantId || null
+          batchQuantity: item.batchQuantity || 1
         }, true);
       }
 
@@ -560,26 +556,16 @@ async function loadCartCount() {
 }
 
 function calculateCartTotals(cart) {
-  let itemsTotal = 0;
-  let totalQuantity = 0;
-
-  cart.forEach(item => {
-    const unitPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
-    const qty = Number(item.quantity || 1) || 0;
-    itemsTotal += unitPrice * qty;
-    totalQuantity += qty;
-  });
-
-  // Basic fallback calculation
-  const deliveryCharge = itemsTotal < 1000 && itemsTotal > 0 ? 120 : 0;
-  const totalPayable = itemsTotal + deliveryCharge;
+  // Use PricingEngine to calculate totals
+  const totals = PricingEngine.calculateOrderTotals(cart, 0); // deliveryCharge handled separately at checkout
 
   return {
     itemCount: cart.length,
-    totalQuantity,
-    itemsTotal,
-    deliveryCharge,
-    totalPayable
+    totalQuantity: totals.totalUnits,
+    itemsTotal: totals.subtotal,
+    deliveryCharge: 0, // Placeholder, dynamic at checkout
+    totalPayable: totals.subtotal,
+    totalWeight: totals.totalWeight
   };
 }
 
@@ -644,7 +630,9 @@ function buildProductCard(p, className = '', showRemove = false) {
         <div class="fo-pricing">
           <span class="fo-price">₹${finalPrice.toFixed(2)}</span>
           ${basePrice > finalPrice ? `<span class="fo-old-price">₹${basePrice.toFixed(2)}</span>` : ''}
+          ${pricing.isBatchProduct ? `<span class="text-[11px] text-gray-500 block">Pack of ${pricing.unitsPerPack}</span>` : ''}
         </div>
+
         ${isOutOfStock ? `
         <button class="fo-cart-btn !bg-gray-400 cursor-not-allowed" disabled>
           Out of Stock
@@ -1771,58 +1759,101 @@ async function initProductPage() {
     let qty = 1;
 
     const updateSummary = () => {
-      const data = Pricing.calculate(p, qty, selectedBatch);
+      const data = PricingEngine.calculateCartItem({
+        product: p,
+        quantity: qty,
+        selectedBatch: selectedBatch
+      });
+
       const suffixes = ['', '-mobile'];
 
       suffixes.forEach(s => {
-        setVal(`qty-value${s}`, data.quantity);
-        setVal(`summary-batch${s}`, data.batch);
+        setVal(`qty-value${s}`, qty);
+        setVal(`summary-batch${s}`, data.isBatchProduct ? `Pack of ${data.batchQuantity}` : "N/A");
         setVal(`summary-hsn${s}`, data.hsn);
-        setVal(`summary-unit-price${s}`, `₹${data.perUnitPrice.toFixed(2)}`);
-        setVal(`summary-price${s}`, `₹${data.finalPrice.toFixed(2)}`);
-        setVal(`summary-discount${s}`, `${data.discount}%`);
-        setVal(`summary-delivery${s}`, 'Free');
+        setVal(`summary-unit-price${s}`, `₹${data.unitPrice.toFixed(2)}`);
+        
+        // Large Display Price
+        const displayPrice = `₹${data.displayPrice.toFixed(2)}`;
+        setVal(`product-price-desktop`, displayPrice);
+        setVal(`product-price-mobile`, displayPrice);
+        setVal(`product-pack-size-desktop`, data.isBatchProduct ? `(Pack of ${data.batchQuantity})` : "");
+        setVal(`product-pack-size-mobile`, data.isBatchProduct ? `(Pack of ${data.batchQuantity})` : "");
+
+        // Informational rows for Batch Products
+        const discountRow = document.getElementById(`summary-discount${s}`)?.parentElement;
+        const gstRow = document.getElementById(`summary-gst${s}`)?.parentElement;
+
+        if (data.isBatchProduct) {
+          // Batch Product Labels
+          const priceLabel = document.getElementById(`summary-price${s}`)?.parentElement?.querySelector('span:first-child');
+          if (priceLabel) priceLabel.textContent = 'Pack Price (Final)';
+
+          setVal(`summary-price${s}`, `₹${data.displayPrice.toFixed(2)}`);
+          setVal(`product-unit-price-desktop`, `₹${data.unitPrice.toFixed(2)} per unit`);
+          setVal(`product-unit-price-mobile`, `₹${data.unitPrice.toFixed(2)} per unit`);
+
+          // Show Discount Informational Row
+          if (discountRow) {
+            discountRow.style.display = 'flex';
+            const label = discountRow.querySelector('span:first-child');
+            const value = discountRow.querySelector('span:last-child');
+            if (label) label.innerHTML = '<span class="text-gray-400 text-[11px]">Included Discount</span>';
+            if (value) value.innerHTML = `<span class="text-gray-400 text-[11px]">${p.discountPercent}%</span>`;
+          }
+
+          // Show GST Informational Row
+          if (gstRow) {
+            gstRow.style.display = 'flex';
+            const label = gstRow.querySelector('span:first-child');
+            const value = gstRow.querySelector('span:last-child');
+            if (label) label.innerHTML = '<span class="text-gray-400 text-[12px]">Included GST</span>';
+            if (value) value.innerHTML = `<span class="text-gray-400 text-[12px]">${p.gstPercent || 18}% </span>`;
+          }
+        } else {
+          // Unit Product Labels
+          const priceLabel = document.getElementById(`summary-price${s}`)?.parentElement?.querySelector('span:first-child');
+          if (priceLabel) priceLabel.textContent = 'Final Price (incl. GST)';
+
+          setVal(`summary-price${s}`, `₹${data.displayPrice.toFixed(2)}`);
+          setVal(`product-unit-price-desktop`, `₹${data.unitPrice.toFixed(2)} per unit (excl. GST)`);
+          setVal(`product-unit-price-mobile`, `₹${data.unitPrice.toFixed(2)} per unit (excl. GST)`);
+
+          // Hide or reset discount/GST rows for non-batch if preferred, 
+          // or keep existing logic if they were used there.
+          // Based on request, for non-batch, keep existing structure.
+          if (discountRow) discountRow.style.display = 'none';
+          if (gstRow) gstRow.style.display = 'none';
+
+          // Show original price if discounted
+          const oldPriceEl = document.getElementById(`product-old-unit-price-desktop`);
+          const basePrice = parseFloat(p.price || p.basePrice || 0);
+          if (oldPriceEl && basePrice > data.unitPrice) {
+            oldPriceEl.textContent = `₹${basePrice.toFixed(2)} original`;
+            oldPriceEl.classList.remove('hidden');
+          }
+        }
+
+        setVal(`summary-delivery${s}`, 'Calculated at Checkout');
         setVal(`summary-subtotal${s}`, `₹${data.subtotal.toFixed(2)}`);
 
-        // Update Labels for Clarity
-        const priceRow = document.getElementById(`summary-price${s}`)?.parentElement;
-        if (priceRow) priceRow.querySelector('span:first-child').textContent = 'Per Pack (incl. GST)';
-
-        const gstRow = document.getElementById(`summary-gst${s}`)?.parentElement;
-        if (gstRow) gstRow.style.display = 'none'; // Hide separate GST row
-
-        const deliveryRow = document.getElementById(`summary-delivery${s}`)?.parentElement;
-        if (deliveryRow) deliveryRow.querySelector('span:first-child').textContent = 'Delivery';
-
-        // Toggle Batch Visibility
+        // Toggle rows
         const bRow = document.getElementById(`summary-batch${s}`)?.parentElement;
-        if (bRow) bRow.style.display = hasBatches ? 'flex' : 'none';
+        if (bRow) bRow.style.display = data.isBatchProduct ? 'flex' : 'none';
 
         const uRow = document.getElementById(`summary-total-units${s}`)?.parentElement;
-        if (uRow) uRow.style.display = hasBatches ? 'flex' : 'none';
-        if (uRow) setVal(`summary-total-units${s}`, qty * (selectedBatch?.quantity || 1));
+        if (uRow) uRow.style.display = data.isBatchProduct ? 'flex' : 'none';
+        if (uRow) setVal(`summary-total-units${s}`, data.totalUnits);
       });
-
-      // Main Display Updates
-      const displayPrice = `₹${data.finalPrice.toFixed(2)}`;
-      setVal('product-price-desktop', displayPrice);
-      setVal('product-price-mobile', displayPrice);
-      ['product-pack-size-desktop', 'product-pack-size-mobile'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = hasBatches ? `(${data.batch})` : '';
-      });
-      const displayPerUnit = `₹${data.perUnitPrice.toFixed(2)}`;
-      setVal('product-unit-price-desktop', `${displayPerUnit} per unit`);
-      setVal('product-unit-price-mobile', `${displayPerUnit} per unit`);
 
       const tUnits = document.getElementById('total-units-display');
-      if (tUnits) tUnits.textContent = `Total: ${qty * (selectedBatch?.quantity || 1)} units`;
+      if (tUnits) tUnits.textContent = `Total: ${data.totalUnits} units`;
 
       const tUnitsMob = document.getElementById('total-units-display-mobile-text');
-      if (tUnitsMob) tUnitsMob.textContent = `Total: ${qty * (selectedBatch?.quantity || 1)} units`;
+      if (tUnitsMob) tUnitsMob.textContent = `Total: ${data.totalUnits} units`;
 
       const mobStickyPrice = document.querySelector('.md\\:hidden.fixed.bottom-\\[57px\\] #product-price-mobile');
-      if (mobStickyPrice) mobStickyPrice.textContent = `₹${data.subtotal}`;
+      if (mobStickyPrice) mobStickyPrice.textContent = `₹${data.subtotal.toFixed(2)}`;
     };
 
     if (hasBatches) {
@@ -1891,6 +1922,7 @@ async function initProductPage() {
       else showToast('Added to cart!', 'success');
     };
     document.getElementById('add-to-cart-btn')?.addEventListener('click', () => handleAdd(false));
+    document.getElementById('add-to-cart-btn-mobile')?.addEventListener('click', () => handleAdd(false));
     document.getElementById('buy-now-btn')?.addEventListener('click', () => handleAdd(true));
     document.getElementById('buy-now-btn-mobile')?.addEventListener('click', () => handleAdd(true));
 
@@ -2065,10 +2097,16 @@ async function renderCart() {
   setVal('summary-quantity-total', `${totals.totalQuantity} Units`);
 
   setVal('summary-items-total', `₹${totals.itemsTotal.toFixed(2)}`);
-  setVal('summary-total-discount', `Applied`);
+  setVal('summary-total-discount', `Included in price`);
 
   const gstRow = document.getElementById('summary-total-gst')?.parentElement;
-  if (gstRow) gstRow.style.display = 'none';
+  if (gstRow) {
+    gstRow.style.display = 'flex';
+    const label = gstRow.querySelector('span:first-child');
+    const value = gstRow.querySelector('span:last-child');
+    if (label) label.innerHTML = '<span class="text-gray-400 text-[11px]">Included GST</span>';
+    if (value) value.innerHTML = `<span class="text-gray-400 text-[11px]">Included in total</span>`;
+  }
 
   setVal('summary-delivery-charges', totals.deliveryCharge > 0 ? `₹${totals.deliveryCharge.toFixed(2)}` : 'Free');
   setVal('summary-total-payable', `₹${totals.totalPayable.toFixed(2)}`);
@@ -2076,11 +2114,17 @@ async function renderCart() {
   // Mobile Summary Panel
   setVal('mobile-summary-items-label', `Items Total (incl. GST):`);
   setVal('mobile-summary-items-total', `₹${totals.itemsTotal.toFixed(2)}`);
-  setVal('mobile-summary-discount', `Applied`);
+  setVal('mobile-summary-discount', `Included`);
   setVal('mobile-summary-delivery', totals.deliveryCharge > 0 ? `₹${totals.deliveryCharge.toFixed(2)}` : 'Free');
 
   const mobGstRow = document.getElementById('mobile-summary-gst')?.parentElement;
-  if (mobGstRow) mobGstRow.style.display = 'none';
+  if (mobGstRow) {
+    mobGstRow.style.display = 'flex';
+    const label = mobGstRow.querySelector('span:first-child');
+    const value = mobGstRow.querySelector('span:last-child');
+    if (label) label.innerHTML = '<span class="text-gray-400 text-[11px]">Included GST</span>';
+    if (value) value.innerHTML = `<span class="text-gray-400 text-[11px]">Included in total</span>`;
+  }
 
   setVal('mobile-summary-grand-total', `₹${totals.totalPayable.toFixed(2)}`);
 
@@ -2178,7 +2222,7 @@ async function initCheckoutPage() {
   const fetchSummary = async (pincode = "") => {
     try {
       const summaryRes = await apiCall('/user/orders/summary', 'POST', {
-        items: cart.map(i => ({ product: i.productId, quantity: i.quantity })),
+        items: cart.map(i => ({ product: i.productId, quantity: i.quantity, batchQuantity: i.batchQuantity || 1 })),
         pincode: pincode
       }, true);
       
@@ -2276,10 +2320,10 @@ async function initCheckoutPage() {
 
         if (selectedMethod === 'Online') {
           console.log('[CHECKOUT] Starting Online Payment Flow...');
-          await handleOnlinePaymentFlow(shippingAddress, backendSummary.finalAmount);
+          await handleOnlinePaymentFlow(shippingAddress, backendSummary);
         } else {
           console.log('[CHECKOUT] Starting COD Flow...');
-          await handleCODFlow(shippingAddress, backendSummary.finalAmount);
+          await handleCODFlow(shippingAddress, backendSummary);
         }
       } catch (err) {
         console.error('[CHECKOUT ERROR]', err);
@@ -2292,18 +2336,76 @@ async function initCheckoutPage() {
 }
 
 /**
- * PRODUCTION COD FLOW
+ * UTILITY: Standardize order payload for both COD and Online flows.
  */
-async function handleCODFlow(shippingAddress, amount) {
+function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paymentDetails = {}, precalculatedItems = null) {
   const cart = Cart.get();
+  
+  if ((!cart || !cart.length) && (!precalculatedItems || !precalculatedItems.length)) {
+    throw new Error('Your cart is empty. Please add items before checking out.');
+  }
+
+  let finalItems = [];
+
+  if (precalculatedItems && precalculatedItems.length > 0) {
+    // Use pre-validated items from backend summary
+    finalItems = precalculatedItems.map(item => ({
+      product: item.product || item.productId,
+      productId: item.product || item.productId,
+      name: item.name,
+      quantity: item.quantity,
+      selectedBatch: item.selectedBatch,
+      finalPrice: item.finalPrice || item.price,
+      subtotal: item.subtotal,
+      image: item.image,
+      isBatchProduct: item.isBatchProduct,
+      batchQuantity: item.batchQuantity,
+      hsn: item.hsn
+    }));
+  } else {
+    // Fallback: Generate from local cart (e.g. for COD if summary check skipped)
+    const totals = PricingEngine.calculateOrderTotals(cart, 0);
+    finalItems = totals.items.map(item => ({
+      product: item.productId,
+      productId: item.productId,
+      name: item.name,
+      quantity: item.quantity,
+      selectedBatch: item.selectedBatch,
+      finalPrice: item.displayPrice,
+      subtotal: item.subtotal,
+      image: item.image,
+      isBatchProduct: item.isBatchProduct,
+      batchQuantity: item.batchQuantity,
+      hsn: item.hsn
+    }));
+  }
+
   const payload = {
-    items: cart.map(i => ({ product: i.productId, quantity: i.quantity, name: i.name, image: i.image })),
+    items: finalItems,
     shippingAddress,
-    paymentMethod: 'COD',
-    paymentStatus: 'Pending'
+    paymentMethod,
+    paymentStatus,
+    paymentDetails
   };
 
+  console.log('[PAYLOAD GENERATED]', { 
+    method: paymentMethod, 
+    itemsCount: finalItems.length,
+    firstItem: finalItems[0] ? { name: finalItems[0].name, price: finalItems[0].finalPrice } : 'NONE'
+  });
+  return payload;
+}
+
+
+/**
+ * PRODUCTION COD FLOW
+ */
+async function handleCODFlow(shippingAddress, backendSummary) {
   try {
+    const amount = backendSummary.finalAmount;
+    const items = backendSummary.items || [];
+    const payload = prepareOrderPayload(shippingAddress, 'COD', 'Pending', {}, items);
+
     const res = await apiCall('/user/orders', 'POST', payload, true);
     if (res.success) {
       Cart.save([]);
@@ -2322,74 +2424,169 @@ async function handleCODFlow(shippingAddress, amount) {
 /**
  * PRODUCTION ONLINE FLOW (Verify-then-Create)
  */
-async function handleOnlinePaymentFlow(shippingAddress, amount) {
+async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
   try {
-    // 1. Create Razorpay order on backend
-    console.log('[PAYMENT] Creating gateway order...');
-    const rzpOrderRes = await apiCall('/payment/create-order', 'POST', { amount }, true);
-    if (!rzpOrderRes.success) throw new Error(rzpOrderRes.message);
+    console.log('[PAYMENT] Starting Online Payment Flow...');
+    console.log('[PAYMENT] Backend Summary:', backendSummary);
 
-    // 2. Open Razorpay Popup
+    // ---------------------------------------------------
+    // 1. Validate Summary & Items
+    // ---------------------------------------------------
+    if (!backendSummary) {
+      throw new Error('Order summary is missing');
+    }
+
+    const amount = backendSummary.finalAmount || backendSummary.totalAmount;
+
+    // Use items from backend summary (Normalized SSOT)
+    const items = backendSummary.items || [];
+
+    if (!Array.isArray(items) || items.length === 0) {
+      console.error('[PAYMENT] Invalid Items from backend summary:', items);
+      throw new Error('Could not verify cart items. Please refresh and try again.');
+    }
+
+    // ---------------------------------------------------
+    // 2. Create Razorpay Order
+    // ---------------------------------------------------
+    console.log('[PAYMENT] Creating Razorpay order...');
+
+    const paymentPayload = {
+      amount,
+      items,
+      shippingAddress
+    };
+
+    console.log('[PAYMENT] Payload sent to backend:', paymentPayload);
+
+    const rzpOrderRes = await apiCall(
+      '/payment/create-order',
+      'POST',
+      paymentPayload,
+      true
+    );
+
+    if (!rzpOrderRes.success) {
+      throw new Error(rzpOrderRes.message || 'Failed to create payment order');
+    }
+
+    // ---------------------------------------------------
+    // 3. Open Razorpay Popup
+    // ---------------------------------------------------
     const options = {
       key: rzpOrderRes.key,
       amount: rzpOrderRes.amount,
       currency: rzpOrderRes.currency,
-      name: "Springwala",
-      description: "Secure Checkout",
+      name: 'Springwala',
+      description: 'Secure Checkout',
       order_id: rzpOrderRes.id,
+
       handler: async function (response) {
-        console.log('[PAYMENT] Gateway success. Verifying signature...');
+        console.log('[PAYMENT] Razorpay payment success:', response);
 
         try {
-          // 3. Verify Payment
-          const verifyRes = await apiCall('/payment/verify', 'POST', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          }, true);
 
-          if (verifyRes.success) {
-            console.log('[PAYMENT] Signature verified. Finalizing DB Order...');
+          // ---------------------------------------------------
+          // 4. Verify Payment Signature
+          // ---------------------------------------------------
+          const verifyRes = await apiCall(
+            '/payment/verify',
+            'POST',
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            },
+            true
+          );
 
-            // 4. Create Order in DB (Marked as Completed)
-            const cart = Cart.get();
-            const orderPayload = {
-              items: cart.map(i => ({ product: i.productId, quantity: i.quantity, name: i.name, image: i.image })),
-              shippingAddress,
-              paymentMethod: 'Online',
-              paymentStatus: 'Completed',
-              paymentDetails: {
-                transactionId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id
-              }
-            };
-
-            const finalRes = await apiCall('/user/orders', 'POST', orderPayload, true);
-            if (finalRes.success) {
-              Cart.save([]);
-              showToast('Payment successful!', 'success');
-              const redirectUrl = `order-success.html?id=${finalRes.orderNumber}&amount=${amount}&payment=success&awb=${finalRes.tracking?.awb || ''}&tracking=${encodeURIComponent(finalRes.tracking?.url || '')}`;
-              window.location.href = redirectUrl;
-            } else {
-              throw new Error('Payment verified but order creation failed. Please contact support.');
-            }
-          } else {
-            throw new Error('Payment verification failed. Please try again.');
+          if (!verifyRes.success) {
+            throw new Error('Payment verification failed');
           }
+
+          console.log('[PAYMENT] Signature verified successfully');
+
+          // ---------------------------------------------------
+          // 5. Prepare Final Order Payload
+          // ---------------------------------------------------
+          const orderPayload = prepareOrderPayload(
+            shippingAddress,
+            'Online',
+            'Completed',
+            {
+              transactionId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id
+            },
+            items // Use normalized items from summary response
+          );
+
+          console.log('[ORDER] Final Order Payload:', orderPayload);
+
+          // ---------------------------------------------------
+          // 6. Create Final Order
+          // ---------------------------------------------------
+          const finalRes = await apiCall(
+            '/user/orders',
+            'POST',
+            orderPayload,
+            true
+          );
+
+          if (!finalRes.success) {
+            throw new Error(
+              finalRes.message ||
+              'Payment succeeded but order creation failed'
+            );
+          }
+
+          // ---------------------------------------------------
+          // 7. Success Cleanup
+          // ---------------------------------------------------
+          Cart.save([]);
+
+          showToast('Payment successful!', 'success');
+
+          const redirectUrl =
+            `order-success.html?id=${finalRes.orderNumber}` +
+            `&amount=${amount}` +
+            `&payment=success` +
+            `&awb=${finalRes.tracking?.awb || ''}` +
+            `&tracking=${encodeURIComponent(finalRes.tracking?.url || '')}`;
+
+          window.location.href = redirectUrl;
+
         } catch (err) {
-          console.error('[PAYMENT ERROR]', err);
-          showToast(err.message, 'error');
+          console.error('[PAYMENT VERIFICATION ERROR]', err);
+
+          showToast(
+            err.message || 'Payment completed but order processing failed',
+            'error'
+          );
+
+          const placeBtn = document.getElementById('place-order-btn');
+
+          if (placeBtn) {
+            placeBtn.disabled = false;
+            placeBtn.textContent = 'Place Order';
+          }
         }
       },
+
       prefill: {
         name: shippingAddress.fullName,
         contact: shippingAddress.phone
       },
-      theme: { color: "#BE2229" },
+
+      theme: {
+        color: '#BE2229'
+      },
+
       modal: {
         ondismiss: function () {
-          console.warn('[PAYMENT] Modal closed.');
+          console.warn('[PAYMENT] Razorpay modal dismissed');
+
           const placeBtn = document.getElementById('place-order-btn');
+
           if (placeBtn) {
             placeBtn.disabled = false;
             placeBtn.textContent = 'Place Order';
@@ -2398,17 +2595,43 @@ async function handleOnlinePaymentFlow(shippingAddress, amount) {
       }
     };
 
+    // ---------------------------------------------------
+    // 8. Open Razorpay
+    // ---------------------------------------------------
     const rzp = new Razorpay(options);
+
     rzp.on('payment.failed', function (res) {
-      showToast('Payment Failed: ' + res.error.description, 'error');
+      console.error('[PAYMENT FAILED]', res);
+
+      showToast(
+        'Payment Failed: ' + (res.error?.description || 'Unknown error'),
+        'error'
+      );
+
+      const placeBtn = document.getElementById('place-order-btn');
+
+      if (placeBtn) {
+        placeBtn.disabled = false;
+        placeBtn.textContent = 'Place Order';
+      }
     });
+
     rzp.open();
 
   } catch (err) {
+
+    console.error('[ONLINE PAYMENT FLOW ERROR]', err);
+
+    const placeBtn = document.getElementById('place-order-btn');
+
+    if (placeBtn) {
+      placeBtn.disabled = false;
+      placeBtn.textContent = 'Place Order';
+    }
+
     throw err;
   }
 }
-
 
 async function loadRecommendedProducts() {
   const slider = document.getElementById('product-slider');

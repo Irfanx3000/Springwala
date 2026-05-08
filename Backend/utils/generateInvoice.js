@@ -36,16 +36,24 @@ const generateInvoice = async (order) => {
          .fontSize(10)
          .text(`Order Number: ${order.orderNumber}`, 50, 100)
          .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 50, 115)
-         .text(`Status: ${order.orderStatus}`, 50, 130)
-         .moveDown();
+         .text(`Status: ${order.orderStatus}`, 50, 130);
+
+      if (order.courier || order.waybill) {
+        doc.text(`Courier: ${order.courier || 'Delhivery'}`, 50, 145);
+        if (order.waybill) doc.text(`Tracking ID: ${order.waybill}`, 50, 160);
+        doc.moveDown();
+      } else {
+        doc.moveDown();
+      }
 
       // --- Shipping Address ---
       const sa = order.shippingAddress;
-      doc.text('Bill To:', 50, 160, { fontWeight: 'bold' })
-         .text(sa.fullName, 50, 175)
-         .text(sa.addressLine1, 50, 190)
-         .text(`${sa.city}, ${sa.state} - ${sa.pincode}`, 50, 205)
-         .text(`Phone: ${sa.phone}`, 50, 220)
+      const billToY = (order.courier || order.waybill) ? 190 : 160;
+      doc.text('Bill To:', 50, billToY, { fontWeight: 'bold' })
+         .text(sa.fullName, 50, billToY + 15)
+         .text(sa.addressLine1, 50, billToY + 30)
+         .text(`${sa.city}, ${sa.state} - ${sa.pincode}`, 50, billToY + 45)
+         .text(`Phone: ${sa.phone}`, 50, billToY + 60)
          .moveDown();
 
       // --- Items Table ---
@@ -64,11 +72,15 @@ const generateInvoice = async (order) => {
       let i = 0;
       order.items.forEach(item => {
         const y = tableTop + 25 + (i * 25);
-        const price = item.price || item.finalPrice || 0;
-        const quantity = item.quantity || 1;
-        const subtotal = item.subtotal || item.total || (price * quantity);
+        
+        // Use SSOT snapshot fields
+        const isBatch = item.isBatchProduct && item.batchQuantity > 0;
+        const itemName = isBatch ? `${item.name} (Pack of ${item.batchQuantity})` : item.name;
+        const price = isBatch ? item.batchPrice : item.unitPrice;
+        const quantity = item.quantity || 1; // Number of packs or units
+        const subtotal = item.subtotal || (price * quantity);
 
-        doc.text(item.name, 50, y, { width: 200 });
+        doc.text(itemName, 50, y, { width: 200 });
         doc.text(quantity.toString(), 280, y, { width: 90, align: 'right' });
         doc.text(`₹${safe(price)}`, 370, y, { width: 90, align: 'right' });
         doc.text(`₹${safe(subtotal)}`, 480, y, { width: 70, align: 'right' });

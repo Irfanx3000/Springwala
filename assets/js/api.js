@@ -181,8 +181,15 @@ function initSidebar() {
   const openBtn = document.getElementById('open-sidebar');
   const closeBtn = document.getElementById('close-sidebar');
 
-  const toggle = () => { sidebar?.classList.toggle('-translate-x-full'); overlay?.classList.toggle('hidden'); };
-  openBtn?.addEventListener('click', toggle);
+  if (!sidebar || !openBtn) return;
+  if (openBtn.dataset.sidebarInit) return; // Guard against double init
+  openBtn.dataset.sidebarInit = 'true';
+
+  const toggle = () => { 
+    sidebar.classList.toggle('-translate-x-full'); 
+    overlay?.classList.toggle('hidden'); 
+  };
+  openBtn.addEventListener('click', toggle);
   closeBtn?.addEventListener('click', toggle);
   overlay?.addEventListener('click', toggle);
 

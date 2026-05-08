@@ -63,9 +63,19 @@ async function loadOrders(page = 1) {
         <td class="px-6 font-['Roboto'] text-[17px] truncate max-w-[200px]">
           ${o.items?.[0]?.product?.name || o.items?.[0]?.name || "N/A"}${o.items.length > 1 ? ` +${o.items.length - 1} more` : ""}
         </td>
-        <td class="px-6">${renderStatusBadge(o.orderStatus)}</td>
+        <td class="px-6">
+          <div class="flex flex-col gap-1">
+            ${renderStatusBadge(o.orderStatus)}
+            ${o.waybill ? `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">Delhivery: ${o.waybill}</span>` : ''}
+          </div>
+        </td>
         <td class="px-6">${renderPaymentBadge(o.paymentStatus)}</td>
-        <td class="px-6 font-['Roboto'] text-[17px]">₹${o.totalAmount.toFixed(2)}</td>
+        <td class="px-6 font-['Roboto'] text-[17px]">
+          <div class="flex flex-col">
+            <span>₹${o.totalAmount.toFixed(2)}</span>
+            ${o.waybill ? `<a href="${o.trackingUrl}" target="_blank" class="text-[12px] text-[#BE2229] hover:underline font-bold" onclick="event.stopPropagation()">Track Package</a>` : ''}
+          </div>
+        </td>
       </tr>`).join('');
 
     buildPagination('orders-pagination', page, data.pages || Math.ceil(data.total / ORDER_LIMIT), (n) => loadOrders(n));

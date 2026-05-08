@@ -741,24 +741,22 @@
             style="box-shadow: 0px -2px 7px rgba(0, 0, 0, 0.09);">
 
             <!-- Price Breakdown -->
-            <div class="flex flex-col gap-[5px] mb-[12px]">
-                <div class="flex items-center justify-between">
-                    <span id="mobile-summary-items-label" class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-[18px]">Items Total (After Discount):</span>
-                    <span id="mobile-summary-items-total" class="text-[#383737] text-[18px] font-bold font-['Roboto'] leading-[21px]">₹0.00</span>
+            <div class="flex flex-col gap-2 mb-[12px]">
+                <div class="flex items-start justify-between gap-2">
+                    <span id="mobile-summary-items-label" class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-tight">Items Total (incl. GST):</span>
+                    <span id="mobile-summary-items-total" class="text-[#383737] text-[18px] font-bold font-['Roboto'] leading-none shrink-0">₹0.00</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-[18px]">Delivery
-                        Charges:</span>
-                    <span id="mobile-summary-delivery" class="text-[#2E7D32] text-[18px] font-bold font-['Roboto'] leading-[21px]">Free</span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-tight">Delivery Charges:</span>
+                    <span id="mobile-summary-delivery" class="text-[#2E7D32] text-[18px] font-bold font-['Roboto'] leading-none shrink-0">Free</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-[18px]">Discount:</span>
-                    <span id="mobile-summary-discount" class="text-[#2E7D32] text-[18px] font-bold font-['Roboto'] leading-[21px]">0%</span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-tight">Discount:</span>
+                    <span id="mobile-summary-discount" class="text-[#2E7D32] text-[18px] font-bold font-['Roboto'] leading-none shrink-0">Included</span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-[#000000] text-[15px] font-normal font-['Roboto'] leading-[18px]">GST
-                        (on final price):</span>
-                    <span id="mobile-summary-gst" class="text-[#383737] text-[18px] font-bold font-['Roboto'] leading-[21px]">₹0.00</span>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-[#000000] text-[11px] font-normal font-['Roboto'] leading-tight text-gray-400">Included GST:</span>
+                    <span id="mobile-summary-gst" class="text-[#383737] text-[11px] font-bold font-['Roboto'] leading-none text-gray-400 shrink-0">Included in total</span>
                 </div>
             </div>
 
@@ -804,6 +802,7 @@
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/pricingEngine.js"></script>
     <script src="assets/js/app.js"></script>
 
     <!-- Product Slider Controls -->

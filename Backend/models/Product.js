@@ -68,6 +68,8 @@ ProductSchema.pre('save', function (next) {
   }
 
   // PRICING ENGINE (BACKEND - SINGLE SOURCE OF TRUTH)
+  const PricingEngine = require('../utils/pricingEngine');
+  
   // Ensure basePrice is synced with price
   if (this.isModified('price')) {
     this.basePrice = this.price;
@@ -75,18 +77,9 @@ ProductSchema.pre('save', function (next) {
     this.price = this.basePrice;
   }
 
-  const base = Number(this.basePrice || this.price || 0) || 0;
-  const discount = Number(this.discountPercent || 0) || 0;
-  const gst = Number(this.gstPercent || 0) || 0;
-
-  // 1. Calculate Discounted Price (After Discount, Before GST)
-  const afterDiscount = base * (1 - discount / 100);
-  
-  // 2. Calculate Final Price (After Discount, Including GST)
-  this.finalPrice = afterDiscount * (1 + gst / 100);
-  
-  // 3. Sync legacy discountedPrice for internal use if needed
-  this.discountedPrice = afterDiscount;
+  const unitPricing = PricingEngine.calculateUnitPricing(this);
+  this.finalPrice = unitPricing.finalUnitPrice;
+  this.discountedPrice = unitPricing.discountedUnitPrice;
 
   next();
 });

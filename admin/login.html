@@ -41,6 +41,55 @@
             max-width: 500px;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        /* Back Navigation Styles */
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 50;
+        }
+
+        .back-btn-admin {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            color: #4b5563;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn-admin:hover {
+            background: white;
+            transform: translateX(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: var(--primary);
+        }
+
+        .back-btn-admin svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 640px) {
+            .back-nav {
+                top: 15px;
+                left: 15px;
+            }
+            .back-btn-admin {
+                padding: 6px 10px;
+                font-size: 12px;
+                border-radius: 8px;
+            }
         }
 
         .btn-primary {
@@ -147,6 +196,16 @@
 <body>
 
     <div class="glass-card p-8 sm:p-10">
+        <!-- Back Navigation -->
+        <div class="back-nav">
+            <button onclick="goBack()" class="back-btn-admin" aria-label="Go Back">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Back</span>
+            </button>
+        </div>
+
         <!-- Header -->
         <div class="text-center mb-8">
             <img src="../assets/images/header.png" alt="Springwala Logo" class="h-12 mx-auto mb-6 object-contain">
@@ -304,7 +363,37 @@
     <script src="../assets/js/login.js"></script>
 
     <script>
-        // Global Toast System
+        // Navigation State Tracking
+        let currentState = "entry";
+        let stateHistory = [];
+
+        function goBack() {
+            // If currently on root entry page
+            if (currentState === "entry") {
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Internal state navigation
+            if (stateHistory.length > 0) {
+                const previousState = stateHistory.pop();
+                switchState(previousState, false);
+            } else {
+                switchState("entry", false);
+            }
+        }
+
+        function updateBackButton() {
+            const backNav = document.querySelector(".back-nav");
+            if (!backNav) return;
+
+            if (currentState === "entry") {
+                backNav.style.display = "none";
+            } else {
+                backNav.style.display = "block";
+            }
+        }
+
         function showToast(message, type = "success") {
             const toast = document.getElementById("toast");
             toast.innerText = message;
@@ -313,34 +402,47 @@
         }
 
         // State Management
-        function switchState(state) {
+        function switchState(state, pushToHistory = true) {
+            if (pushToHistory && currentState !== state) {
+                stateHistory.push(currentState);
+            }
+            
+            currentState = state;
+
             const containers = ['entry', 'login', 'request', 'pending', 'rejected', 'otp', 'password'];
             containers.forEach(c => {
-                document.getElementById(`state-${c}`).classList.add('hidden');
+                const element = document.getElementById(`state-${c}`);
+                if (element) element.classList.add('hidden');
             });
-            document.getElementById(`state-${state}`).classList.remove('hidden');
+
+            const targetElement = document.getElementById(`state-${state}`);
+            if (targetElement) targetElement.classList.remove('hidden');
 
             // Update header text based on state
             const header = document.getElementById('dynamic-header');
-            switch(state) {
-                case 'login': 
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Login</h2><p class="text-gray-500">Sign in to your dashboard</p>';
-                    break;
-                case 'request':
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Request Access</h2><p class="text-gray-500">Join the administrative team</p>';
-                    break;
-                case 'pending':
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting Room</h2><p class="text-gray-500">Approval in progress</p>';
-                    break;
-                case 'otp':
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">One-Step Verification</h2><p class="text-gray-500">Check your inbox</p>';
-                    break;
-                case 'password':
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Final Step</h2><p class="text-gray-500">Secure your account</p>';
-                    break;
-                default:
-                    header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2><p class="text-gray-500">Secure access for authorized personnel</p>';
+            if (header) {
+                switch(state) {
+                    case 'login': 
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Login</h2><p class="text-gray-500">Sign in to your dashboard</p>';
+                        break;
+                    case 'request':
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Request Access</h2><p class="text-gray-500">Join the administrative team</p>';
+                        break;
+                    case 'pending':
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting Room</h2><p class="text-gray-500">Approval in progress</p>';
+                        break;
+                    case 'otp':
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">One-Step Verification</h2><p class="text-gray-500">Check your inbox</p>';
+                        break;
+                    case 'password':
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Final Step</h2><p class="text-gray-500">Secure your account</p>';
+                        break;
+                    default:
+                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2><p class="text-gray-500">Secure access for authorized personnel</p>';
+                }
             }
+
+            updateBackButton();
         }
 
         function reRequest() {
@@ -372,6 +474,8 @@
 
         // Initialize Onboarding Check
         document.addEventListener('DOMContentLoaded', () => {
+            switchState("entry", false);
+            
             if (typeof checkAdminState === 'function') {
                 checkAdminState();
             }

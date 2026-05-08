@@ -22,10 +22,22 @@ const razorpay = new Razorpay({
  */
 exports.createRazorpayOrder = async (req, res) => {
   try {
-    const { amount, currency = "INR", receipt = `rcpt_${Date.now()}` } = req.body;
+    const { items, shippingAddress, currency = "INR", receipt = `rcpt_${Date.now()}` } = req.body;
+
+    if (!items || !items.length) {
+      return res.status(400).json({ success: false, message: 'Items are required' });
+    }
+
+    // 1. Calculate amount on backend (SSOT)
+    // We import calculatePricing from userOrderController
+    const { calculatePricing } = require('./userOrderController');
+    const pincode = shippingAddress?.pincode;
+    
+    const pricing = await calculatePricing(items, pincode);
+    const amount = pricing.finalAmount;
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid amount' });
+      return res.status(400).json({ success: false, message: 'Invalid calculated amount' });
     }
 
     const options = {

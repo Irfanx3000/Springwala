@@ -7,7 +7,7 @@ const {
 const { protect } = require('../middleware/auth');
 const { uploadBanner } = require('../middleware/upload');
 
-router.get('/', getPublicBanners);
+router.get('/public', getPublicBanners);
 router.get('/admin', protect, getBanners); // Admin view
 router.get('/:id', getBanner);
 router.post('/', protect, uploadBanner.fields([{ name: 'image', maxCount: 1 }, { name: 'mobileImage', maxCount: 1 }]), createBanner);

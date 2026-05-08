@@ -468,7 +468,7 @@
                             <div class="flex flex-col mb-4">
                                 <div class="flex items-end gap-2">
                                     <span id="product-price-desktop" class="text-[25px] font-black font-['Roboto'] leading-[29px] text-black">₹0.00</span>
-                                    <span id="product-pack-size-desktop" class="text-[16px] font-medium text-[#525252] mb-[2px]">(Pack of 0)</span>
+                                    <span id="product-pack-size-desktop" class="text-[16px] font-medium text-[#525252] mb-[2px]"></span>
                                 </div>
                                 <div class="flex items-center gap-2 mt-1">
                                     <span id="product-unit-price-desktop" class="text-[15px] font-medium text-[#656565]">₹0.00 per unit</span>
@@ -1595,14 +1595,14 @@
 
     <!-- Mobile Sticky Action Bar -->
     <div
-        class="md:hidden fixed bottom-[57px] left-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-[90] flex flex-col gap-3 border-t border-gray-100">
+        class="md:hidden fixed bottom-[65px] left-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-[100] flex flex-col gap-3 border-t border-gray-100">
         <!-- Row 1: Price and Quantity -->
         <div class="flex justify-between items-center">
             <!-- Price -->
             <div class="flex flex-col">
                 <div class="flex items-center gap-2">
                     <span id="product-price-mobile" class="text-[28px] font-black font-['Roboto'] leading-none text-black">₹0.00</span>
-                    <span id="product-pack-size-mobile" class="text-[16px] font-medium text-[#525252] leading-none relative top-[2px]">(Pack of 0)</span>
+                    <span id="product-pack-size-mobile" class="text-[16px] font-medium text-[#525252] leading-none relative top-[2px]"></span>
                 </div>
                 <div class="flex items-center gap-2 mt-1">
                     <span id="product-unit-price-mobile" class="text-[15px] font-medium text-[#656565]">₹0.00 per unit</span>
@@ -1612,14 +1612,14 @@
             <!-- Quantity -->
             <div class="flex flex-col items-center">
                 <span class="text-[12px] font-bold font-['Roboto'] text-black mb-1">Quantity</span>
-                <div class="flex items-center w-[74px] h-[24px]">
+                <div class="flex items-center w-[90px] h-[32px] border border-gray-200 rounded overflow-hidden">
                     <button id="qty-minus-mobile"
-                        class="w-[20px] h-[24px] flex items-center justify-center text-white bg-[#C6C6C6] font-bold text-[14px] leading-none focus:outline-none">-</button>
+                        class="w-[30px] h-full flex items-center justify-center text-white bg-[#C6C6C6] font-bold text-[18px] leading-none focus:outline-none">-</button>
                     <div id="qty-value-mobile"
-                        class="flex-1 h-[24px] flex justify-center items-center text-black text-[14px] font-bold bg-white">
+                        class="flex-1 h-full flex justify-center items-center text-black text-[15px] font-bold bg-white">
                         1</div>
                     <button id="qty-plus-mobile"
-                        class="w-[20px] h-[24px] flex items-center justify-center text-white bg-[#BE2229] font-bold text-[14px] leading-none focus:outline-none">+</button>
+                        class="w-[30px] h-full flex items-center justify-center text-white bg-[#BE2229] font-bold text-[18px] leading-none focus:outline-none">+</button>
                 </div>
                 <span id="total-units-display-mobile-text" class="text-[10px] text-[#747474] mt-0.5">Total: 6 units</span>
             </div>
@@ -1628,10 +1628,10 @@
         <!-- Row 2: Buttons -->
         <div class="flex gap-2">
             <button id="buy-now-btn-mobile"
-                class="flex-1 h-[40px] bg-[#BE2229] text-white rounded-[6px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center">Buy
+                class="flex-1 h-[44px] bg-[#BE2229] text-white rounded-[8px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center active:scale-[0.98] transition-transform">Buy
                 Now</button>
-            <button
-                class="flex-1 h-[40px] bg-white border border-[#BE2229] text-[#BE2229] rounded-[6px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center">Add
+            <button id="add-to-cart-btn-mobile"
+                class="flex-1 h-[44px] bg-white border border-[#BE2229] text-[#BE2229] rounded-[8px] font-semibold text-[16px] font-['Roboto'] flex items-center justify-center active:scale-[0.98] transition-transform">Add
                 to Cart</button>
         </div>
     </div>
@@ -1870,6 +1870,7 @@
             });
         });
     </script>
+    <script src="assets/js/pricingEngine.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

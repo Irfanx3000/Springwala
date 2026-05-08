@@ -573,104 +573,189 @@ async function prefillEditForm(productId) {
   }
 }
 
-async function submitProductForm(publish = true) {
-  const name     = document.getElementById('product-name')?.value?.trim();
-  const category = document.getElementById('product-category')?.value;
-  const price    = document.getElementById('product-price')?.value;
+function markInvalid(id, isValid) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!isValid) {
+    el.classList.add('border-red-500', 'bg-red-50');
+    el.classList.remove('border-[#656565]/60', 'border-gray-300', 'border-[#DADADA]');
+  } else {
+    el.classList.remove('border-red-500', 'bg-red-50');
+    // Restore original classes (approximate)
+    if (el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        el.classList.add('border-[#656565]/60');
+    }
+  }
+}
 
-  if (!name)     { showToast('Product name is required', 'error'); document.getElementById('product-name')?.focus(); return; }
-  if (!category) { showToast('Please select a category', 'error'); return; }
-  if (!price)    { showToast('Please enter a price', 'error'); document.getElementById('product-price')?.focus(); return; }
-
-  const formData = new FormData();
-  formData.append('name', name);
-  formData.append('category', category);
-  formData.append('price', price);
-  formData.append('isActive', publish ? 'true' : 'false');
-  formData.append('isFeatured', document.getElementById('product-featured')?.checked ? 'true' : 'false');
-
-  const optFields = {
-    'product-brand':       'brand',
-    'product-sku':         'sku',
-    'short-description':   'shortDescription',
-    'long-description':    'description',
-    'product-hsn':         'hsnCode',
-    'product-discount':    'discountPercent',
-    'product-gst':         'gstPercent',
-    'product-unit-weight': 'weight',
-    'product-weight-unit': 'weightUnit',
-    'product-type':        'type',
+function validateProductForm() {
+  let firstErrorId = null;
+  const check = (id, condition) => {
+    const isValid = !!condition;
+    markInvalid(id, isValid);
+    if (!isValid && !firstErrorId) firstErrorId = id;
+    return isValid;
   };
-  Object.entries(optFields).forEach(([id, key]) => {
-    const val = document.getElementById(id)?.value?.trim();
-    formData.append(key, val || '');
-  });
 
-  // Discounted price
-  const rawPrice    = parseFloat(price);
-  const discount    = parseFloat(document.getElementById('product-discount')?.value || 0);
-  const discounted  = rawPrice - (rawPrice * discount / 100);
-  formData.append('discountedPrice', discounted.toFixed(2));
+  let isFormValid = true;
 
-  // Stock & Batches
+  // Basic Info
+  isFormValid &= check('product-name', document.getElementById('product-name')?.value?.trim());
+  isFormValid &= check('product-category', document.getElementById('product-category')?.value);
+  isFormValid &= check('product-brand', document.getElementById('product-brand')?.value?.trim());
+  isFormValid &= check('short-description', document.getElementById('short-description')?.value?.trim());
+  isFormValid &= check('long-description', document.getElementById('long-description')?.value?.trim());
+
+  // Pricing
+  const price = parseFloat(document.getElementById('product-price')?.value || 0);
+  isFormValid &= check('product-price', price > 0);
+  isFormValid &= check('product-discount', parseFloat(document.getElementById('product-discount')?.value || 0) >= 0);
+  isFormValid &= check('product-gst', parseFloat(document.getElementById('product-gst')?.value || 0) >= 0);
+
+  // Inventory
+  isFormValid &= check('product-sku', document.getElementById('product-sku')?.value?.trim());
+  isFormValid &= check('product-hsn', document.getElementById('product-hsn')?.value?.trim());
+
+  // Batches
   const batchRows = document.querySelectorAll('.batch-row');
-  const batches = [];
-  let totalStock = 0;
-  
-  batchRows.forEach(row => {
-    const qty = parseFloat(row.querySelector('.quantity-input')?.value || 0);
-    const price = parseFloat(row.querySelector('.batch-price')?.value || 0);
+  let validBatches = 0;
+  batchRows.forEach((row, i) => {
+    const q = parseFloat(row.querySelector('.quantity-input')?.value || 0);
+    const p = parseFloat(row.querySelector('.batch-price')?.value || 0);
+    const qInput = row.querySelector('.quantity-input');
+    const pInput = row.querySelector('.batch-price');
     
-    if (qty > 0) {
-      batches.push({ quantity: qty, price: price });
-      totalStock += qty;
+    if (q > 0 && p > 0) {
+      validBatches++;
+      qInput?.classList.remove('border-red-500');
+      pInput?.classList.remove('border-red-500');
+    } else {
+      qInput?.classList.add('border-red-500');
+      pInput?.classList.add('border-red-500');
+      if (!firstErrorId) firstErrorId = qInput.id || 'inventory-container';
     }
   });
-  
-  formData.append('stock', totalStock);
-  formData.append('batches', JSON.stringify(batches));
+  if (validBatches === 0) isFormValid = false;
+
+  // Features
+  const featureRows = document.querySelectorAll('.feature-row');
+  let validSpecs = 0;
+  featureRows.forEach(row => {
+    const k = row.querySelector('.feature-key')?.value?.trim();
+    const v = row.querySelector('.feature-value')?.value?.trim();
+    if (k && v) {
+      validSpecs++;
+    } else {
+      row.querySelector('.feature-key')?.classList.add('border-red-500');
+      row.querySelector('.feature-value')?.classList.add('border-red-500');
+      if (!firstErrorId) firstErrorId = 'features-container';
+    }
+  });
+  if (validSpecs === 0) isFormValid = false;
+
+  // Shipping
+  isFormValid &= check('product-unit-weight', parseFloat(document.getElementById('product-unit-weight')?.value || 0) > 0);
+  isFormValid &= check('product-weight-unit', document.getElementById('product-weight-unit')?.value);
+
+  // Status/Type
+  isFormValid &= check('product-status', document.getElementById('product-status')?.value);
+  isFormValid &= check('product-type', document.getElementById('product-type')?.value);
+
+  if (!isFormValid && firstErrorId) {
+    const el = document.getElementById(firstErrorId);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('Please fill all required fields correctly.', 'error');
+  }
+
+  return isFormValid;
+}
+
+async function submitProductForm(publish = true) {
+  if (!validateProductForm()) return;
+
+  const formData = new FormData();
+  formData.append('name', document.getElementById('product-name').value.trim());
+  formData.append('category', document.getElementById('product-category').value);
+  formData.append('brand', document.getElementById('product-brand').value.trim());
+  formData.append('shortDescription', document.getElementById('short-description').value.trim());
+  formData.append('description', document.getElementById('long-description').value.trim());
+  formData.append('sku', document.getElementById('product-sku').value.trim());
+  formData.append('hsnCode', document.getElementById('product-hsn').value.trim());
+  formData.append('price', document.getElementById('product-price').value);
+  formData.append('discountPercent', document.getElementById('product-discount').value || 0);
+  formData.append('gstPercent', document.getElementById('product-gst').value || 0);
+  formData.append('weight', document.getElementById('product-unit-weight').value);
+  formData.append('weightUnit', document.getElementById('product-weight-unit').value);
+  formData.append('type', document.getElementById('product-type').value);
+  formData.append('isActive', (document.getElementById('product-status').value === 'published' || publish) ? 'true' : 'false');
+  formData.append('isFeatured', document.getElementById('product-featured')?.checked ? 'true' : 'false');
 
   // Sub-category
   const sub = document.getElementById('product-subcategory')?.value;
   if (sub) formData.append('subcategory', sub);
 
-  // Specifications from feature rows
+  // Batches
+  const batchRows = document.querySelectorAll('.batch-row');
+  const batches = [];
+  let totalStock = 0;
+  batchRows.forEach(row => {
+    const qty = parseFloat(row.querySelector('.quantity-input')?.value || 0);
+    const price = parseFloat(row.querySelector('.batch-price')?.value || 0);
+    if (qty > 0) {
+      batches.push({ quantity: qty, price: price });
+      totalStock += qty;
+    }
+  });
+  formData.append('stock', totalStock);
+  formData.append('batches', JSON.stringify(batches));
+
+  // Specifications
   const featureRows = document.querySelectorAll('.feature-row');
   const specs = [];
   featureRows.forEach(row => {
     const key = row.querySelector('.feature-key')?.value?.trim();
     const val = row.querySelector('.feature-value')?.value?.trim();
-    if (key && val) specs.push({ key, val });
+    if (key && val) specs.push({ key, value: val });
   });
-  if (specs.length) formData.append('specifications', JSON.stringify(specs.map(s => ({ key: s.key, value: s.val }))));
+  formData.append('specifications', JSON.stringify(specs));
 
-  // Images: collect existing ones that weren't deleted
+  // Images
   const existingImages = [];
   for (let i = 1; i <= 4; i++) {
     const url = document.getElementById(`slot-${i}`)?.getAttribute('data-existing-url');
     if (url) existingImages.push(url);
   }
   formData.append('existingImages', JSON.stringify(existingImages));
-
-  // Attach new image files
   slotFiles.forEach(file => { if (file instanceof File) formData.append('images', file); });
 
   const publishBtn   = document.getElementById('publish-btn');
   const saveDraftBtn = document.getElementById('save-draft-btn');
   const activeBtn    = publish ? publishBtn : saveDraftBtn;
-  if (activeBtn) { activeBtn.disabled = true; activeBtn.textContent = 'Saving...'; }
+  
+  if (activeBtn) {
+    activeBtn.disabled = true;
+    const originalText = activeBtn.textContent;
+    activeBtn.textContent = 'Saving...';
+  }
 
   try {
-    if (editingProductId) {
-      await apiFetch(`/products/${editingProductId}`, { method: 'PUT', body: formData });
-      showToast('Product updated successfully!', 'success');
-    } else {
-      await apiFetch('/products', { method: 'POST', body: formData });
-      showToast('Product added successfully!', 'success');
+    const method = editingProductId ? 'PUT' : 'POST';
+    const endpoint = editingProductId ? `/products/${editingProductId}` : '/products';
+    
+    const res = await apiFetch(endpoint, { method, body: formData });
+    
+    if (res && res.success) {
+      showToast(editingProductId ? 'Product updated successfully!' : 'Product added successfully!', 'success');
       setTimeout(() => window.location.href = 'product-list.html', 1000);
     }
   } catch (err) {
-    showToast('Save failed: ' + err.message, 'error');
+    console.error('Submit Error:', err);
+    // Handle detailed backend validation errors
+    if (err.errors && Array.isArray(err.errors)) {
+      showToast(err.errors[0], 'error');
+    } else {
+      showToast(err.message || 'Save failed', 'error');
+    }
   } finally {
     if (activeBtn) {
       activeBtn.disabled = false;

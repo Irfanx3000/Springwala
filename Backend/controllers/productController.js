@@ -71,38 +71,94 @@ exports.createProduct = async (req, res) => {
   try {
     const {
       name, description, shortDescription, category, subcategory,
-      brand, sku, price, discountedPrice, discountPercent, gstPercent, hsnCode,
+      brand, sku, price, discountPercent, gstPercent, hsnCode,
       stock, lowStockThreshold, tags, specifications,
       weight, weightUnit, isFeatured, isActive, variants, batches,
+      type
     } = req.body;
 
-    // Validate required
-    if (!name)     return res.status(400).json({ success: false, message: 'Product name is required' });
-    if (!category) return res.status(400).json({ success: false, message: 'Category is required' });
-    if (!price)    return res.status(400).json({ success: false, message: 'Price is required' });
+    // --- Strict Backend Validation ---
+    const errors = [];
+    if (!name?.trim()) errors.push('Product name is required');
+    if (!category) errors.push('Category is required');
+    if (!brand?.trim()) errors.push('Brand is required');
+    if (!shortDescription?.trim()) errors.push('Short description is required');
+    if (!description?.trim()) errors.push('Long description is required');
+    
+    const numPrice = Number(price);
+    if (isNaN(numPrice) || numPrice <= 0) errors.push('Valid unit price (> 0) is required');
+    
+    const numDiscount = Number(discountPercent);
+    if (isNaN(numDiscount) || numDiscount < 0) errors.push('Discount percentage cannot be negative');
+    
+    const numGst = Number(gstPercent);
+    if (isNaN(numGst) || numGst < 0) errors.push('GST percentage cannot be negative');
+    
+    if (!sku?.trim()) errors.push('SKU is required');
+    if (!hsnCode?.trim()) errors.push('HSN code is required');
+    
+    const parsedBatches = batches ? JSON.parse(batches) : [];
+    if (!parsedBatches || parsedBatches.length === 0) {
+      errors.push('At least one batch row is required');
+    } else {
+      parsedBatches.forEach((b, i) => {
+        if (!b.quantity || Number(b.quantity) <= 0) errors.push(`Batch row ${i+1}: Quantity must be greater than 0`);
+        if (!b.price || Number(b.price) <= 0) errors.push(`Batch row ${i+1}: Price must be greater than 0`);
+      });
+      // Check for duplicate quantities in batches
+      const quantities = parsedBatches.map(b => Number(b.quantity));
+      if (new Set(quantities).size !== quantities.length) {
+        errors.push('Duplicate quantities found in batches. Each batch must have a unique quantity.');
+      }
+    }
+
+    const parsedSpecs = specifications ? JSON.parse(specifications) : [];
+    if (!parsedSpecs || parsedSpecs.length === 0) {
+      errors.push('At least one specification/feature is required');
+    } else {
+      parsedSpecs.forEach((s, i) => {
+        if (!s.key?.trim()) errors.push(`Feature ${i+1}: Key is required`);
+        if (!s.value?.trim()) errors.push(`Feature ${i+1}: Value is required`);
+      });
+    }
+
+    const numWeight = Number(weight);
+    if (isNaN(numWeight) || numWeight <= 0) errors.push('Valid weight (> 0) is required for shipping');
+    if (!weightUnit) errors.push('Weight unit is required');
+    
+    if (!type) errors.push('Product type (physical/digital) is required');
+
+    if (errors.length > 0) {
+      return res.status(400).json({ success: false, message: 'Validation failed', errors });
+    }
 
     const images = req.files ? req.files.map(f => `/uploads/products/${f.filename}`) : [];
 
     const product = await Product.create({
-      name, description, shortDescription,
+      name: name.trim(), 
+      description: description.trim(), 
+      shortDescription: shortDescription.trim(),
       category,
       subcategory: subcategory || null,
-      brand, sku, images,
-      price: Number(price),
-      basePrice: Number(price),
-      discountPercent: Number(discountPercent || 0),
-      gstPercent: Number(gstPercent || 0),
-      hsnCode: hsnCode || '',
+      brand: brand.trim(), 
+      sku: sku.trim(), 
+      images,
+      price: numPrice,
+      basePrice: numPrice,
+      discountPercent: numDiscount,
+      gstPercent: numGst,
+      hsnCode: hsnCode.trim(),
       stock: Number(stock || 0),
       lowStockThreshold: Number(lowStockThreshold || 5),
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(Boolean)) : [],
-      specifications: specifications ? JSON.parse(specifications) : [],
-      weight: Number(weight || 0),
-      weightUnit: weightUnit || 'kg',
+      specifications: parsedSpecs,
+      weight: numWeight,
+      weightUnit: weightUnit,
       isFeatured: isFeatured === 'true' || isFeatured === true,
-      isActive:   isActive === 'false' ? false : true,
-      variants:   variants ? JSON.parse(variants) : [],
-      batches:    batches ? JSON.parse(batches) : [],
+      isActive: isActive === 'false' ? false : true,
+      variants: variants ? JSON.parse(variants) : [],
+      batches: parsedBatches,
+      type: type || 'physical'
     });
 
     // Update category product count
@@ -138,25 +194,94 @@ exports.updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
+    const {
+      name, description, shortDescription, category, subcategory,
+      brand, sku, price, discountPercent, gstPercent, hsnCode,
+      stock, lowStockThreshold, tags, specifications,
+      weight, weightUnit, isFeatured, isActive, variants, batches,
+      type
+    } = req.body;
+
+    // --- Strict Backend Validation for Updates ---
+    const errors = [];
+    if (name !== undefined && !name.trim()) errors.push('Product name cannot be empty');
+    if (category !== undefined && !category) errors.push('Category is required');
+    if (brand !== undefined && !brand.trim()) errors.push('Brand is required');
+    if (shortDescription !== undefined && !shortDescription.trim()) errors.push('Short description is required');
+    if (description !== undefined && !description.trim()) errors.push('Long description is required');
+
+    if (price !== undefined) {
+      const numPrice = Number(price);
+      if (isNaN(numPrice) || numPrice <= 0) errors.push('Valid unit price (> 0) is required');
+    }
+
+    if (sku !== undefined && !sku.trim()) errors.push('SKU is required');
+    if (hsnCode !== undefined && !hsnCode.trim()) errors.push('HSN code is required');
+
+    if (batches !== undefined) {
+      const parsedBatches = JSON.parse(batches);
+      if (!parsedBatches || parsedBatches.length === 0) {
+        errors.push('At least one batch row is required');
+      } else {
+        parsedBatches.forEach((b, i) => {
+          if (!b.quantity || Number(b.quantity) <= 0) errors.push(`Batch row ${i+1}: Quantity must be greater than 0`);
+          if (!b.price || Number(b.price) <= 0) errors.push(`Batch row ${i+1}: Price must be greater than 0`);
+        });
+      }
+    }
+
+    if (specifications !== undefined) {
+      const parsedSpecs = JSON.parse(specifications);
+      if (!parsedSpecs || parsedSpecs.length === 0) {
+        errors.push('At least one specification/feature is required');
+      } else {
+        parsedSpecs.forEach((s, i) => {
+          if (!s.key?.trim()) errors.push(`Feature ${i+1}: Key is required`);
+          if (!s.value?.trim()) errors.push(`Feature ${i+1}: Value is required`);
+        });
+      }
+    }
+
+    if (weight !== undefined) {
+      const numWeight = Number(weight);
+      if (isNaN(numWeight) || numWeight <= 0) errors.push('Valid weight (> 0) is required for shipping');
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ success: false, message: 'Validation failed', errors });
+    }
+
+    // --- Update Logic ---
     const scalarFields = [
-      'name','description','shortDescription','brand','sku','price', 'basePrice',
+      'name','description','shortDescription','brand','sku','price',
       'discountPercent','gstPercent','hsnCode','stock',
-      'lowStockThreshold','weight','weightUnit','isFeatured','isActive','batchNumber','type', 'deliveryCharge',
+      'lowStockThreshold','weight','weightUnit','isFeatured','isActive','type'
     ];
+    
     scalarFields.forEach(f => {
-      if (req.body[f] !== undefined) product[f] = req.body[f];
+      if (req.body[f] !== undefined) {
+        if (f === 'price') {
+            product.price = Number(req.body.price);
+            product.basePrice = Number(req.body.price);
+        } else if (f === 'isActive') {
+            product.isActive = req.body.isActive === 'true' || req.body.isActive === true;
+        } else if (f === 'isFeatured') {
+            product.isFeatured = req.body.isFeatured === 'true' || req.body.isFeatured === true;
+        } else {
+            product[f] = req.body[f];
+        }
+      }
     });
 
-    if (req.body.batches)        product.batches        = JSON.parse(req.body.batches);
-
-    if (req.body.category)  product.category   = req.body.category;
+    if (req.body.batches) product.batches = JSON.parse(req.body.batches);
+    if (req.body.category) product.category = req.body.category;
     if (req.body.subcategory !== undefined) product.subcategory = req.body.subcategory || null;
 
     if (req.body.tags) {
       product.tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags.split(',').map(t => t.trim()).filter(Boolean);
     }
     if (req.body.specifications) product.specifications = JSON.parse(req.body.specifications);
-    if (req.body.variants)       product.variants       = JSON.parse(req.body.variants);
+    if (req.body.variants) product.variants = JSON.parse(req.body.variants);
 
     // Handle images
     let images = product.images;

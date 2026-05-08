@@ -130,26 +130,26 @@
 
                     <!-- Price Details -->
                     <div class="space-y-3 mb-6">
-                        <div class="flex justify-between text-[#525252]">
-                            <span>Items Total (incl. GST)</span>
-                            <span id="summary-items-total">₹0.00</span>
+                        <div class="flex justify-between items-start gap-2 text-[#525252]">
+                            <span class="leading-tight">Items Total (incl. GST)</span>
+                            <span id="summary-items-total" class="shrink-0">₹0.00</span>
                         </div>
-                        <div class="flex justify-between text-[#2E7D32]" style="display: none;">
-                            <span>Discount</span>
-                            <span id="summary-discount">0%</span>
+                        <div class="flex justify-between items-start gap-2 text-[#2E7D32]" style="display: none;">
+                            <span class="leading-tight">Discount</span>
+                            <span id="summary-discount" class="shrink-0">0%</span>
                         </div>
-                        <div class="flex justify-between text-[#525252]" style="display: none;">
-                            <span>GST (on final price)</span>
-                            <span id="summary-gst">₹0.00</span>
+                        <div class="flex justify-between items-start gap-2 text-[#525252]" style="display: none;">
+                            <span class="leading-tight text-[11px] text-gray-400">Included GST</span>
+                            <span id="summary-gst" class="shrink-0 text-[11px] text-gray-400">Included in total</span>
                         </div>
-                        <div class="flex justify-between text-[#525252]">
-                            <span>Delivery Charges</span>
-                            <span id="summary-delivery">Free</span>
+                        <div class="flex justify-between items-start gap-2 text-[#525252]">
+                            <span class="leading-tight">Delivery Charges</span>
+                            <span id="summary-delivery" class="shrink-0">Free</span>
                         </div>
                         <div class="h-[1px] bg-[#E4E4E4] my-2"></div>
-                        <div class="flex justify-between text-[18px] font-bold text-[#242323]">
+                        <div class="flex justify-between items-center text-[18px] font-bold text-[#242323]">
                             <span>Total Payable</span>
-                            <span id="summary-total">₹0.00</span>
+                            <span id="summary-total" class="shrink-0">₹0.00</span>
                         </div>
                     </div>
 
@@ -164,6 +164,7 @@
 
     <!-- Scripting -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="assets/js/pricingEngine.js"></script>
     <script src="assets/js/app.js"></script>
     <script>
         document.body.dataset.page = 'checkout';

@@ -15,125 +15,61 @@
     <link rel="stylesheet" href="../../assets/css/style.css">
 
     <!-- Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #F2F2F2;
-        }
+        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
+        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
+        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
 
-        /* Sidebar Styling */
-        .sidebar-item {
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-item.active {
-            background-color: #FFD9D9;
-            border-radius: 5px;
-        }
-
-        .sidebar-item.active span {
-            color: #BE2229;
-            font-weight: 500;
-        }
-
-        .sidebar-item:hover:not(.active) {
-            background-color: #f8f8f8;
-            border-radius: 5px;
-        }
-
-
-        /* Hide scrollbar for cleaner look in specific areas */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .box-shadow-card {
-            box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15);
-        }
-
-        .active-tab {
-            color: #000000;
-            border-bottom: 3px solid #000000;
-            padding-bottom: 4px;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .box-shadow-card { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
+        .active-tab { color: #000000; border-bottom: 3px solid #000000; padding-bottom: 4px; }
     </style>
 	<script src="../../assets/js/config.js"></script>
 </head>
 
 <body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
 
-    <!-- Sidebar Overlay (Mobile) -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden transition-opacity"></div>
 
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar"
-        class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
-        <!-- Close Button (Mobile Only) -->
+    <aside id="sidebar" class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
         <button id="close-sidebar" class="xl:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
 
-        <!-- Logo -->
         <div class="px-11 mb-10 w-full flex justify-center">
             <img src="../../assets/images/header.png" alt="Springwala Admin Logo" class="h-[40px] w-auto">
         </div>
 
-        <!-- Navigation Links -->
         <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
-
-            <a href="../dashboard.html"
-                class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+            <a href="../dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="../categories.html"
-                class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+            <a href="../categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <!-- Products Section (Hover/Click to open) -->
             <div class="w-full flex flex-col group relative">
-                <button id="products-menu-btn"
-                    class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
+                <button id="products-menu-btn" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
                     <div class="flex items-center gap-[15px]">
                         <img src="../../assets/icons/admin/products-active.svg" alt="Products" class="w-6 h-6 shrink-0">
-                        <span
-                            class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Products</span>
+                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Products</span>
                     </div>
-                    <!-- Chevron Arrow -->
-                    <svg id="products-menu-chevron"
-                        class="w-5 h-5 text-[#BE2229] transition-transform duration-300 transform rotate-180"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+                    <svg id="products-menu-chevron" class="w-5 h-5 text-[#BE2229] transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-
-                <!-- Submenu -->
-                <div id="products-submenu"
-                    class="flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
+                <div id="products-submenu" class="flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
                     <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
-                    <a href="product-list.html"
-                        class="font-['Poppins'] text-[18px] text-[#BE2229] font-medium leading-[27px]">Product List</a>
-                    <a href="add-product.html"
-                        class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a
-                        Product</a>
+                    <a href="product-list.html" class="font-['Poppins'] text-[18px] text-[#BE2229] font-medium leading-[27px]">Product List</a>
+                    <a href="add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
                     <a href="../products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
                 </div>
             </div>
@@ -141,35 +77,28 @@
 
             <a href="../orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
             <a href="../users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="../inventory.html"
-                class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+            <a href="../inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="../analytics.html"
-                class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+            <a href="../analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
             </a>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <!-- Banners Dropdown -->
             <div class="w-full flex flex-col group relative">
                 <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
                     <div class="flex items-center gap-[15px]">
@@ -191,13 +120,10 @@
             </div>
             <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="../settings.html"
-                class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
+            <a href="../settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
                 <img src="../../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
-                <span
-                    class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
+                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
             </a>
-
         
             <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
 
@@ -208,355 +134,220 @@
         </nav>
     </aside>
 
-    <!-- Main Content Area -->
-    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
-        <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
-            <!-- Persistent Top Bar (Mobile Sticky / Desktop Single Row) -->
-            <div
-                class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
-                <div class="flex items-center gap-4 flex-1">
-                    <button id="open-sidebar"
-                        class="xl:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    <h2
-                        class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center">
-                        Master Admin</h2>
+        <!-- Persistent Top Bar -->
+        <div class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
+            <div class="flex items-center gap-4 flex-1">
+                <button id="open-sidebar" class="xl:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h2 class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center">Master Admin</h2>
 
-                    <!-- Desktop Search (Hidden on Mobile) -->
-                    <div
-                        class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink">
-                        <img src="../../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
-                        <input id="desktop-search-input" type="text" placeholder="Search orders, products, customers....."
-                            class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent">
-                    </div>
-                </div>
-
-                <!-- Desktop Action Buttons (Visible md+) -->
-                <div class="hidden md:flex items-center gap-3">
-                    <a href="add-product.html"
-                        class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap">+
-                        Add Product</a>
-                    <a href="../orders.html"
-                        class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">View
-                        Orders</a>
-                    <button
-                        class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">Vendors</button>
-                </div>
-            </div>
-
-            <!-- Mobile Scrollable Section (Visible only on mobile below md) -->
-            <div class="md:hidden px-4 sm:px-6 flex flex-col gap-4 mt-2">
-                <!-- Mobile Search -->
-                <div
-                    class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink">
+                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink">
                     <img src="../../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
-                    <input id="mobile-search-input" type="text" placeholder="Search orders, products, customers....."
-                        class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent">
-                </div>
-
-                <!-- Mobile Action Buttons -->
-                <div class="flex items-center gap-3 justify-between">
-                    <a href="add-product.html"
-                        class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap">+
-                        Add Product</a>
-                    <a href="../orders.html"
-                        class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center">View
-                        Orders</a>
-                    <button
-                        class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap">Vendors</button>
+                    <input id="desktop-search-input" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent">
                 </div>
             </div>
 
-            <!-- Page Content -->
-            <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mt-8 flex flex-col">
+            <div class="hidden md:flex items-center gap-3">
+                <a href="add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="../orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
 
-                <!-- Title & Back Button -->
-                <div class="flex items-center gap-3 mb-6">
-                    <a href="../dashboard.html"
-                        class="w-[40px] h-[40px] flex items-center justify-center bg-white rounded-[5px] shrink-0 border border-transparent shadow-sm hover:bg-gray-50 transition">
-                        <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                            </path>
-                        </svg>
-                    </a>
-                    <h2 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Product List</h2>
-                </div>
-
-                <!-- 4 Stats Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6 w-full mb-6">
-                    <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
-                        <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Total Products</span>
-                        <span id="stat-total-products" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-[#000000]">0</span>
-                    </div>
-                    <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
-                        <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Active Products</span>
-                        <span id="stat-active-products" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-[#000000]">0</span>
-                    </div>
-                    <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
-                        <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Low Stock</span>
-                        <span id="stat-low-stock" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-red-500">0</span>
-                    </div>
-                    <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
-                        <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Out of Stock</span>
-                        <span id="stat-out-of-stock" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-red-600">0</span>
-                    </div>
-                </div>
-
-                <!-- Filter Controls Box -->
-                <div
-                    class="w-full bg-white rounded-[10px] h-auto lg:h-[94px] flex flex-col justify-center px-4 lg:px-6 py-4 lg:py-0 border border-transparent box-shadow-card mb-[29px] relative">
-
-                    <!-- Refresh Button Absolute -->
-                    <button
-                        class="absolute top-4 right-4 lg:top-1/2 lg:-translate-y-1/2 cursor-pointer w-[24px] h-[24px]">
-                        <img src="../../assets/icons/admin/refresh.svg" alt="Refresh"
-                            class="w-full h-full object-contain">
-                    </button>
-
-                    <div class="flex flex-col lg:flex-row items-start lg:items-end gap-6 w-full pr-8">
-                        <!-- Search Field -->
-                        <div class="flex flex-col gap-[7px] w-full lg:w-[350px] shrink-0">
-                            <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Search Product</label>
-                            <div class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center">
-                                <input id="product-search" type="text" placeholder="Product Name / SKU"
-                                    class="bg-transparent w-full font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none">
-                            </div>
-                        </div>
-
-                        <!-- Category Select -->
-                        <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
-                            <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Category</label>
-                            <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
-                                <select id="category-filter" class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
-                                    <option value="">All Categories</option>
-                                </select>
-                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Select -->
-                        <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
-                            <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Stock Status</label>
-                            <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
-                                <select id="stock-filter" class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
-                                    <option value="">All Stock Status</option>
-                                    <option value="in">In Stock</option>
-                                    <option value="low">Low Stock</option>
-                                    <option value="out">Out of Stock</option>
-                                </select>
-                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sort By Select -->
-                        <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
-                            <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Sort By</label>
-                            <div
-                                class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
-                                <select id="sort-filter"
-                                    class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
-                                    <option value="-createdAt">Newest First</option>
-                                    <option value="createdAt">Oldest First</option>
-                                    <option value="name">Name A-Z</option>
-                                    <option value="-name">Name Z-A</option>
-                                    <option value="-price">Price High-Low</option>
-                                    <option value="price">Price Low-High</option>
-                                </select>
-                                <div
-                                    class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Table & Tabs Container -->
-                <div
-                    class="w-full bg-white rounded-[10px] flex flex-col mb-16 relative border border-transparent box-shadow-card overflow-hidden">
-
-                    <!-- Tab Row (Shared for Mobile and Desktop) -->
-                    <div
-                        class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 px-4 sm:px-[24px] pt-4 pb-2">
-                        <!-- Nav Links -->
-                        <div
-                            class="flex flex-wrap items-center gap-6 sm:gap-8 overflow-x-auto w-full lg:w-auto no-scrollbar">
-                            <button data-status="all"
-                                class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] active-tab whitespace-nowrap">All
-                                Products</button>
-                            <button data-status="hidden"
-                                class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] text-[#A4A4A4] hover:text-[#000000] transition pb-1 whitespace-nowrap">Hidden
-                                Products</button>
-                            <button data-status="draft"
-                                class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] text-[#A4A4A4] hover:text-[#000000] transition pb-1 whitespace-nowrap">Draft</button>
-                        </div>
-
-                        <!-- Bulk Actions & Top Pagination -->
-                        <div class="flex items-center gap-4 sm:gap-8 justify-between w-full lg:w-auto">
-                            <div class="flex items-center gap-2">
-                                <span
-                                    class="font-['Roboto'] font-medium text-[15px] sm:text-[17px] leading-[20px] text-[#414141]">Bulk
-                                    Actions:</span>
-                                <div class="flex gap-[15px] items-center ml-2">
-                                    <!-- Eye icon -->
-                                    <button
-                                        id="bulk-view-btn"
-                                        class="w-[22px] h-[15px] flex items-center justify-center hover:opacity-75 relative top-0.5">
-                                        <img src="../../assets/icons/admin/eye.svg" alt="View"
-                                            class="w-full h-full object-contain">
-                                    </button>
-                                    <!-- Trash icon -->
-                                    <button id="bulk-delete-btn" class="w-[16px] h-[18px] flex items-center justify-center hover:opacity-75">
-                                        <img src="../../assets/icons/admin/delete.svg" alt="Delete"
-                                            class="w-full h-full object-contain">
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-[9px] shrink-0 hidden lg:flex">
-                                <button
-                                    class="w-[23px] h-[23px] bg-white border border-[#EEEEEE] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0">
-                                    <svg class="w-3 h-3 text-[#BDBDBD]" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
-                                    </svg>
-                                </button>
-                                <span
-                                    id="products-count-text"
-                                    class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] text-center w-[120px]">0–0 of 0</span>
-                                <button
-                                    class="w-[23px] h-[23px] bg-white border border-[#E6E6E6] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0">
-                                    <svg class="w-3 h-3 text-[#2B2B2B]" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Top Breakdown Line (Separates Tabs from Content) -->
-                    <div class="w-full px-4 sm:px-[24px]">
-                        <div class="w-full h-[1px] bg-black/20"></div>
-                    </div>
-
-                    <!-- Desktop Table Grid View (Hidden on mobile) -->
-                    <div class="w-full overflow-x-auto hidden xl:flex flex-col text-nowrap pb-2">
-                        <div class="w-full min-w-max px-4 sm:px-[24px] flex flex-col">
-
-                            <!-- Table Header -->
-                            <div
-                                class="grid grid-cols-[50px_90px_minmax(150px,1fr)_120px_140px_70px_90px_100px_80px_90px_110px] w-full min-w-[1100px] items-end pb-2 pt-4 text-[#414141] font-['Roboto'] font-medium text-[17px] leading-[20px] text-center">
-                                <div class="flex items-center justify-center"><input type="checkbox" id="select-all-products" class="w-[18px] h-[18px] accent-[#BE2229] cursor-pointer rounded border-[#DADADA]"></div>
-                                <div class="text-center">Image</div>
-                                <div class="text-left pl-2">Product Name</div>
-                                <div class="text-center">SKU</div>
-                                <div class="text-center">Sub-category</div>
-                                <div class="text-center">Stock</div>
-                                <div class="text-center px-1 leading-[20px]">Batch<br>Quantity</div>
-                                <div class="text-center">Status</div>
-                                <div class="text-center">Discount</div>
-                                <div class="text-center leading-[20px]">Selling<br>Price</div>
-                                <div class="text-center pr-4">Actions</div>
-                            </div>
-                            <div id="products-tbody" class="w-full pt-2 pb-12 flex flex-col gap-[10px]">
-                                <!-- Products will be loaded here -->
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div id="products-mobile-list" class="w-full flex flex-col gap-4 mt-4 px-4 sm:px-[24px] xl:hidden pb-12">
-                        <!-- Mobile cards will be loaded here -->
-                    </div>
-
-                    <!-- Bottom Breakdown Line -->
-                    <div class="w-full px-4 sm:px-[24px]">
-                        <div class="w-full h-[1px] bg-black/20"></div>
-                    </div>
-
-                    <div id="products-pagination"
-                        class="flex flex-row items-center justify-center xl:justify-end gap-[9px] w-full py-4 px-4 sm:px-[24px]">
-                        <!-- Pagination will be loaded here -->
-                    </div>
-                </div>
-
+        <!-- Mobile Scrollable Section -->
+        <div class="md:hidden px-4 sm:px-6 flex flex-col gap-4 mt-2">
+            <div class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink">
+                <img src="../../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
+                <input id="mobile-search-input" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent">
             </div>
 
-        </main>
+            <div class="flex items-center gap-3 justify-between">
+                <a href="add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white hover:text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
+                <a href="../orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center">View Orders</a>
+                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap">Vendors</button>
+            </div>
+        </div>
+
+        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mt-8 flex flex-col">
+            <!-- Title -->
+            <div class="flex items-center gap-3 mb-6">
+                <a href="../dashboard.html" class="w-[40px] h-[40px] flex items-center justify-center bg-white rounded-[5px] shrink-0 border border-transparent shadow-sm hover:bg-gray-50 transition">
+                    <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+                <h2 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Product List</h2>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6 w-full mb-6">
+                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Total Products</span>
+                    <span id="stat-total-products" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-[#000000]">0</span>
+                </div>
+                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Active Products</span>
+                    <span id="stat-active-products" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black text-center">0</span>
+                </div>
+                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Low Stock</span>
+                    <span id="stat-low-stock" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-red-500">0</span>
+                </div>
+                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[101px] flex flex-col items-center justify-center gap-1 p-2">
+                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-[#000000] text-center">Out of Stock</span>
+                    <span id="stat-out-of-stock" class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[40px] text-red-600">0</span>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="w-full bg-white rounded-[10px] h-auto lg:h-[94px] flex flex-col justify-center px-4 lg:px-6 py-4 lg:py-0 border border-transparent box-shadow-card mb-[29px] relative">
+                <button class="absolute top-4 right-4 lg:top-1/2 lg:-translate-y-1/2 cursor-pointer w-[24px] h-[24px]">
+                    <img src="../../assets/icons/admin/refresh.svg" alt="Refresh" class="w-full h-full object-contain">
+                </button>
+
+                <div class="flex flex-col lg:flex-row items-start lg:items-end gap-6 w-full pr-8">
+                    <div class="flex flex-col gap-[7px] w-full lg:w-[350px] shrink-0">
+                        <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Search Product</label>
+                        <div class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center">
+                            <input id="product-search" type="text" placeholder="Product Name / SKU" class="bg-transparent w-full font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
+                        <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Category</label>
+                        <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
+                            <select id="category-filter" class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
+                                <option value="">All Categories</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
+                        <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Stock Status</label>
+                        <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
+                            <select id="stock-filter" class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
+                                <option value="">All Stock Status</option>
+                                <option value="in">In Stock</option>
+                                <option value="low">Low Stock</option>
+                                <option value="out">Out of Stock</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-[7px] w-full lg:w-[250px] shrink-0">
+                        <label class="font-['Roboto'] font-medium text-[18px] leading-[21px] text-[#000000]">Sort By</label>
+                        <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-[10px] flex items-center cursor-pointer">
+                            <select id="sort-filter" class="w-full h-full bg-transparent appearance-none font-['Roboto'] font-normal text-[15px] sm:text-[17px] leading-[20px] text-[#656565] outline-none cursor-pointer">
+                                <option value="-createdAt">Newest First</option>
+                                <option value="createdAt">Oldest First</option>
+                                <option value="name">Name A-Z</option>
+                                <option value="-name">Name Z-A</option>
+                                <option value="-price">Price High-Low</option>
+                                <option value="price">Price Low-High</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#696969]">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="w-full bg-white rounded-[10px] flex flex-col mb-16 relative border border-transparent box-shadow-card overflow-hidden">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 px-4 sm:px-[24px] pt-4 pb-2">
+                    <div class="flex flex-wrap items-center gap-6 sm:gap-8 overflow-x-auto w-full lg:w-auto no-scrollbar">
+                        <button data-status="all" class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] active-tab whitespace-nowrap">All Products</button>
+                        <button data-status="hidden" class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] text-[#A4A4A4] hover:text-[#000000] transition pb-1 whitespace-nowrap">Hidden Products</button>
+                        <button data-status="draft" class="product-tab font-['Poppins'] font-medium text-[18px] sm:text-[20px] leading-[30px] text-[#A4A4A4] hover:text-[#000000] transition pb-1 whitespace-nowrap">Draft</button>
+                    </div>
+
+                    <div class="flex items-center gap-4 sm:gap-8 justify-between w-full lg:w-auto">
+                        <div class="flex items-center gap-2">
+                            <span class="font-['Roboto'] font-medium text-[15px] sm:text-[17px] leading-[20px] text-[#414141]">Bulk Actions:</span>
+                            <div class="flex gap-[15px] items-center ml-2">
+                                <button id="bulk-view-btn" class="w-[22px] h-[15px] flex items-center justify-center hover:opacity-75 relative top-0.5">
+                                    <img src="../../assets/icons/admin/eye.svg" alt="View" class="w-full h-full object-contain">
+                                </button>
+                                <button id="bulk-delete-btn" class="w-[16px] h-[18px] flex items-center justify-center hover:opacity-75">
+                                    <img src="../../assets/icons/admin/delete.svg" alt="Delete" class="w-full h-full object-contain">
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-[9px] shrink-0 hidden lg:flex">
+                            <button class="w-[23px] h-[23px] bg-white border border-[#EEEEEE] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0">
+                                <svg class="w-3 h-3 text-[#BDBDBD]" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" /></svg>
+                            </button>
+                            <span id="products-count-text" class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] text-center w-[120px]">0–0 of 0</span>
+                            <button class="w-[23px] h-[23px] bg-white border border-[#E6E6E6] rounded-[2px] flex items-center justify-center hover:bg-gray-50 flex-shrink-0">
+                                <svg class="w-3 h-3 text-[#2B2B2B]" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full px-4 sm:px-[24px]">
+                    <div class="w-full h-[1px] bg-black/20"></div>
+                </div>
+
+                <!-- Desktop Table -->
+                <div class="w-full overflow-x-auto hidden xl:flex flex-col text-nowrap pb-2">
+                    <div class="w-full min-w-max px-4 sm:px-[24px] flex flex-col">
+                        <div class="grid grid-cols-[50px_90px_minmax(150px,1fr)_120px_140px_70px_90px_100px_80px_90px_110px] w-full min-w-[1100px] items-end pb-2 pt-4 text-[#414141] font-['Roboto'] font-medium text-[17px] leading-[20px] text-center">
+                            <div class="flex items-center justify-center"><input type="checkbox" id="select-all-products" class="w-[18px] h-[18px] accent-[#BE2229] cursor-pointer rounded border-[#DADADA]"></div>
+                            <div class="text-center">Image</div>
+                            <div class="text-left pl-2">Product Name</div>
+                            <div class="text-center">SKU</div>
+                            <div class="text-center">Sub-category</div>
+                            <div class="text-center">Stock</div>
+                            <div class="text-center px-1 leading-[20px]">Batch<br>Quantity</div>
+                            <div class="text-center">Status</div>
+                            <div class="text-center">Discount</div>
+                            <div class="text-center leading-[20px]">Selling<br>Price</div>
+                            <div class="text-center pr-4">Actions</div>
+                        </div>
+                        <div id="products-tbody" class="w-full pt-2 pb-12 flex flex-col gap-[10px]">
+                            <!-- Products will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile List -->
+                <div id="products-mobile-list" class="w-full flex flex-col gap-4 mt-4 px-4 sm:px-[24px] xl:hidden pb-12">
+                    <!-- Mobile cards will be loaded here -->
+                </div>
+
+                <div class="w-full px-4 sm:px-[24px]">
+                    <div class="w-full h-[1px] bg-black/20"></div>
+                </div>
+
+                <div id="products-pagination" class="flex flex-row items-center justify-center xl:justify-end gap-[9px] w-full py-4 px-4 sm:px-[24px]">
+                    <!-- Pagination loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script src="../../assets/js/auth.js"></script>
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/products.js"></script>
     <script src="../../assets/js/admin-sidebar.js"></script>
-    <!-- Sidebar Auto-Toggle Logic -->
-        <script>
-            Auth.requireAuth();
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('open-sidebar');
-            const closeBtn = document.getElementById('close-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-
-            function toggleSidebar() {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-            }
-
-            openBtn.addEventListener('click', toggleSidebar);
-            closeBtn.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
-
-            // --- Products Menu Toggle ---
-            const productsMenuBtn = document.getElementById('products-menu-btn');
-            const productsSubmenu = document.getElementById('products-submenu');
-            const productsChevron = document.getElementById('products-menu-chevron');
-
-            productsMenuBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const isHidden = productsSubmenu.classList.contains('hidden');
-                if (isHidden) {
-                    productsSubmenu.classList.remove('hidden'); productsSubmenu.classList.add('flex'); productsChevron.classList.add('rotate-180');
-                } else {
-                    productsSubmenu.classList.add('hidden'); productsSubmenu.classList.remove('flex'); productsChevron.classList.remove('rotate-180');
-                }
+    <script>
+        Auth.requireAuth();
+        const selectAllCheckbox = document.getElementById('select-all-products');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                const rowCheckboxes = document.querySelectorAll('.product-row-checkbox');
+                rowCheckboxes.forEach(cb => cb.checked = this.checked);
             });
-
-            const bannersMenuBtn = document.getElementById('banners-menu-btn');
-            const bannersSubmenu = document.getElementById('banners-submenu');
-            const bannersChevron = document.getElementById('banners-menu-chevron');
-
-            if (bannersMenuBtn) {
-                bannersMenuBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (bannersSubmenu.classList.contains('hidden')) {
-                        bannersSubmenu.classList.remove('hidden'); bannersSubmenu.classList.add('flex'); bannersChevron.classList.add('rotate-180');
-                    } else {
-                        bannersSubmenu.classList.add('hidden'); bannersSubmenu.classList.remove('flex'); bannersChevron.classList.remove('rotate-180');
-                    }
-                });
-            }
-
-            // --- Select All Checkbox ---
-            const selectAllCheckbox = document.getElementById('select-all-products');
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function() {
-                    const rowCheckboxes = document.querySelectorAll('.product-row-checkbox');
-                    rowCheckboxes.forEach(cb => cb.checked = this.checked);
-                });
-            }
-        </script>
+        }
+    </script>
 </body>
-
 </html>
-
-

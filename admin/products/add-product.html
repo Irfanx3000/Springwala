@@ -265,7 +265,7 @@
                             <div class="flex flex-col gap-2">
                                 <label
                                     class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Product
-                                    Name</label>
+                                    Name <span class="text-red-500">*</span></label>
                                 <input id="product-name" type="text" placeholder="Product Name"
                                     class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                             </div>
@@ -274,7 +274,7 @@
                             <div class="flex flex-col sm:flex-row gap-6 w-full">
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Category</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Category <span class="text-red-500">*</span></label>
                                     <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] cursor-pointer">
                                         <select id="product-category"
                                             class="w-full h-full bg-transparent appearance-none px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none cursor-pointer">
@@ -290,7 +290,7 @@
                                 </div>
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Brand</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Brand <span class="text-red-500">*</span></label>
                                     <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] cursor-pointer">
                                         <select id="product-brand"
                                             class="w-full h-full bg-transparent appearance-none px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none cursor-pointer">
@@ -329,7 +329,7 @@
                             <div class="flex flex-col gap-2 mt-4">
                                 <label
                                     class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Short
-                                    Description</label>
+                                    Description <span class="text-red-500">*</span></label>
                                 <textarea id="short-description" placeholder="Enter short description"
                                     class="w-full h-[136px] bg-white border border-[#D3D3D3] rounded-[5px] p-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none focus:border-gray-500 transition resize-none"></textarea>
                             </div>
@@ -338,7 +338,7 @@
                             <div class="flex flex-col gap-2 mt-2">
                                 <label
                                     class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Long
-                                    Description</label>
+                                    Description <span class="text-red-500">*</span></label>
                                 <textarea id="long-description" placeholder="Enter long description"
                                     class="w-full h-[266px] bg-white border border-[#D3D3D3] rounded-[5px] p-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none focus:border-gray-500 transition resize-none"></textarea>
                             </div>
@@ -367,14 +367,14 @@
                             <div class="flex flex-col sm:flex-row gap-6 w-full">
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">SKU</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">SKU <span class="text-red-500">*</span></label>
                                     <input id="product-sku" type="text" placeholder="Enter SKU"
                                         class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
                                         class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">HSN
-                                        Code</label>
+                                        Code <span class="text-red-500">*</span></label>
                                     <input id="product-hsn" type="text" placeholder="Enter HSN Code"
                                         class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
@@ -385,12 +385,12 @@
                                 <span class="font-['Roboto'] text-[18px] text-[#363636] pb-2 hidden sm:block">1</span>
                                  <div class="flex flex-col gap-2 flex-1 w-full sm:w-auto">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Batch Quantity</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Batch Quantity <span class="text-red-500">*</span></label>
                                     <input type="number" placeholder="Enter Batch Quantity"
                                         class="quantity-input w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
                                  <div class="flex flex-col gap-2 flex-1 w-full sm:w-auto">
-                                    <label class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Batch Price</label>
+                                    <label class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Batch Price <span class="text-red-500">*</span></label>
                                     <input type="number" placeholder="Batch Price"
                                         class="batch-price w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
@@ -430,11 +430,11 @@
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
                                         class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Features
-                                        Key</label>
+                                        Key <span class="text-red-500">*</span></label>
                                 </div>
                                 <div class="flex flex-col gap-2 flex-1 hidden sm:flex">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Value</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Value <span class="text-red-500">*</span></label>
                                 </div>
                             </div>
 
@@ -606,7 +606,7 @@
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
                                         class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Price
-                                        <span class="font-normal text-[14px] sm:text-[16px]">(Per Unit)</span></label>
+                                        <span class="font-normal text-[14px] sm:text-[16px]">(Per Unit)</span> <span class="text-red-500">*</span></label>
                                     <input id="product-price" type="number" placeholder="Enter Price per Unit"
                                         class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
@@ -614,7 +614,7 @@
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
                                         class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Discount
-                                        (%)</label>
+                                        (%) <span class="text-red-500">*</span></label>
                                     <input id="product-discount" type="number" placeholder="Enter Discount %"
                                         class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
@@ -624,7 +624,7 @@
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
                                         class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">GST
-                                        (%)</label>
+                                        (%) <span class="text-red-500">*</span></label>
                                     <input id="product-gst" type="number" placeholder="Enter GST %"
                                         class="w-full h-[40px] bg-[#EDEDED] rounded-[5px] px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none border border-transparent focus:border-gray-400 transition" />
                                 </div>
@@ -663,7 +663,7 @@
                             <div class="flex flex-col gap-2">
                                 <label
                                     class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Weight
-                                    <span class="font-normal text-[14px] sm:text-[16px]">(Per Unit)</span></label>
+                                    <span class="font-normal text-[14px] sm:text-[16px]">(Per Unit)</span> <span class="text-red-500">*</span></label>
                                 <div class="relative w-full h-[40px] flex items-center bg-[#EDEDED] rounded-[5px]">
                                     <input id="product-unit-weight" type="number" placeholder="Enter Weight"
                                         class="w-full h-full bg-transparent px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none" />
@@ -751,7 +751,7 @@
                             <div class="flex flex-col sm:flex-row gap-6 w-full">
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Status</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Status <span class="text-red-500">*</span></label>
                                     <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] cursor-pointer">
                                         <select id="product-status"
                                             class="w-full h-full bg-transparent appearance-none px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none cursor-pointer">
@@ -769,7 +769,7 @@
                                 </div>
                                 <div class="flex flex-col gap-2 flex-1">
                                     <label
-                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Type</label>
+                                        class="font-['Roboto'] font-medium text-[16px] sm:text-[18px] leading-[21px] text-black">Type <span class="text-red-500">*</span></label>
                                     <div class="relative w-full h-[40px] bg-[#EDEDED] rounded-[5px] cursor-pointer">
                                         <select id="product-type"
                                             class="w-full h-full bg-transparent appearance-none px-3 font-['Roboto'] text-[15px] sm:text-[17px] text-[#656565] outline-none cursor-pointer">
@@ -810,55 +810,12 @@
 
     </main>
 
-    <!-- Sidebar Auto-Toggle Logic -->
     <script src="../../assets/js/auth.js"></script>
     <script src="../../assets/js/api.js"></script>
     <script src="../../assets/js/products.js"></script>
+    <script src="../../assets/js/admin-sidebar.js"></script>
     <script>
         Auth.requireAuth();
-        const sidebar = document.getElementById('sidebar');
-        const openBtn = document.getElementById('open-sidebar');
-        const closeBtn = document.getElementById('close-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        openBtn.addEventListener('click', toggleSidebar);
-        closeBtn.addEventListener('click', toggleSidebar);
-        overlay.addEventListener('click', toggleSidebar);
-
-        // --- Products Menu Toggle ---
-        const productsMenuBtn = document.getElementById('products-menu-btn');
-        const productsSubmenu = document.getElementById('products-submenu');
-        const productsChevron = document.getElementById('products-menu-chevron');
-
-        productsMenuBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const isHidden = productsSubmenu.classList.contains('hidden');
-            if (isHidden) {
-                productsSubmenu.classList.remove('hidden'); productsSubmenu.classList.add('flex'); productsChevron.classList.add('rotate-180');
-            } else {
-                productsSubmenu.classList.add('hidden'); productsSubmenu.classList.remove('flex'); productsChevron.classList.remove('rotate-180');
-            }
-        });
-
-        const bannersMenuBtn = document.getElementById('banners-menu-btn');
-        const bannersSubmenu = document.getElementById('banners-submenu');
-        const bannersChevron = document.getElementById('banners-menu-chevron');
-
-        if (bannersMenuBtn) {
-            bannersMenuBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (bannersSubmenu.classList.contains('hidden')) {
-                    bannersSubmenu.classList.remove('hidden'); bannersSubmenu.classList.add('flex'); bannersChevron.classList.add('rotate-180');
-                } else {
-                    bannersSubmenu.classList.add('hidden'); bannersSubmenu.classList.remove('flex'); bannersChevron.classList.remove('rotate-180');
-                }
-            });
-        }
 
         // --- Dynamic Inventory Batches & Weights ---
         const inventoryContainer = document.getElementById('inventory-container');

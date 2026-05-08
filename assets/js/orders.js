@@ -145,16 +145,19 @@ function buildDesktopOrderCard(order, item) {
                         </div>
                     </div>
                     <div class="absolute bottom-0 left-0 w-full flex justify-between items-end">
-                        <div class="flex gap-[16px]">
-                            <button onclick="trackOrder('${order._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
-                                <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Track Order</span>
-                            </button>
-                            <button onclick="contactSupport()" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
-                                <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Customer Support</span>
-                            </button>
-                            ${order.invoiceUrl ? `<button onclick="window.open('${order.invoiceUrl}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
-                                <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">View Invoice</span>
-                            </button>` : ''}
+                        <div class="flex flex-col gap-2">
+                             ${order.waybill || order.awb ? `<div class="flex items-center gap-2"><span class="text-[11px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
+                            <div class="flex gap-[16px]">
+                                <button onclick="handleTracking('${order.waybill || order.awb || ''}', '${order._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
+                                    <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Track Order</span>
+                                </button>
+                                <button onclick="contactSupport()" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
+                                    <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Customer Support</span>
+                                </button>
+                                ${order.invoiceUrl ? `<button onclick="window.open('${order.invoiceUrl}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
+                                    <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">View Invoice</span>
+                                </button>` : ''}
+                            </div>
                         </div>
                         <button onclick="orderAgain('${product._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
                             <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Order Again</span>
@@ -190,19 +193,22 @@ function buildMobileOrderCard(order, item) {
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-start gap-[8px] w-full overflow-x-auto hide-scrollbar flex-nowrap">
-                <button onclick="trackOrder('${order._id}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
-                    <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Track Order</span>
-                </button>
-                <button onclick="contactSupport()" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
-                    <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Customer Support</span>
-                </button>
-                ${order.invoiceUrl ? `<button onclick="window.open('${order.invoiceUrl}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
-                    <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">View Invoice</span>
-                </button>` : ''}
-                <button onclick="orderAgain('${product._id}')" class="bg-[#42AD42] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
-                    <span class="text-white text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Order Again</span>
-                </button>
+            <div class="mb-3">
+                ${order.waybill || order.awb ? `<div class="flex items-center gap-2 mb-2"><span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
+                <div class="flex items-center justify-start gap-[8px] w-full overflow-x-auto hide-scrollbar flex-nowrap">
+                    <button onclick="handleTracking('${order.waybill || order.awb || ''}', '${order._id}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                        <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Track Order</span>
+                    </button>
+                    <button onclick="contactSupport()" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                        <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Customer Support</span>
+                    </button>
+                    ${order.invoiceUrl ? `<button onclick="window.open('${order.invoiceUrl}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                        <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">View Invoice</span>
+                    </button>` : ''}
+                    <button onclick="orderAgain('${product._id}')" class="bg-[#42AD42] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                        <span class="text-white text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Order Again</span>
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -297,14 +303,18 @@ function initSliderControls(totalCards) {
     updatePageInfo();
 }
 
-function trackOrder(id) {
-    Swal.fire({
-        title: 'Track Order',
-        text: 'Checking status for order #' + id.slice(-6).toUpperCase(),
-        icon: 'info',
-        timer: 2000,
-        showConfirmButton: false
-    });
+function handleTracking(awb, orderId) {
+    if (awb) {
+        window.location.href = `track-order.html?awb=${awb}`;
+    } else {
+        Swal.fire({
+            title: 'Shipment Pending',
+            text: 'Your order is being processed. Tracking will be available once it is handed over to the courier.',
+            icon: 'info',
+            confirmButtonText: 'Got it',
+            confirmButtonColor: '#BE2229'
+        });
+    }
 }
 
 async function orderAgain(productId) {

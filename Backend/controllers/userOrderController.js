@@ -1,7 +1,8 @@
+const User = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
-const User = require('../models/User');
+const delhiveryService = require('../services/delhiveryService');
 
 const generateOrderNumber = async () => {
   const count = await Order.countDocuments();
@@ -23,81 +24,119 @@ async function getShippingRate({ pincode, weight }) {
 
 // --- Hybrid Delivery Logic (SSOT) ---
 const getDeliveryCharges = async ({ totalAmount, pincode, weight }) => {
-  const rate = await getShippingRate({ pincode, weight });
-  console.log("[SHIPPING RATE]", rate);
+  try {
+    const DEFAULT_CHARGE = Number(process.env.DEFAULT_SHIPPING_CHARGE || 120);
+    const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
 
-  if (rate && rate > 0) {
-    return rate;
+    // 1. Try real Delhivery Rate API
+    const estimate = await delhiveryService.getShippingEstimate({
+      pincode,
+      weight: weight * 1000, // convert kg to grams for API
+      paymentMode: 'Prepaid', // Default for estimation
+      totalAmount
+    });
+
+    if (estimate && estimate.success) {
+      console.log(`[DELHIVERY RATE SUCCESS] Charge: ${estimate.deliveryCharge}`);
+      return estimate.deliveryCharge;
+    }
+
+    // 2. Fallback to Environment Rules if API fails or pincode unserviceable
+    console.log(`[SHIPPING FALLBACK USED] Total: ${totalAmount}, Threshold: ${THRESHOLD}`);
+    return totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
+  } catch (err) {
+    console.error(`[SHIPPING ERROR] Fallback triggered:`, err.message);
+    const DEFAULT_CHARGE = Number(process.env.DEFAULT_SHIPPING_CHARGE || 120);
+    const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
+    return totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
   }
-
-  // Fallback Rule: ₹120 for orders < 1000, else FREE
-  return totalAmount >= 1000 ? 0 : 120;
 };
 
-// --- Mock Shipment System ---
-const generateMockAWB = () => "SWP" + Date.now() + Math.floor(Math.random() * 1000);
-
-async function createShipment(order) {
-  // TODO: Replace with real Delhivery / Courier API call later
-  const awb = generateMockAWB();
-  const trackingUrl = `https://springwala.com/track/${awb}`; // Placeholder URL
-
-  return {
-    awb,
-    trackingUrl,
-    status: "Ready to Ship"
-  };
-}
+// --- Integrated Shipment System (REMOVED: Manual Flow Only) ---
+// Admin must manually trigger shipment from dashboard for Online orders.
 
 // --- Pricing Single Source of Truth (SSOT) ---
+const PricingEngine = require('../utils/pricingEngine');
+
 const calculatePricing = async (bodyItems, pincode) => {
-  let totalAmount = 0;
+  let subtotal = 0;
+  let totalUnits = 0;
   let totalWeight = 0;
   const validatedItems = [];
 
   for (const item of bodyItems) {
-    const product = await Product.findById(item.product).select('name finalPrice price basePrice discountedPrice weight');
-    if (product) {
-      const price = Number(product.finalPrice || product.discountedPrice || product.basePrice || product.price || 0);
-      const quantity = Number(item.quantity || 1);
-      const weight = Number(product.weight || 1); // Default 1kg if not set
-      const subtotal = price * quantity;
+    const product = await Product.findById(item.product);
+    if (!product) continue;
 
-      totalAmount += subtotal;
-      totalWeight += weight * quantity;
-
-      validatedItems.push({
-        product: product._id,
-        name: product.name,
-        quantity,
-        price,
-        subtotal,
-        finalPrice: price,
-        total: subtotal,
-        weight: weight,
-        image: item.image || ''
-      });
+    // Determine batch if specified
+    let selectedBatch = null;
+    if (item.batchQuantity && product.batches) {
+      selectedBatch = product.batches.find(b => b.quantity === item.batchQuantity);
     }
+
+    const calc = PricingEngine.calculateCartItem({
+      product,
+      quantity: Number(item.quantity || 1),
+      selectedBatch: selectedBatch || item.selectedBatch
+    });
+
+    const validatedItem = {
+      product: product._id,
+      productId: product._id, // Mirror for safety
+      name: product.name,
+      image: item.image || (product.images && product.images[0]) || '',
+      quantity: Number(item.quantity || 1),
+      finalPrice: calc.displayPrice, 
+      subtotal: calc.subtotal,
+      total: calc.subtotal,
+      hsn: calc.hsn || product.hsnCode || '',
+      
+      // Snapshots for Invoice & Admin
+      isBatchProduct: calc.isBatchProduct,
+      batchQuantity: calc.batchQuantity,
+      batchPrice: calc.batchPrice,
+      unitPrice: calc.unitPrice,
+      basePrice: calc.baseUnitPrice,
+      discountPercent: calc.discountPercent,
+      gstPercent: calc.gstPercent,
+      weight: calc.deliveryEligibleWeight / calc.totalUnits,
+      totalUnits: calc.totalUnits,
+      selectedBatch: calc.selectedBatch,
+      gstAmount: calc.gstAmount,
+      totalWithoutGst: calc.totalWithoutGst
+    };
+
+    console.log(`[PRICING] Item: ${product.name} | Batch: ${calc.isBatchProduct} | Price: ${calc.displayPrice} | Subtotal: ${calc.subtotal}`);
+
+    validatedItems.push(validatedItem);
+    subtotal += calc.subtotal;
+    totalUnits += calc.totalUnits;
+    totalWeight += calc.deliveryEligibleWeight;
   }
 
+  // Delivery Charges calculation
   let deliveryCharges = await getDeliveryCharges({
-    totalAmount,
+    totalAmount: subtotal,
     pincode,
     weight: totalWeight
   });
 
   if (!deliveryCharges || isNaN(deliveryCharges)) deliveryCharges = 0;
 
-  const finalAmount = totalAmount + deliveryCharges;
+  const finalAmount = subtotal + deliveryCharges;
 
   return {
     items: validatedItems,
-    totalAmount,
+    totalAmount: subtotal,
     deliveryCharges,
     finalAmount,
-    totalWeight
+    totalWeight,
+    totalUnits
   };
 };
+
+exports.calculatePricing = calculatePricing;
+
 
 // ─── POST /api/user/orders ────────────────────────────────────────────────────
 exports.placeOrder = async (req, res) => {
@@ -127,7 +166,7 @@ exports.placeOrder = async (req, res) => {
       }
     }
 
-    const { totalAmount, deliveryCharges, finalAmount, items: validatedItems } = pricing;
+    const { totalAmount, deliveryCharges, finalAmount, items: validatedItems, totalWeight, totalUnits } = pricing;
     console.log(`[DELIVERY] Total: ${totalAmount}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
 
     // 3. Generate Unique Order Number
@@ -141,12 +180,14 @@ exports.placeOrder = async (req, res) => {
       customerName: user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Unknown Customer',
       items: validatedItems,
       shippingAddress,
-      subtotal: totalAmount, // For legacy/schema requirement
-      gstAmount: 0,
+      subtotal: totalAmount, 
+      gstAmount: validatedItems.reduce((sum, i) => sum + (i.gstAmount || 0), 0),
       shippingCharge: deliveryCharges,
       deliveryCharges: deliveryCharges,
       totalAmount: totalAmount, // Items Total
       finalAmount: finalAmount, // Grand Total
+      totalUnits,
+      totalWeight,
       paymentMethod,
       paymentStatus: req.body.paymentStatus || 'Pending',
       paymentDetails: req.body.paymentDetails || {},
@@ -155,15 +196,9 @@ exports.placeOrder = async (req, res) => {
       statusHistory: [{ status: 'Ordered', updatedBy: 'User', note: req.body.paymentStatus === 'Completed' ? 'Order placed & Paid online' : 'Order placed' }]
     });
 
-    // ─── AUTO-GENERATE SHIPMENT (Mock) ───
-    const shipment = await createShipment(order);
-    order.awb = shipment.awb;
-    order.trackingUrl = shipment.trackingUrl;
-    order.shipmentStatus = shipment.status;
-    order.trackingNumber = shipment.awb; // Sync for consistency
-    await order.save();
-
-    console.log("[SHIPMENT CREATED]", { awb: order.awb, status: order.shipmentStatus });
+    // ─── GENERATE SHIPMENT (REMOVED: Manual Admin Workflow Only) ───
+    // Shipment is no longer auto-created on placement.
+    // Admin reviews paid orders and clicks 'Create Shipment' in Dashboard.
 
     // ─── Generate Invoice & Email ───
     const generateInvoice = require('../utils/generateInvoice');
@@ -314,31 +349,65 @@ exports.cancelOrder = async (req, res) => {
 exports.getOrderSummary = async (req, res) => {
   try {
     const { items: bodyItems, pincode } = req.body;
+    
+    console.log('[SUMMARY REQUEST] Items count:', bodyItems?.length, 'Pincode:', pincode);
+
     if (!bodyItems || !bodyItems.length) {
       return res.json({ success: true, totalAmount: 0, deliveryCharges: 0, finalAmount: 0 });
     }
 
     const pricing = await calculatePricing(bodyItems, pincode);
 
+    console.log('[SUMMARY SUCCESS] Total:', pricing.finalAmount, 'Items:', pricing.items?.length);
+
     res.json({
       success: true,
+      items: pricing.items,
       totalAmount: pricing.totalAmount,
       deliveryCharges: pricing.deliveryCharges,
-      finalAmount: pricing.finalAmount
+      finalAmount: pricing.finalAmount,
+      totalWeight: pricing.totalWeight,
+      totalUnits: pricing.totalUnits
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('[SUMMARY CRITICAL ERROR]', err);
+    // Even on error, try to return a safe response if possible or a clear message
+    res.status(500).json({ 
+      success: false, 
+      message: 'Order summary calculation failed. This might be due to invalid product data or cart corruption.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
+
 
 // ─── GET /api/user/orders/track/:awb ─────────────────────────────────────────
 exports.trackOrder = async (req, res) => {
   try {
     const { awb } = req.params;
-    const order = await Order.findOne({ awb }).select('awb shipmentStatus orderStatus customerName createdAt updatedAt');
+    const order = await Order.findOne({ awb }).select('awb shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Tracking information not found for this ID.' });
+    }
+
+    let scans = [];
+    let expectedDelivery = null;
+
+    // Fetch live tracking if it's a Delhivery shipment
+    if (order.awb || order.waybill) {
+      const liveTracking = await delhiveryService.trackShipment(order.awb || order.waybill);
+      if (liveTracking.success) {
+        scans = liveTracking.scans || [];
+        expectedDelivery = liveTracking.expectedDeliveryDate;
+        
+        // Sync status if it's different
+        const mappedStatus = delhiveryService.mapStatus(liveTracking.status);
+        if (mappedStatus && mappedStatus !== order.shipmentStatus) {
+          order.shipmentStatus = mappedStatus;
+          await order.save();
+        }
+      }
     }
 
     res.json({
@@ -349,10 +418,15 @@ exports.trackOrder = async (req, res) => {
         orderStatus: order.orderStatus,
         customer: order.customerName,
         placedAt: order.createdAt,
-        lastUpdated: order.updatedAt
+        lastUpdated: order.updatedAt,
+        scans: scans,
+        expectedDelivery: expectedDelivery,
+        trackingUrl: order.trackingUrl,
+        courier: order.courier || 'Delhivery'
       }
     });
   } catch (err) {
+    console.error('[TRACK ORDER ERROR]', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 };
