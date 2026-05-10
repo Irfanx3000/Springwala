@@ -1,46 +1,36 @@
 /**
  * Springwala Admin — auth.js
- * Centralized, production-grade authentication logic.
- * Solves race conditions, redirect loops, and persistence issues.
+ * Optimized authentication logic: Optimistic access + Silent background validation.
  */
 
 const Auth = window.Auth = {
-    // Storage keys (SSOT)
     TOKEN_KEY: 'sw_admin_token',
     USER_KEY: 'sw_admin',
     
     state: {
         isInitialized: false,
         isValidating: false,
-        validationPromise: null,
         admin: null,
         token: null
     },
 
     /**
-     * Bootstraps the authentication state.
-     * Must be called at the very top of protected pages.
+     * Optimistic hydration. Instant access if token exists.
      */
-    init: async function() {
+    init: function() {
         if (this.state.isInitialized) return this.isLoggedIn();
 
-        console.log("[AUTH] Hydrating state from storage...");
         this.state.token = localStorage.getItem(this.TOKEN_KEY);
         try {
             const userData = localStorage.getItem(this.USER_KEY);
             this.state.admin = userData ? JSON.parse(userData) : null;
         } catch (e) {
-            console.error("[AUTH] Failed to parse cached admin data", e);
             this.state.admin = null;
         }
 
         this.state.isInitialized = true;
-        console.log("[AUTH] State Hydrated:", { 
-            hasToken: !!this.state.token, 
-            admin: this.state.admin?.email || 'none' 
-        });
         
-        // Show body if hidden by bootstrap
+        // Instant UI stabilization
         document.documentElement.classList.add('auth-initialized');
         const loader = document.getElementById('sw-auth-loader');
         if (loader) loader.style.display = 'none';
@@ -49,7 +39,6 @@ const Auth = window.Auth = {
     },
 
     getToken: function() {
-        // SSOT: Always prefer memory state if initialized, otherwise storage
         return this.state.token || localStorage.getItem(this.TOKEN_KEY);
     },
 
@@ -58,7 +47,6 @@ const Auth = window.Auth = {
     },
 
     setSession: function(token, admin) {
-        console.log("[AUTH] Setting new session for:", admin.email);
         this.state.token = token;
         this.state.admin = admin;
         localStorage.setItem(this.TOKEN_KEY, token);
@@ -67,7 +55,6 @@ const Auth = window.Auth = {
     },
 
     clearSession: function() {
-        console.log("[AUTH] Clearing session and local storage");
         this.state.token = null;
         this.state.admin = null;
         localStorage.removeItem(this.TOKEN_KEY);
@@ -79,101 +66,74 @@ const Auth = window.Auth = {
     },
 
     logout: function(reason = "Manual") {
-        console.warn(`[AUTH] Logout triggered. Reason: ${reason}`);
+        console.warn(`[AUTH] Logout: ${reason}`);
         this.clearSession();
         if (!window.location.pathname.includes('login.html')) {
-            console.log("[AUTH] Redirecting to login page...");
             window.location.href = '/admin/login.html';
         }
     },
 
-    /**
-     * Backward compatibility wrapper.
-     */
     requireAuth: function() {
         return this.requireAdminAuth();
     },
 
     /**
-     * Strict Auth Guard with hydration wait.
-     * Prevents race conditions on dashboard load.
+     * OPTIMISTIC GUARD: Only check if token exists.
+     * Never blocks dashboard rendering.
      */
     requireAdminAuth: function() {
-        const token = this.getToken();
-        if (!token) {
-            console.warn("[AUTH] No token found during requirement check. Redirecting...");
-            this.logout("Missing Token");
+        if (!this.getToken()) {
+            this.logout("Session missing");
             return false;
         }
         return true;
     },
 
     /**
-     * Async validation with retry logic and execution lock.
-     * Prevents logouts due to temporary network blips.
+     * SILENT BACKGROUND VALIDATION
+     * Runs after page load. Non-blocking.
      */
-    validate: async function(retries = 1) {
-        // Task 5: Prevent duplicate concurrent validation
-        if (this.state.validationPromise) {
-            console.log("[AUTH] Validation already in progress, awaiting existing promise...");
-            return this.state.validationPromise;
-        }
-
+    validate: async function() {
+        if (this.state.isValidating) return;
         const token = this.getToken();
         if (!token) return false;
 
-        this.state.validationPromise = (async () => {
-            this.state.isValidating = true;
-            try {
-                console.log("[AUTH] Validating token with server...");
-                const res = await fetch(`${CONFIG.API_BASE_URL}/auth/admin/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+        this.state.isValidating = true;
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}/auth/admin/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-                if (res.status === 401) {
-                    this.logout("Server 401: Session expired");
-                    return false;
-                }
+            if (res.status === 401) {
+                this.logout("Session expired");
+                return false;
+            }
 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
+            if (res.ok) {
                 const data = await res.json();
                 if (data.success) {
-                    console.log("[AUTH] Token validated successfully");
-                    this.setSession(token, data.admin); // Refresh cache
-                    return true;
+                    this.state.admin = data.admin;
+                    localStorage.setItem(this.USER_KEY, JSON.stringify(data.admin));
                 }
-                return false;
-            } catch (err) {
-                console.error(`[AUTH] Validation error (${retries} retries left):`, err.message);
-                if (retries > 0) {
-                    console.log("[AUTH] Retrying validation in 1.5s...");
-                    await new Promise(r => setTimeout(r, 1500));
-                    this.state.validationPromise = null; // Reset lock for retry
-                    return this.validate(retries - 1);
-                }
-                console.warn("[AUTH] Network failure during validation. Preserving session for now.");
-                return true; // Don't logout on network error
-            } finally {
-                this.state.isValidating = false;
-                this.state.validationPromise = null;
             }
-        })();
-
-        return this.state.validationPromise;
+            return true;
+        } catch (err) {
+            // Network failure: Preserve session
+            return true; 
+        } finally {
+            this.state.isValidating = false;
+        }
     }
 };
 
-// ─── Auth Bootstrap Injector ──────────────────────────────────────────────────
+// ─── Auth Bootstrap ──────────────────────────────────────────────────
 (function() {
     const path = window.location.pathname;
-    const isAdminPage = path.includes('/admin/');
     const isLoginPage = path.includes('login.html');
+    const isAdminPage = path.includes('/admin/');
 
     if (isAdminPage && !isLoginPage) {
-        console.log("[AUTH] Bootstrap started for protected page");
-        
-        // Prevent FOPC
+        // Prevent FOPC with instant hydration
         const style = document.createElement('style');
         style.textContent = `
             html:not(.auth-initialized) body { display: none !important; }
@@ -193,24 +153,26 @@ const Auth = window.Auth = {
 
         const loader = document.createElement('div');
         loader.id = 'sw-auth-loader';
-        loader.innerHTML = '<div class="sw-spinner"></div><p style="margin-top:15px;color:#666;font-size:14px;">Verifying Session...</p>';
+        loader.innerHTML = '<div class="sw-spinner"></div><p style="margin-top:15px;color:#666;font-size:14px;">Initializing...</p>';
         
         // Ensure body exists before appending
         const checkBody = setInterval(() => {
             if (document.body) {
                 document.body.appendChild(loader);
                 clearInterval(checkBody);
+                
+                // Optimistic Init after loader is attached
+                const loggedIn = Auth.init();
+                if (!loggedIn) {
+                    Auth.logout("Bootstrap: No session");
+                } else {
+                    // Silent background validation after load
+                    window.addEventListener('load', () => {
+                        setTimeout(() => Auth.validate(), 500);
+                    });
+                }
             }
-        }, 10);
-
-        // Run Init
-        Auth.init().then(loggedIn => {
-            if (!loggedIn) {
-                console.warn("[AUTH] No session found during bootstrap. Redirecting...");
-                Auth.logout("Bootstrap: No session");
-            } else {
-                Auth.validate(); // Background verify
-            }
-        });
+        }, 1);
     }
 })();
+

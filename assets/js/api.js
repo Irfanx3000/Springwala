@@ -32,52 +32,10 @@ async function apiFetch(endpoint, opts = {}) {
     throw new Error('Network error. Please check your connection.');
   }
 
-  // 401 Handling: Only logout if it's a legitimate auth failure
+  // 401 Handling: Trigger silent validation
   if (res.status === 401) {
     console.warn(`[API-WARN] 401 Unauthorized at ${endpoint}`);
-
-    // Prevent multiple logout loops
-    if (!window.__swAuthRetrying) {
-      window.__swAuthRetrying = true;
-
-      try {
-        const valid = await Auth.validate(1);
-
-        if (!valid) {
-          Auth.logout("Session expired");
-          return null;
-        }
-
-        // Retry original request ONCE
-        const retryHeaders = { ...headers };
-        const retryToken = Auth.getToken();
-
-        if (retryToken) {
-          retryHeaders['Authorization'] = `Bearer ${retryToken}`;
-        }
-
-        const retryRes = await fetch(url, {
-          ...opts,
-          headers: retryHeaders
-        });
-
-        window.__swAuthRetrying = false;
-
-        if (!retryRes.ok) {
-          throw new Error(`Retry failed (${retryRes.status})`);
-        }
-
-        return await retryRes.json();
-
-      } catch (err) {
-        window.__swAuthRetrying = false;
-        console.error("[AUTH] Retry validation failed:", err);
-
-        Auth.logout("Authentication expired");
-        return null;
-      }
-    }
-
+    Auth.validate(); // This will logout if truly expired
     return null;
   }
 

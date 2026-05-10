@@ -25,16 +25,8 @@ function initAuthHandlers() {
                     Auth.setSession(res.token, res.admin);
                     showToast('Login successful! Redirecting...', 'success');
                     
-                    // Task 1: Stabilization delay for localStorage persistence
-                    setTimeout(() => {
-                        // Verify token exists in storage before final hop
-                        if (Auth.getToken()) {
-                            window.location.href = 'dashboard.html';
-                        } else {
-                            console.error("[AUTH] Redirect blocked: Token missing after setSession");
-                            showError("Login failed to stabilize. Please try again.");
-                        }
-                    }, 1200);
+                    // Instant redirect
+                    window.location.href = '/admin/dashboard.html';
                 } else {
                     showError(res.message);
                 }
@@ -87,14 +79,8 @@ function initAuthHandlers() {
                     Auth.setSession(res.token, res.admin);
                     showToast('Login successful!', 'success');
                     
-                    // Task 1: Stabilization delay
-                    setTimeout(() => {
-                        if (Auth.getToken()) {
-                            window.location.href = 'dashboard.html';
-                        } else {
-                            showError("Login stabilization failed.");
-                        }
-                    }, 1200);
+                    // Instant redirect
+                    window.location.href = '/admin/dashboard.html';
                 } else {
                     showError(res.message);
                 }
