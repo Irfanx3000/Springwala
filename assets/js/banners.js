@@ -26,7 +26,7 @@ async function loadBanners(type) {
 
   try {
     const params = { type, ...currentFilters };
-    const data = await api.get('/banners', params);
+    const data = await api.get('/banners/admin', params);
     if (!data) return;
     
     const countEl = document.getElementById('banners-count');
@@ -40,59 +40,77 @@ async function loadBanners(type) {
       return;
     }
 
-    grid.className = "flex flex-col gap-4"; // Single column list as per image
+    grid.className = "flex flex-col gap-4 w-full"; // Ensure full width
     grid.innerHTML = data.banners.map(b => `
-      <div class="bg-white rounded-[12px] border border-[#E9E9E9] p-4 flex items-center gap-6 shadow-sm hover:shadow-md transition relative group">
-        <!-- Desktop Preview -->
-        <div class="flex flex-col items-center gap-2">
-            <div class="w-[200px] h-[112px] bg-gray-100 rounded-[8px] border border-[#EFEFEF] overflow-hidden flex items-center justify-center">
-                <img src="${imageUrl(b.image)}" class="w-full h-full object-contain" alt="Desktop">
+      <div class="bg-white rounded-[12px] border border-[#E9E9E9] p-4 flex flex-col lg:flex-row lg:items-center gap-5 shadow-sm hover:shadow-md transition relative group overflow-hidden">
+        
+        <!-- Previews Wrapper -->
+        <div class="flex flex-row items-center gap-4 shrink-0 justify-center lg:justify-start">
+            <!-- Desktop Preview -->
+            <div class="flex flex-col items-center gap-1.5">
+                <div class="w-[140px] sm:w-[180px] lg:w-[200px] h-[78px] sm:h-[101px] lg:h-[112px] bg-gray-100 rounded-[8px] border border-[#EFEFEF] overflow-hidden flex items-center justify-center">
+                    <img src="${imageUrl(b.image)}" class="w-full h-full object-contain" alt="Desktop" onerror="this.src='../../assets/images/deafult.png'">
+                </div>
+                <span class="text-[10px] sm:text-[12px] text-gray-400 font-medium uppercase tracking-wider">Desktop</span>
             </div>
-            <span class="text-[12px] text-gray-500">Desktop</span>
+ 
+            <!-- Mobile Preview -->
+            <div class="flex flex-col items-center gap-1.5">
+                <div class="w-[56px] sm:w-[72px] lg:w-[80px] h-[78px] sm:h-[101px] lg:h-[112px] rounded border border-gray-100 overflow-hidden bg-gray-50 relative">
+                  <div class="absolute top-1 left-1 bg-black/40 text-white text-[8px] px-1 rounded z-10">MOBILE</div>
+                  ${b.mobileImage ? 
+                    `<img src="${imageUrl(b.mobileImage)}" class="w-full h-full object-cover" alt="Mobile" onerror="this.src='../../assets/images/deafult.png'">` : 
+                    `<div class="w-full h-full flex flex-col items-center justify-center text-[10px] text-gray-400 opacity-60">
+                       <img src="${imageUrl(b.image)}" class="w-full h-full object-cover blur-[1px] grayscale opacity-30" alt="Mobile Fallback" onerror="this.src='../../assets/images/deafult.png'">
+                       <span class="absolute inset-0 flex items-center justify-center font-bold text-[9px] bg-white/40">NONE</span>
+                     </div>`
+                  }
+                </div>
+                <span class="text-[10px] sm:text-[12px] text-gray-400 font-medium uppercase tracking-wider">Mobile</span>
+            </div>
         </div>
 
-        <!-- Mobile Preview -->
-        <div class="flex flex-col items-center gap-2">
-            <div class="w-[80px] h-[112px] bg-gray-100 rounded-[8px] border border-[#EFEFEF] overflow-hidden flex items-center justify-center">
-                ${b.mobileImage ? `<img src="${imageUrl(b.mobileImage)}" class="w-full h-full object-cover">` : `<svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`}
-            </div>
-            <span class="text-[12px] text-gray-500">Mobile</span>
-        </div>
-
-        <!-- Content -->
+        <!-- Content & Info -->
         <div class="flex-1 min-w-0 flex flex-col gap-3">
-            <h4 class="font-['Poppins'] font-semibold text-[18px] text-black truncate">${b.title}</h4>
-            <div class="flex items-center bg-[#EDEDED] rounded-[5px] h-[34px] px-3 max-w-[350px]">
-                <img src="../../assets/icons/admin/search.svg" class="w-4 h-4 mr-2 opacity-50 rotate-45" style="filter: grayscale(1);">
-                <input type="text" readonly value="${b.link || 'https://example.com'}" class="bg-transparent outline-none text-[#656565] text-[14px] w-full">
+            <div class="flex items-center justify-between lg:justify-start gap-3">
+                <h4 class="font-['Poppins'] font-semibold text-[16px] sm:text-[18px] text-black truncate">${b.title}</h4>
+                <div class="lg:hidden flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-gray-100 rounded text-[11px] font-bold text-gray-500">POS: ${b.position || 1}</span>
+                </div>
             </div>
-            <div class="flex items-center gap-6 mt-1">
-                <div class="flex items-center gap-3">
-                    <span class="font-medium text-[15px]">Position</span>
-                    <div class="w-[35px] h-[26px] bg-[#EDEDED] rounded-[3px] flex items-center justify-center font-bold text-[15px]">${b.position || 0}</div>
+            
+            <div class="flex items-center bg-[#EDEDED] rounded-[5px] h-[36px] px-3 w-full lg:max-w-[350px]">
+                <img src="../../assets/icons/admin/search.svg" class="w-3.5 h-3.5 mr-2 opacity-50 rotate-45" style="filter: grayscale(1);">
+                <input type="text" readonly value="${b.link || 'https://example.com'}" class="bg-transparent outline-none text-[#656565] text-[13px] sm:text-[14px] w-full truncate">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mt-1">
+                <div class="hidden lg:flex items-center gap-3">
+                    <span class="font-medium text-[14px] sm:text-[15px] text-gray-600">Position</span>
+                    <div class="min-w-[35px] h-[26px] px-2 bg-[#EDEDED] rounded-[3px] flex items-center justify-center font-bold text-[14px] sm:text-[15px]">${b.position || 1}</div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="font-medium text-[15px]">Status</span>
+                    <span class="font-medium text-[14px] sm:text-[15px] text-gray-600">Status</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" class="sr-only peer" ${b.isActive ? 'checked' : ''} onchange="toggleBannerById('${b._id}','${type}')">
-                        <div class="w-11 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                        <span class="ml-2 text-[13px] font-medium text-gray-500">${b.isActive ? 'Active' : 'Inactive'}</span>
+                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#BE2229]"></div>
+                        <span class="ml-2 text-[12px] sm:text-[13px] font-medium text-gray-500">${b.isActive ? 'Active' : 'Inactive'}</span>
                     </label>
                 </div>
             </div>
         </div>
 
-        <!-- Right Side Actions -->
-        <div class="flex flex-col gap-2 min-w-[120px]">
-            <button onclick="editBannerById('${b._id}')" class="w-full h-[28px] border border-[#B9B9B9] rounded-[5px] flex items-center justify-center gap-2 text-[14px] font-medium hover:bg-gray-50 transition">
+        <!-- Action Buttons -->
+        <div class="flex flex-row lg:flex-col gap-2 w-full lg:w-[140px] border-t lg:border-t-0 border-gray-100 pt-4 lg:pt-0">
+            <button onclick="editBannerById('${b._id}')" class="flex-1 lg:flex-none h-[32px] border border-[#B9B9B9] rounded-[6px] flex items-center justify-center gap-2 text-[13px] sm:text-[14px] font-medium hover:bg-gray-50 transition shadow-sm bg-white">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Edit
             </button>
-            <button onclick="deleteBannerById('${b._id}','${b.title.replace(/'/g,"\\'")}','${type}')" class="w-full h-[28px] border border-[#B9B9B9] rounded-[5px] flex items-center justify-center gap-2 text-[14px] font-medium hover:bg-red-50 hover:text-red-600 transition">
+            <button onclick="deleteBannerById('${b._id}','${b.title.replace(/'/g,"\\'")}','${type}')" class="flex-1 lg:flex-none h-[32px] border border-[#B9B9B9] rounded-[6px] flex items-center justify-center gap-2 text-[13px] sm:text-[14px] font-medium hover:bg-red-50 hover:text-red-600 transition shadow-sm bg-white">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                 Remove
             </button>
-            <button class="w-full h-[28px] border border-[#B9B9B9] rounded-[5px] flex items-center justify-center gap-2 text-[14px] font-medium cursor-default">
+            <button class="hidden lg:flex w-full h-[32px] border border-[#B9B9B9] rounded-[6px] items-center justify-center gap-2 text-[13px] sm:text-[14px] font-medium cursor-default opacity-60 bg-gray-50">
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 Published
             </button>
@@ -123,10 +141,15 @@ function closeBannerModal() {
   editBannerId = null;
   
   // Reset form fields
-  ['banner-title-input','banner-link-input','banner-alt-input','banner-start-date','banner-end-date','banner-position-input'].forEach(id => {
+  ['banner-title-input','banner-link-input','banner-alt-input','banner-start-date','banner-end-date'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  
+  const posInput = document.getElementById('banner-position-input');
+  const sortInput = document.getElementById('banner-sort-order-input');
+  if (posInput) posInput.value = '1'; 
+  if (sortInput) sortInput.value = '0';
   
   const desktopInput = document.getElementById('banner-file-input');
   const mobileInput  = document.getElementById('banner-mobile-input');
@@ -151,7 +174,8 @@ async function editBannerById(id) {
       'banner-title-input': b.title,
       'banner-link-input': b.link,
       'banner-alt-input': b.altText,
-      'banner-position-input': b.position || 0
+      'banner-position-input': b.position || 1,
+      'banner-sort-order-input': b.sortOrder || 0
     };
     
     Object.entries(fieldMap).forEach(([id, val]) => {
@@ -176,46 +200,114 @@ async function editBannerById(id) {
   } catch (err) { showToast('Load error: ' + err.message, 'error'); }
 }
 
-async function saveBanner(type) {
-  const title = document.getElementById('banner-title-input')?.value?.trim();
-  const dfile = document.getElementById('banner-file-input')?.files?.[0];
-  const mfile = document.getElementById('banner-mobile-input')?.files?.[0];
-
-  if (!title) { showToast('Banner title is required', 'error'); return; }
-  if (!editBannerId && !dfile) { showToast('Desktop image is required', 'error'); return; }
-
+/**
+ * CENTRALIZED FORMDATA BUILDER
+ * One shared pipeline for ALL banner types.
+ * Ensures consistent field names and safe File object appending.
+ */
+function buildBannerFormData(type) {
   const fd = new FormData();
+  
+  // 1. Text Fields & Metadata
+  const title = document.getElementById('banner-title-input')?.value?.trim();
+  const link = document.getElementById('banner-link-input')?.value?.trim() || '';
+  const altText = document.getElementById('banner-alt-input')?.value?.trim() || title;
+  const position = document.getElementById('banner-position-input')?.value || '1';
+  const sortOrder = document.getElementById('banner-sort-order-input')?.value || '0';
+  const startDate = document.getElementById('banner-start-date')?.value;
+  const endDate = document.getElementById('banner-end-date')?.value;
+
   fd.append('title', title);
   fd.append('type', type);
-  fd.append('link',     document.getElementById('banner-link-input')?.value?.trim() || '');
-  fd.append('altText',  document.getElementById('banner-alt-input')?.value?.trim() || title);
-  fd.append('position', document.getElementById('banner-position-input')?.value || '0');
+  fd.append('link', link);
+  fd.append('altText', altText);
+  fd.append('position', position);
+  fd.append('sortOrder', sortOrder);
   
-  const sd = document.getElementById('banner-start-date')?.value;
-  const ed = document.getElementById('banner-end-date')?.value;
-  if (sd) fd.append('startDate', sd);
-  if (ed) fd.append('endDate', ed);
-  
-  if (dfile) fd.append('image', dfile);
-  if (mfile) fd.append('mobileImage', mfile);
+  if (startDate) fd.append('startDate', startDate);
+  if (endDate) fd.append('endDate', endDate);
 
+  // 2. Desktop Image Appending
+  const desktopInput = document.getElementById('banner-file-input');
+  const desktopFile = desktopInput?.files?.[0];
+  if (desktopFile instanceof File) {
+    fd.append('image', desktopFile);
+    console.log(`[BANNER-UPLOAD] Desktop Image Detected: ${desktopFile.name}`);
+  }
+
+  // 3. Mobile Image Appending (CRITICAL FIX)
+  // Consistently uses 'mobileImage' field name for Multer/Mongo compatibility
+  const mobileInput = document.getElementById('banner-mobile-input');
+  const mobileFile = mobileInput?.files?.[0];
+  if (mobileFile instanceof File) {
+    fd.append('mobileImage', mobileFile);
+    console.log(`[BANNER-UPLOAD] Mobile Image Detected: ${mobileFile.name}`);
+  } else {
+    console.log(`[BANNER-UPLOAD] No new mobile image selected.`);
+  }
+
+  return { fd, title, desktopFile, mobileFile };
+}
+
+async function saveBanner(type) {
   const saveBtn = document.getElementById('save-banner-btn');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
+  
+  // 1. Build Centralized FormData
+  const { fd, title, desktopFile, mobileFile } = buildBannerFormData(type);
+
+  // 2. SHARED VALIDATION
+  if (!title) {
+    showToast('Banner title is required', 'error');
+    return;
+  }
+
+  // Requirement: New banners must have at least a desktop image
+  if (!editBannerId && (!desktopFile || !(desktopFile instanceof File))) {
+    showToast('Desktop image is required for new banners', 'error');
+    return;
+  }
+
+  // File Type Validation
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (desktopFile && !allowedTypes.includes(desktopFile.type)) {
+    showToast('Invalid desktop image type. Please use JPG, PNG, or WEBP.', 'error');
+    return;
+  }
+  if (mobileFile && !allowedTypes.includes(mobileFile.type)) {
+    showToast('Invalid mobile image type. Please use JPG, PNG, or WEBP.', 'error');
+    return;
+  }
+
+  // 3. EXECUTE UPLOAD
+  if (saveBtn) { 
+    saveBtn.disabled = true; 
+    saveBtn.textContent = 'Uploading...'; 
+  }
 
   try {
+    let result;
     if (editBannerId) {
-      await apiFetch(`/banners/${editBannerId}`, { method: 'PUT', body: fd });
-      showToast('Banner updated!', 'success');
+      console.log(`[BANNER-UPLOAD] Updating banner: ${editBannerId}`);
+      result = await api.put(`/banners/${editBannerId}`, fd);
+      showToast('Banner updated successfully!', 'success');
     } else {
-      await apiFetch('/banners', { method: 'POST', body: fd });
-      showToast('Banner uploaded!', 'success');
+      console.log(`[BANNER-UPLOAD] Creating new banner of type: ${type}`);
+      result = await api.post('/banners', fd);
+      showToast('Banner created successfully!', 'success');
     }
-    closeBannerModal();
-    await loadBanners(type);
+    
+    if (result) {
+      closeBannerModal();
+      await loadBanners(type);
+    }
   } catch (err) {
-    showToast('Save failed: ' + err.message, 'error');
+    console.error('[BANNER-UPLOAD-ERROR]', err);
+    showToast(err.message || 'Upload failed', 'error');
   } finally {
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Banner'; }
+    if (saveBtn) { 
+      saveBtn.disabled = false; 
+      saveBtn.textContent = 'Save Banner'; 
+    }
   }
 }
 

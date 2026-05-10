@@ -41,7 +41,7 @@
 <body class="bg-[#F4F6F6] text-[#1E1E1E] font-['Roboto']" data-page="product">
 
     <!-- Header (Same as Index) -->
-    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center" data-banner-type="informational" data-banner-position="99">
         <span class="text-white text-[13px]">Get discount on every selected product</span>
     </div>
 
@@ -170,7 +170,7 @@
             </ul>
 
             <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
-                <img src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
+                <img id="customer-support-slot" src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
             </div>
         </div>
     </div>
@@ -537,7 +537,8 @@
 
                     <!-- Yellow Promo Banner -->
                     <div
-                        class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-6 relative overflow-hidden">
+                    <div id="product-offer-banner"
+                        class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-6 relative overflow-hidden" data-banner-type="promotional" data-banner-position="5">
                         <div class="flex flex-col justify-center">
                             <span
                                 class="text-[#000000] text-[24px] font-black font-['Roboto'] leading-tight whitespace-nowrap">Flat
@@ -636,13 +637,13 @@
 
                     <!-- Banner Images -->
                     <div
-                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100">
-                        <img src="assets/images/deafult.png" alt="Promo Large"
+                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100" data-banner-type="promotional" data-banner-position="1">
+                        <img id="product-sidebar-promo-1" src="assets/images/deafult.png" alt="Promo Large"
                             class="w-full h-auto max-h-[277px] object-cover mix-blend-multiply">
                     </div>
                     <div
-                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100 mt-[-8px]">
-                        <img src="assets/images/deafult.png" alt="Promo Small"
+                        class="w-full rounded-[10px] overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-100 mt-[-8px]" data-banner-type="promotional" data-banner-position="2">
+                        <img id="product-sidebar-promo-2" src="assets/images/deafult.png" alt="Promo Small"
                             class="w-full h-auto max-h-[138px] object-cover mix-blend-multiply">
                     </div>
 
@@ -666,8 +667,8 @@
             </div>
 
             <!-- Mobile Promo Banner -->
-            <div
-                class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-5 relative overflow-hidden mb-4">
+            <div id="product-offer-banner-mobile"
+                class="w-full bg-[#F9C71D] rounded-[11px] h-[74px] flex items-center justify-between px-5 relative overflow-hidden mb-4" data-banner-type="promotional" data-banner-position="5">
                 <div class="flex flex-col justify-center">
                     <span
                         class="text-[#000000] text-[20px] font-black font-['Roboto'] leading-tight whitespace-nowrap">Flat
@@ -1674,6 +1675,132 @@
 
     <!-- Product Image Zoom & Gallery Logic -->
     <script>
+        // Global Gallery State
+        window.productGallery = {
+            sliderImages: [
+                'assets/images/deafult.png',
+                'assets/images/deafult.png',
+                'assets/images/deafult.png',
+                'assets/images/deafult.png'
+            ],
+            currentIndex: 0,
+            slideInterval: null,
+            
+            update: function(images) {
+                if (!images || !images.length) return;
+                
+                // 1. Update internal state
+                this.sliderImages = images.map(img => {
+                    if (typeof getImageUrl === 'function') return getImageUrl(img);
+                    return img.startsWith('http') ? img : '/uploads/' + img; // Fallback
+                });
+                
+                // 2. Refresh Modal Thumbnails
+                const modalThumbnailsContainer = document.getElementById('modalThumbnails');
+                if (modalThumbnailsContainer) {
+                    modalThumbnailsContainer.innerHTML = '';
+                    this.sliderImages.forEach((imgSrc, i) => {
+                        const thumbWrapper = document.createElement('div');
+                        thumbWrapper.className = 'w-[60px] h-[60px] flex-shrink-0 bg-white rounded-[6px] overflow-hidden cursor-pointer hover:opacity-80 transition cursor-pointer border-2 border-transparent';
+                        const imgNode = document.createElement('img');
+                        imgNode.src = imgSrc;
+                        imgNode.className = 'w-full h-full object-contain p-1';
+                        thumbWrapper.appendChild(imgNode);
+
+                        thumbWrapper.addEventListener('click', () => {
+                            const modalImage = document.getElementById('modalImage');
+                            if (modalImage) modalImage.src = imgSrc;
+                            
+                            // Active state indication
+                            Array.from(modalThumbnailsContainer.children).forEach(c => c.classList.remove('border-[#BE2229]'));
+                            thumbWrapper.classList.add('border-[#BE2229]');
+                        });
+                        modalThumbnailsContainer.appendChild(thumbWrapper);
+                    });
+                }
+                
+                // 3. Reset Mobile Slider if active
+                if (this.slideInterval) {
+                    clearInterval(this.slideInterval);
+                    this.initMobileSlider();
+                }
+            },
+            
+            initMobileSlider: function() {
+                const mobileMainImage = document.getElementById('mobileMainImage');
+                const mobileDotsContainer = document.getElementById('mobileCarouselDots');
+                if (!mobileMainImage || !mobileDotsContainer) return;
+
+                const self = this;
+                const dots = Array.from(mobileDotsContainer.children);
+                
+                function changeMobileSlide(index) {
+                    if (!self.sliderImages[index]) return;
+                    
+                    dots.forEach((dot, i) => {
+                        dot.classList.remove('bg-[#625656]');
+                        dot.classList.add('bg-[#D9D9D9]');
+                        if (i === index) {
+                            dot.classList.remove('bg-[#D9D9D9]');
+                            dot.classList.add('bg-[#625656]');
+                        }
+                    });
+
+                    mobileMainImage.style.opacity = '0.5';
+                    setTimeout(() => {
+                        mobileMainImage.src = self.sliderImages[index];
+                        mobileMainImage.style.opacity = '1';
+                    }, 150);
+
+                    self.currentIndex = index;
+                }
+
+                // Initial setup
+                if (this.slideInterval) clearInterval(this.slideInterval);
+                this.slideInterval = setInterval(() => {
+                    let nextIndex = (self.currentIndex + 1) % self.sliderImages.length;
+                    changeMobileSlide(nextIndex);
+                }, 3000);
+
+                dots.forEach((dot, i) => {
+                    dot.addEventListener('click', () => {
+                        clearInterval(self.slideInterval);
+                        changeMobileSlide(i);
+                        self.slideInterval = setInterval(() => {
+                            let nextIndex = (self.currentIndex + 1) % self.sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        }, 3000);
+                    });
+                });
+
+                // Swipe Support
+                let touchStartX = 0;
+                let touchEndX = 0;
+                const swipeContainer = mobileMainImage.parentElement;
+                
+                const handleSwipe = () => {
+                    const swipeDistance = touchEndX - touchStartX;
+                    if (Math.abs(swipeDistance) > 40) {
+                        clearInterval(self.slideInterval);
+                        if (swipeDistance < 0) {
+                            let nextIndex = (self.currentIndex + 1) % self.sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        } else {
+                            let prevIndex = (self.currentIndex - 1 + self.sliderImages.length) % self.sliderImages.length;
+                            changeMobileSlide(prevIndex);
+                        }
+                        self.slideInterval = setInterval(() => {
+                            let nextIndex = (self.currentIndex + 1) % self.sliderImages.length;
+                            changeMobileSlide(nextIndex);
+                        }, 3000);
+                    }
+                };
+
+                swipeContainer.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+                swipeContainer.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Create Modal Container
             const modal = document.createElement('div');
@@ -1682,11 +1809,9 @@
                     <button id="closeModal" class="absolute top-6 right-6 text-white hover:text-gray-300 focus:outline-none z-50">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
-                    <!-- Modal Content Container -->
                     <div class="relative w-full h-full flex flex-col items-center justify-center pt-8 pb-32">
                         <img id="modalImage" src="" alt="Expanded Image" class="max-w-[95vw] max-h-[70vh] object-contain select-none">
                     </div>
-                    <!-- Thumbnails row -->
                     <div id="modalThumbnails" class="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-4 max-w-[95vw] overflow-x-auto px-4 py-3 bg-black/60 rounded-[10px] items-center">
                     </div>
                 </div>
@@ -1701,42 +1826,20 @@
             const thumbnails = document.querySelectorAll('.flex.gap-\\[17px\\] > div > img');
             const desktopMainImg = document.querySelector('.w-\\[435px\\] > div > img.mix-blend-multiply');
 
-            // Set up common images
-            const sliderImages = [
-                'assets/images/deafult.png',
-                'assets/images/deafult.png',
-                'assets/images/deafult.png',
-                'assets/images/deafult.png'
-            ];
-
-            // Setup Modal Thumbnails
-            sliderImages.forEach((imgSrc, i) => {
-                const thumbWrapper = document.createElement('div');
-                thumbWrapper.className = 'w-[60px] h-[60px] flex-shrink-0 bg-white rounded-[6px] overflow-hidden cursor-pointer hover:opacity-80 transition cursor-pointer border-2 border-transparent';
-                const imgNode = document.createElement('img');
-                imgNode.src = imgSrc;
-                imgNode.className = 'w-full h-full object-contain p-1';
-                thumbWrapper.appendChild(imgNode);
-
-                thumbWrapper.addEventListener('click', () => {
-                    modalImage.src = imgSrc;
-                    // Active state indication
-                    Array.from(modalThumbnailsContainer.children).forEach(c => c.classList.remove('border-[#BE2229]'));
-                    thumbWrapper.classList.add('border-[#BE2229]');
-                });
-                modalThumbnailsContainer.appendChild(thumbWrapper);
-            });
+            // Initialize Modal UI with defaults
+            window.productGallery.update([]); // Sets up listeners and default thumbnails if any
 
             // 2. Modal Functions
             function openModal(imgSrc) {
+                if (!imgSrc || imgSrc.includes('undefined')) return;
                 modalImage.src = imgSrc;
                 imageModal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
 
                 // Highlight corresponding thumbnail 
-                Array.from(modalThumbnailsContainer.children).forEach((child, i) => {
+                Array.from(modalThumbnailsContainer.children).forEach((child) => {
                     child.classList.remove('border-[#BE2229]');
-                    if (child.querySelector('img').src === modalImage.src && child.classList.length > 0) {
+                    if (child.querySelector('img').src === modalImage.src) {
                         child.classList.add('border-[#BE2229]');
                     }
                 });
@@ -1762,97 +1865,21 @@
             });
 
             // 4. Bind Thumbnails Activity (Desktop)
-            thumbnails.forEach(thumb => {
-                thumb.parentElement.addEventListener('click', () => {
-                    if (desktopMainImg) {
-                        desktopMainImg.src = thumb.src;
-                    }
-                    openModal(thumb.src); // ALSO open the modal carousel upon clicking a thumbnail!
-                });
+            // Use delegation or re-bind after dynamic load
+            document.addEventListener('click', (e) => {
+                const thumbImg = e.target.closest('#product-thumbnails-desktop img');
+                if (thumbImg) {
+                    if (desktopMainImg) desktopMainImg.src = thumbImg.src;
+                    // We don't necessarily want to open the modal on every thumbnail click on desktop, 
+                    // but keeping it consistent with previous logic if desired.
+                    // openModal(thumbImg.src); 
+                }
             });
 
-            // 5. Mobile Auto Carousel Logic
-            const mobileMainImage = document.getElementById('mobileMainImage');
-            const mobileDotsContainer = document.getElementById('mobileCarouselDots');
+            // 5. Initialize Mobile Slider
+            window.productGallery.initMobileSlider();
 
-            if (mobileMainImage && mobileDotsContainer) {
-                const dots = Array.from(mobileDotsContainer.children);
-                let currentIndex = 0;
-
-                function changeMobileSlide(index) {
-                    dots.forEach((dot, i) => {
-                        dot.classList.remove('bg-[#625656]');
-                        dot.classList.add('bg-[#D9D9D9]');
-                        if (i === index) {
-                            dot.classList.remove('bg-[#D9D9D9]');
-                            dot.classList.add('bg-[#625656]');
-                        }
-                    });
-
-                    // simple fade
-                    mobileMainImage.style.opacity = '0.5';
-                    setTimeout(() => {
-                        mobileMainImage.src = sliderImages[index];
-                        mobileMainImage.style.opacity = '1';
-                    }, 150);
-
-                    currentIndex = index;
-                }
-
-                let slideInterval = setInterval(() => {
-                    let nextIndex = (currentIndex + 1) % sliderImages.length;
-                    changeMobileSlide(nextIndex);
-                }, 3000);
-
-                dots.forEach((dot, i) => {
-                    dot.addEventListener('click', () => {
-                        clearInterval(slideInterval);
-                        changeMobileSlide(i);
-                        slideInterval = setInterval(() => {
-                            let nextIndex = (currentIndex + 1) % sliderImages.length;
-                            changeMobileSlide(nextIndex);
-                        }, 3000);
-                    });
-                });
-
-                // --- Mobile Swipe Support ---
-                let touchStartX = 0;
-                let touchEndX = 0;
-
-                const handleSwipe = () => {
-                    const swipeDistance = touchEndX - touchStartX;
-                    if (Math.abs(swipeDistance) > 40) { // threshold
-                        clearInterval(slideInterval);
-                        if (swipeDistance < 0) {
-                            // swiped left -> next
-                            let nextIndex = (currentIndex + 1) % sliderImages.length;
-                            changeMobileSlide(nextIndex);
-                        } else {
-                            // swiped right -> prev
-                            let prevIndex = (currentIndex - 1 + sliderImages.length) % sliderImages.length;
-                            changeMobileSlide(prevIndex);
-                        }
-                        // restart interval
-                        slideInterval = setInterval(() => {
-                            let nextIndex = (currentIndex + 1) % sliderImages.length;
-                            changeMobileSlide(nextIndex);
-                        }, 3000);
-                    }
-                };
-
-                // Add listeners to the container of the mobile image
-                const swipeContainer = mobileMainImage.parentElement;
-                swipeContainer.addEventListener('touchstart', e => {
-                    touchStartX = e.changedTouches[0].screenX;
-                }, { passive: true });
-
-                swipeContainer.addEventListener('touchend', e => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleSwipe();
-                }, { passive: true });
-            }
-
-            // 6. Product Wishlist Toggle (Main Image Stars)
+            // 6. Product Wishlist Toggle
             const productWishlistBtns = document.querySelectorAll('.product-wishlist-btn');
             productWishlistBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {

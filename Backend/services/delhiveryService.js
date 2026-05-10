@@ -6,7 +6,7 @@ const axios = require('axios');
  */
 
 const TOKEN = (process.env.DELHIVERY_TOKEN || '').trim();
-const BASE_URL = (process.env.DELHIVERY_BASE_URL || 'https://track.delhivery.com').trim();
+const BASE_URL = (process.env.DELHIVERY_BASE_URL || 'https://track.delhivery.com/api').trim();
 const TRACKING_BASE_URL = (process.env.DELHIVERY_TRACKING_URL || 'https://www.delhivery.com/track/package').trim();
 
 // Registered Pickup Warehouse Name (SSOT for Delhivery Shipment API)
@@ -66,7 +66,7 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
       vcl: totalAmount
     };
 
-    const response = await delhiveryClient.get('/api/kinko/v1/invoice/charges/.json', { params });
+    const response = await delhiveryClient.get('/kinko/v1/invoice/charges/.json', { params });
     const data = response.data;
 
     // Delhivery returns an array of possible services. If empty, pincode is unserviceable.
@@ -140,7 +140,7 @@ exports.createShipment = async (orderData, retryCount = 0) => {
             payment_mode: paymentMethod === 'COD' ? 'Collect' : 'Prepaid',
             total_amount: amount, // Task 5: Numeric, 2 precision
             cod_amount: paymentMethod === 'COD' ? amount : 0,
-            weight: weightInGrams, // Task 1: grams directly
+            weight: (weightInGrams / 1000).toFixed(3), // Delhivery expects KG for shipment creation
             products_desc: items.map(i => i.name).join(', ').substring(0, 200),
             hsn_code: String(items[0]?.hsn || ''),
             quantity: qty // Task 3: Numeric
@@ -151,7 +151,7 @@ exports.createShipment = async (orderData, retryCount = 0) => {
 
     console.log(`[SHIPMENT CREATE REQUEST] Order: ${orderNumber} (Attempt ${retryCount + 1})`);
     
-    const response = await delhiveryClient.post('/api/cne/json/create/', payload);
+    const response = await delhiveryClient.post('/cmu/create.json', payload);
     const data = response.data;
 
     // Task 6: Full response logging on failure
@@ -210,7 +210,7 @@ exports.trackShipment = async (waybill) => {
     if (!TOKEN) throw new Error("Delhivery Token is missing in .env");
 
     // API: GET /api/v1/packages/json/?waybill=<waybill>
-    const response = await delhiveryClient.get(`/api/v1/packages/json/?waybill=${waybill}`);
+    const response = await delhiveryClient.get(`/v1/packages/json/?waybill=${waybill}`);
     
     const data = response.data;
     if (data && data.ShipmentData && data.ShipmentData.length > 0) {
@@ -242,7 +242,7 @@ exports.cancelShipment = async (waybill) => {
       cancellation: true
     };
     
-    const response = await delhiveryClient.post('/api/p/edit/', payload);
+    const response = await delhiveryClient.post('/p/edit/', payload);
     return { success: true, data: response.data };
   } catch (error) {
     console.error(`[DELHIVERY] Cancel Error:`, error.message);

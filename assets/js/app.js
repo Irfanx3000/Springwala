@@ -625,6 +625,248 @@ function calculateCartTotals(cart) {
   };
 }
 
+// ─── Unified Banner Rendering Engine ────────────────────────────────────────
+// ─── Production-Grade Banner Engine ────────────────────────────────────────
+const BannerEngine = {
+  slots: new Map(), // Registry for managed slots
+  isInitialized: false,
+
+  // 1. Image Resolver: Constructs correct variant URL (Desktop vs Mobile)
+  resolveUrl: (banner, isMobile = false) => {
+    const prefix = CONFIG.IMAGE_BASE_URL || '';
+    if (!banner) return 'assets/images/deafult.png';
+    let path = isMobile ? (banner.mobileImage || banner.image) : banner.image;
+    if (!path) return 'assets/images/deafult.png';
+    if (path.startsWith('uploads/')) path = '/' + path;
+    if (path.startsWith('/uploads')) {
+      const cleanPrefix = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+      return cleanPrefix + path;
+    }
+    return path;
+  },
+
+  // 2. Slot Discovery: Finds all dynamic slots using data-attributes
+  discoverSlots: (root = document) => {
+    const slotElements = root.querySelectorAll('[data-banner-type]');
+    slotElements.forEach(el => {
+      const type = el.dataset.bannerType;
+      const position = el.dataset.bannerPosition || null;
+      const slotId = el.id || `slot-${type}-${position || 'any'}-${Math.random().toString(36).substr(2, 4)}`;
+      
+      if (!BannerEngine.slots.has(slotId) || BannerEngine.slots.get(slotId).el !== el) {
+        BannerEngine.slots.set(slotId, { el, type, position });
+      }
+    });
+  },
+
+  // 3. Native Picture Injection: Production-grade responsive rendering
+  applyToSlot: (container, banner) => {
+    if (!container || !banner) return;
+    
+    // Safety: Link handling
+    const link = container.tagName === 'A' ? container : container.querySelector('a');
+    if (link && banner.link) link.href = banner.link;
+
+    // Feature: Text-based banners
+    if (!banner.image && banner.title) {
+      const textEl = container.querySelector('span, p, h1, h2, h3') || container;
+      if (textEl) {
+        textEl.textContent = banner.title;
+        return;
+      }
+    }
+
+    // Surgical Slot Takeover: Hide static content for complex slots
+    const isComplexSlot = container.querySelector('span, p, h1, h2, h3') || 
+                          (container.children.length > 1 && !container.querySelector('picture, img'));
+    
+    if ((banner.image || banner.mobileImage) && isComplexSlot) {
+      container.style.padding = '0';
+      if (container.classList.contains('bg-[#E8E8E8]') || container.classList.contains('bg-[#F9C71D]')) {
+        container.style.display = 'block';
+      }
+      Array.from(container.children).forEach(child => {
+        if (child.tagName !== 'IMG' && child.tagName !== 'A' && child.tagName !== 'PICTURE') {
+          child.style.display = 'none';
+        }
+      });
+    }
+
+    // NATIVE PICTURE IMPLEMENTATION
+    let picture = container.querySelector('picture');
+    if (!picture) {
+      picture = document.createElement('picture');
+      const existingImg = container.querySelector('img');
+      if (existingImg) {
+        existingImg.replaceWith(picture);
+      } else {
+        container.appendChild(picture);
+      }
+    }
+
+    // Clear old sources to prevent stale media states
+    picture.querySelectorAll('source').forEach(s => s.remove());
+
+    // Mobile Source (Priority)
+    if (banner.mobileImage) {
+      const source = document.createElement('source');
+      source.media = '(max-width: 768px)';
+      source.srcset = BannerEngine.resolveUrl(banner, true);
+      picture.appendChild(source);
+    }
+
+    // Main Img (Desktop/Default)
+    let img = picture.querySelector('img');
+    if (!img) {
+      img = document.createElement('img');
+      picture.appendChild(img);
+    }
+    
+    img.src = BannerEngine.resolveUrl(banner, false);
+    img.alt = banner.altText || banner.title;
+    img.dataset.bannerId = banner._id;
+
+    // Styling
+    img.className = 'w-full h-full object-cover transition-opacity duration-1000';
+    img.style.display = 'block';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.opacity = '1';
+    
+    // Cleanup legacy classes
+    img.classList.remove('hidden', 'md:block', 'block', 'md:hidden', 'opacity-[0.65]', 'mix-blend-multiply', 'object-contain');
+  },
+
+  // 4. Carousel Renderer: Using native picture implementation
+  renderCarousel: (container, banners) => {
+    if (!container || !banners || !banners.length) return;
+    
+    if (container.dataset.carouselActive === 'true') return;
+    container.dataset.carouselActive = 'true';
+
+    container.innerHTML = `
+      <div class="sw-slider h-full w-full relative overflow-hidden">
+        ${banners.map((b, i) => `
+          <div class="sw-slide absolute inset-0 opacity-0 transition-opacity duration-700 ${i === 0 ? 'active opacity-100' : ''}">
+            <a href="${b.link || '#'}" class="block h-full w-full">
+              <picture>
+                ${b.mobileImage ? `<source media="(max-width: 768px)" srcset="${BannerEngine.resolveUrl(b, true)}">` : ''}
+                <img src="${BannerEngine.resolveUrl(b, false)}" alt="${b.altText || b.title}" class="w-full h-full object-cover">
+              </picture>
+            </a>
+          </div>
+        `).join('')}
+      </div>`;
+
+    // Auto-play
+    let current = 0;
+    const slides = container.querySelectorAll('.sw-slide');
+    if (slides.length > 1) {
+      if (container._swInterval) clearInterval(container._swInterval);
+      container._swInterval = setInterval(() => {
+        slides[current].classList.remove('active', 'opacity-100');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('active', 'opacity-100');
+      }, 5000);
+    }
+  },
+
+  // 5. Unified Processing Pipeline
+  processSlot: async (slotId, data) => {
+    try {
+      const slot = BannerEngine.slots.get(slotId);
+      if (!slot || !data || !data.banners) return;
+
+      let filtered = data.banners;
+      if (slot.position) {
+        // Strict matching for positions to avoid duplication across slots
+        filtered = data.banners.filter(b => b.position == slot.position);
+      } else {
+        // If no position requested for this slot, but banners HAVE positions, 
+        // we should probably not just take the first one randomly.
+        // Business Rule: A slot with NO position only takes banners with NO position.
+        filtered = data.banners.filter(b => !b.position || b.position == 0);
+      }
+
+      if (filtered.length === 0) {
+        // Keep fallback — do not clear container
+        return; 
+      }
+
+      if (filtered.length > 1 && slot.el.classList.contains('hero-box')) {
+         BannerEngine.renderCarousel(slot.el, filtered);
+      } else {
+         BannerEngine.applyToSlot(slot.el, filtered[0]);
+      }
+    } catch (err) {
+      console.warn(`[BannerEngine] Error processing slot ${slotId}:`, err);
+    }
+  },
+
+  // 6. Master Initialization
+  init: async () => {
+    try {
+      // Allow re-init but guard against concurrent runs
+      if (BannerEngine._initializing) return;
+      BannerEngine._initializing = true;
+
+      console.log('[BannerEngine] Initializing stabilized rendering lifecycle...');
+      BannerEngine.discoverSlots();
+
+      const types = [...new Set([...BannerEngine.slots.values()].map(s => s.type))];
+      
+      // Load types in parallel for speed
+      await Promise.all(types.map(async (type) => {
+        try {
+          const data = await apiCall(`/banners/public?type=${type}`);
+          if (!data || !data.success) return;
+
+          const typeSlots = [...BannerEngine.slots.entries()].filter(([, s]) => s.type === type);
+          for (const [id] of typeSlots) {
+            await BannerEngine.processSlot(id, data);
+          }
+        } catch (err) {
+          console.warn(`[BannerEngine] Failed to load banners for type: ${type}`, err);
+        }
+      }));
+
+      BannerEngine.isInitialized = true;
+      BannerEngine._initializing = false;
+
+      // Setup MutationObserver (non-aggressive)
+      if (!BannerEngine._observer) {
+        BannerEngine._observer = new MutationObserver(debounce(() => {
+          BannerEngine.discoverSlots();
+          // We don't re-run full init automatically to avoid loops, 
+          // new slots will be picked up on next route or specific call
+        }, 1000));
+        BannerEngine._observer.observe(document.body, { childList: true, subtree: true });
+      }
+    } catch (e) {
+      console.error('[BannerEngine] Init Fatal Error:', e);
+      BannerEngine._initializing = false;
+    }
+  },
+  
+  // 7. Backward Compatibility Helpers
+  isDynamic: (el) => {
+    if (!el) return false;
+    return !!(el.dataset.bannerId || el.dataset.carouselActive);
+  },
+  mark: (el) => {
+    if (el) el.dataset.bannerProtected = 'true';
+  }
+};
+const BannerRenderer = BannerEngine; // Alias for backward compatibility
+
+// Legacy protection bridge
+const BannerProtection = {
+  isDynamic: BannerRenderer.isDynamic,
+  mark: BannerRenderer.mark,
+  getBannerImage: BannerRenderer.resolveUrl
+};
+
 // ─── Image helper ─────────────────────────────────────────────────────────────
 function goBackToCart() {
   if (document.referrer.includes("cart")) {
@@ -1016,111 +1258,59 @@ async function initHomePage() {
   // Latest Products
   await loadProductSection('latest-products-grid', 'latest-products-pagination', '/user/products/latest?limit=12', 6);
 
-  // Banners (Position-based system)
-  await loadBanners();
-
-  // Categories section
-  loadCategoriesSection();
+  // Categories section (Runs after banners to allow protection to set in)
+  await loadCategoriesSection();
 }
 
-/**
- * POSITION-BASED BANNER SYSTEM (Direct Slot Assignment)
- * Ensures banners render ONLY in their correct section and position.
- * No looping/appending; strictly replaces src of existing fixed slots.
- */
-async function loadBanners() {
-  const prefix = CONFIG.IMAGE_BASE_URL;
-  const getUrl = (path) => (path && path.startsWith('/uploads')) ? prefix + path : path;
-  const isMobile = window.innerWidth < 768;
+// ─── GLOBAL BANNER SYSTEM (PRODUCTION STABILIZED) ──────────────────────────
+async function loadPageBanners() {
+  const legacyMap = {
+    'customer-support-slot': { type: 'informational', position: 99 },
+    'hero-slider-desktop': { type: 'homepage', position: 1 },
+    'hero-slider-mobile': { type: 'homepage', position: 1 },
+    'categories-hero-slot': { type: 'category', position: 1 },
+    'promo-banner': { type: 'promotional', position: 1 },
+    'product-sidebar-promo-1': { type: 'promotional', position: 1 },
+    'product-sidebar-promo-2': { type: 'promotional', position: 2 },
+    'product-bottom-promo-1': { type: 'promotional', position: 3 },
+    'product-bottom-promo-2': { type: 'promotional', position: 4 },
+    // Multi-slot container parents (these are not slots themselves, their children are)
+    'promo-banners-container-parent': { type: 'promotional' }, 
+    'features-banners-container-parent': { type: 'features' },
+    'advertisement-banners-container-parent': { type: 'advertisement' },
+    'informational-banners-container-parent': { type: 'informational' },
+    'categories-poster': { type: 'category' }
+  };
 
-  try {
-    const data = await apiCall('/banners/public');
-    const banners = data.banners || [];
-    const active = banners.filter(b => b.isActive === true);
-
-    // 1. FILTER BY TYPE (Strict Isolation)
-    const homepage = active.filter(b => b.type === 'homepage');
-    const promotional = active.filter(b => b.type === 'promotional');
-
-    // ─── HOMEPAGE HERO SECTION ──────────────────────────────────────────
-
-    const h0 = homepage.find(b => b.position === 0);
-    const h1 = homepage.find(b => b.position === 1);
-    const h2 = homepage.find(b => b.position === 2);
-
-    if (isMobile) {
-      // Mobile Hero Slot
-      const mobileImg = document.querySelector('#hero-slider-mobile img');
-      if (mobileImg && h0 && h0.mobileImage) {
-        mobileImg.src = getUrl(h0.mobileImage);
-        const link = mobileImg.closest('a');
-        if (link) link.href = h0.link || '#';
-      }
-    } else {
-      // Desktop Main Hero (Position 0)
-      const mainImg = document.querySelector('#hero-slider-desktop img');
-      if (mainImg && h0 && h0.image) {
-        mainImg.src = getUrl(h0.image);
-        const link = mainImg.closest('a');
-        if (link) link.href = h0.link || '#';
-      }
-
-      // Desktop Right Column (Position 1 & 2)
-      const rightCol = document.querySelectorAll('#hero-right-col img');
-      if (rightCol[0] && h1 && h1.image) {
-        rightCol[0].src = getUrl(h1.image);
-        const link = rightCol[0].closest('a');
-        if (link) link.href = h1.link || '#';
-      }
-      if (rightCol[1] && h2 && h2.image) {
-        rightCol[1].src = getUrl(h2.image);
-        const link = rightCol[1].closest('a');
-        if (link) link.href = h2.link || '#';
-      }
+  Object.entries(legacyMap).forEach(([id, meta]) => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.bannerType) {
+      el.dataset.bannerType = meta.type;
+      if (meta.position) el.dataset.bannerPosition = meta.position;
     }
+  });
 
-    // ─── PROMOTIONAL SECTION ─────────────────────────────────────────────
+  const containerTypes = {
+    'promo-banners-container': 'promotional',
+    'features-banners-container': 'features',
+    'advertisement-banners-container': 'advertisement',
+    'informational-banners-container': 'informational'
+  };
 
-    const p0 = promotional.find(b => b.position === 0);
-    const p1 = promotional.find(b => b.position === 1);
-    const promoImgs = document.querySelectorAll('#promo-banners-container img');
-
-    if (promoImgs.length > 0) {
-      // Position 0
-      if (p0 && promoImgs[0]) {
-        const pImg = isMobile ? (p0.mobileImage || p0.image) : p0.image;
-        if (pImg) {
-          promoImgs[0].src = getUrl(pImg);
-          const link = promoImgs[0].closest('a');
-          if (link) link.href = p0.link || '#';
-        }
+  Object.entries(containerTypes).forEach(([id, type]) => {
+    // Support children that are divs OR anchors (common for wrapped banners)
+    document.querySelectorAll(`#${id} > div, #${id} > a`).forEach((child, idx) => {
+      if (!child.dataset.bannerType) {
+        child.dataset.bannerType = type;
+        if (!child.dataset.bannerPosition) child.dataset.bannerPosition = idx + 1;
       }
-      // Position 1
-      if (p1 && promoImgs[1]) {
-        const pImg = isMobile ? (p1.mobileImage || p1.image) : p1.image;
-        if (pImg) {
-          promoImgs[1].src = getUrl(pImg);
-          const link = promoImgs[1].closest('a');
-          if (link) link.href = p1.link || '#';
-        }
-      }
-    }
+    });
+  });
 
-    // Secondary Promotional Banner (e.g., allproducts.html)
-    const subPromo = document.getElementById('promo-banner');
-    if (subPromo && p0) {
-      const pImg = isMobile ? (p0.mobileImage || p0.image) : p0.image;
-      if (pImg) {
-        subPromo.src = getUrl(pImg);
-        const link = subPromo.closest('a');
-        if (link) link.href = p0.link || '#';
-      }
-    }
-
-  } catch (err) {
-    console.warn("Dynamic banners could not load; using fallback defaults.", err);
-  }
+  await BannerEngine.init();
 }
+
+
 
 /**
  * FEATURED PRODUCTS LOGIC
@@ -1340,11 +1530,24 @@ async function loadCategoriesSection() {
 
     render();
 
-    // Poster: first category banner
+    // Poster: first category banner (Respects Banner Protection)
     const poster = document.getElementById('categories-poster');
-    if (poster && cats[0]?.banner) {
-      const src = cats[0].banner.startsWith('http') ? cats[0].banner : `${API_BASE.replace('/api', '')}/uploads/${cats[0].banner}`;
-      poster.innerHTML = `<img src="${src}" alt="Categories" onerror="this.src='assets/images/deafult.png'">`;
+    if (poster) {
+      const img = poster.querySelector('img');
+      // Only apply category fallback if no dynamic banner was injected by loadBanners()
+      if (!BannerRenderer.isDynamic(img)) {
+        if (cats[0]?.banner) {
+          const src = cats[0].banner.startsWith('http') ? cats[0].banner : `${API_BASE.replace('/api', '')}/uploads/${cats[0].banner}`;
+          if (img) {
+            img.src = src;
+            img.alt = cats[0].name;
+            BannerRenderer.mark(img); // Mark as non-dynamic but protected from further overwrites if needed
+          } else {
+            poster.innerHTML = `<img src="${src}" alt="${cats[0].name}" onerror="this.src='assets/images/deafult.png'">`;
+          }
+        }
+      } else {
+      }
     }
 
     const pag = document.getElementById('categories-pagination');
@@ -1415,34 +1618,12 @@ async function initAllProductsPage() {
       renderCategories();
       applyFilters();
       setupEventListeners();
-      loadPromotionalBanner();
     } catch (err) {
       console.error("[AllProducts] Init Error:", err);
       if (grid) grid.innerHTML = '<div class="col-span-2 lg:col-span-5 text-center py-12 text-red-500">Failed to load products. Please refresh.</div>';
     }
   }
 
-  async function loadPromotionalBanner() {
-    const bannerImg = document.getElementById('promo-banner');
-    const bannerLink = document.getElementById('promo-banner-link');
-    if (!bannerImg) return;
-
-    try {
-      const data = await apiCall('/banners/public');
-      const promoBanners = (data.banners || []).filter(b => b.type === 'promotional' && b.isActive);
-      if (promoBanners.length > 0) {
-        const banner = promoBanners[0];
-        const fullPath = banner.image.startsWith('http') ? banner.image : `${IMAGE_BASE}${banner.image}`;
-        if (bannerLink && banner.link) {
-          bannerLink.href = banner.link;
-        }
-        bannerImg.src = fullPath;
-        bannerImg.style.opacity = '1';
-      }
-    } catch (err) {
-      console.warn("[AllProducts] Banner Error:", err);
-    }
-  }
 
   function applyFilters() {
     try {
@@ -1799,6 +1980,11 @@ async function initProductPage() {
 
     const thumbContainer = document.getElementById('product-thumbnails-desktop');
     const mobileThumbDots = document.getElementById('mobileCarouselDots');
+
+    // Update the lightbox/slider system with real images
+    if (window.productGallery && p.images?.length) {
+      window.productGallery.update(p.images);
+    }
 
     if (thumbContainer && p.images?.length) {
       thumbContainer.innerHTML = p.images.slice(0, 4).map(img => {
@@ -3405,12 +3591,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Run Cart Migration on every page load to ensure device consistency
   if (typeof Cart !== 'undefined' && Cart.migrate) Cart.migrate();
 
-  // DEBUG MODE: Log auth state for mobile troubleshooting
-  console.log("--- [Springwala Auth Debug] ---");
-  console.log("Page:", window.location.pathname);
-  console.log("Token exists:", !!Auth.getToken());
-  console.log("User cached:", !!Auth.getUser());
   console.log("------------------------------");
+
+  // Load Banners (Global and Page Specific) - NON-BLOCKING
+  loadPageBanners().catch(err => console.warn('[DOMContentLoaded] Banner load failed:', err));
 
   // Inject CSS for animations and mobile states
   if (!document.getElementById('sw-styles')) {
@@ -3424,6 +3608,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       .overflow-hidden { overflow: hidden !important; }
       #mobile-sub-header { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
       #mobile-sub-header.hide-sub { max-height: 0; opacity: 0; pointer-events: none; }
+      
+      /* Hero Carousel Styles */
+      .sw-slider { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .sw-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease-in-out; pointer-events: none; }
+      .sw-slide.active { opacity: 1; pointer-events: auto; position: relative; }
+      .sw-slide img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
     `;
     document.head.appendChild(style);
   }
@@ -3526,6 +3716,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initFilterDrawer();
   initSearch();
   loadCartCount();
+
+  // Smart Responsive Banner Switch is now handled globally above
 
   // Highlight active nav items (desktop & mobile)
   const currentPage = document.body.dataset.page;

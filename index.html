@@ -21,7 +21,7 @@
 </head>
 <body class="bg-white text-gray-900 font-['Roboto']" data-page="index">
 
-    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center" data-banner-type="informational" data-banner-position="99">
         <span class="text-white text-[13px]">Get discount on every selected product</span>
     </div>
 
@@ -151,7 +151,7 @@
         </ul>
 
         <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
-            <img src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
+            <img id="customer-support-slot" src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
         </div>
     </div>
 
@@ -195,18 +195,18 @@
     <section class="springwala-hero">
         <div class="hero-desktop-wrapper">
             <div class="hero-container" id="hero-desktop-container">
-                <div class="hero-box main-banner" id="hero-slider-desktop">
+                <div class="hero-box main-banner" id="hero-slider-desktop" data-banner-type="homepage" data-banner-position="1">
                     <a href="#">
                         <img src="assets/slide-banners/desktop-slide1.png" alt="ISO Standard Die Springs">
                     </a>
                 </div>
                 <div class="hero-right-col" id="hero-right-col">
-                    <div class="hero-box small-banner">
+                    <div class="hero-box small-banner" data-banner-type="homepage" data-banner-position="2">
                         <a href="#">
                             <img src="assets/banners/banner1.png" alt="Industrial Components">
                         </a>
                     </div>
-                    <div class="hero-box small-banner">
+                    <div class="hero-box small-banner" data-banner-type="homepage" data-banner-position="3">
                         <a href="#">
                             <img src="assets/banners/banner2.png" alt="Precision Circlips">
                         </a>
@@ -215,7 +215,7 @@
             </div>
         </div>
 
-        <div class="hero-mobile-wrapper" id="hero-slider-mobile">
+        <div class="hero-mobile-wrapper" id="hero-slider-mobile" data-banner-type="homepage" data-banner-position="1">
             <!-- Mobile Banners will be injected here -->
             <div class="mobile-banner-box">
                 <a href="#">
@@ -239,7 +239,7 @@
 
             <div class="ec-content-wrapper">
 
-                <div class="ec-poster" id="categories-poster">
+                <div class="ec-poster" id="categories-poster" data-banner-type="category" data-banner-position="1">
                     <img src="assets/images/deafult.png" alt="Industrial Components Poster">
                 </div>
 
@@ -336,14 +336,12 @@
     <section class="w-full bg-[#f9f9f9] pb-8 pt-2">
         <div class="max-w-[1440px] mx-auto px-4 md:px-[80px]">
             <div class="flex flex-col md:flex-row gap-[24px] justify-between" id="promo-banners-container">
-                <!-- Promo banners will be injected here -->
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/banner1.png" alt="Promotional Banner 1"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+                <!-- Promo banners injected here -->
+                <div class="flex-1 banner-slot promo-slot shadow-sm transition" data-banner-position="1">
+                    <img src="assets/banners/banner1.png" alt="Promotional Banner 1">
                 </div>
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/banner2.png" alt="Promotional Banner 2"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+                <div class="flex-1 banner-slot promo-slot shadow-sm transition" data-banner-position="2">
+                    <img src="assets/banners/banner2.png" alt="Promotional Banner 2">
                 </div>
             </div>
         </div>
@@ -390,19 +388,16 @@
     <!-- Trust Banners Section -->
     <section class="w-full bg-[#f9f9f9] py-6">
         <div class="max-w-[1440px] mx-auto px-4 md:px-[80px]">
-            <div class="flex flex-col md:flex-row gap-[24px] justify-between">
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/trust1.png" alt="Trust 1"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+            <div class="flex flex-col md:flex-row gap-[24px] justify-between" id="features-banners-container">
+                <!-- Features banners injected here -->
+                <div class="flex-1 banner-slot features-slot shadow-sm transition" data-banner-position="1">
+                    <img src="assets/banners/trust1.png" alt="Trust 1">
                 </div>
-                <!-- Note: order classes adjust position on desktop vs mobile if needed, assuming trust2 is fast dispatch, trust3 is bulk order -->
-                <div class="flex-1 rounded-[10px] overflow-hidden md:order-last">
-                    <img src="assets/banners/trust2.png" alt="Trust 2"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+                <div class="flex-1 banner-slot features-slot shadow-sm transition" data-banner-position="2">
+                    <img src="assets/banners/trust2.png" alt="Trust 2">
                 </div>
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/trust3.png" alt="Trust 3"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+                <div class="flex-1 banner-slot features-slot shadow-sm transition" data-banner-position="3">
+                    <img src="assets/banners/trust3.png" alt="Trust 3">
                 </div>
             </div>
         </div>
@@ -440,14 +435,13 @@
     <!-- Mid Promotional Banners Section -->
     <section class="w-full bg-[#f9f9f9] pb-8">
         <div class="max-w-[1440px] mx-auto px-4 md:px-[80px]">
-            <div class="flex flex-col md:flex-row gap-[24px] justify-between">
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/banner1.png" alt="Promotional Banner 1"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+            <div class="flex flex-col md:flex-row gap-[24px] justify-between" id="advertisement-banners-container">
+                <!-- Advertisement banners injected here -->
+                <div class="flex-1 banner-slot advertisement-slot shadow-sm transition" data-banner-position="1">
+                    <img src="assets/banners/banner1.png" alt="Ad 1">
                 </div>
-                <div class="flex-1 rounded-[10px] overflow-hidden">
-                    <img src="assets/banners/banner2.png" alt="Promotional Banner 2"
-                        class="w-full h-auto object-cover mix-blend-multiply">
+                <div class="flex-1 banner-slot advertisement-slot shadow-sm transition" data-banner-position="2">
+                    <img src="assets/banners/banner2.png" alt="Ad 2">
                 </div>
             </div>
         </div>
@@ -502,12 +496,15 @@
     <!-- WhatsApp Connect Banner -->
     <section class="w-full bg-[#f9f9f9] py-8">
         <div class="max-w-[1440px] mx-auto px-4 md:px-[80px]">
-            <a href="#" class="block w-full rounded-[10px] overflow-hidden hover:opacity-95 transition">
-                <img src="assets/banners/desktop-connect.png" alt="Connect on WhatsApp"
-                    class="w-full h-auto object-cover mix-blend-multiply hidden md:block">
-                <img src="assets/banners/mobile-connect.png" alt="Connect on WhatsApp"
-                    class="w-full h-auto object-cover mix-blend-multiply block md:hidden">
-            </a>
+            <div id="informational-banners-container" class="banner-slot informational-slot shadow-sm transition" data-banner-type="informational">
+                <!-- Informational banners injected here -->
+                <a href="#" class="block w-full h-full">
+                    <picture>
+                        <source media="(max-width: 768px)" srcset="assets/banners/mobile-connect.png">
+                        <img src="assets/banners/desktop-connect.png" alt="Connect on WhatsApp" class="w-full h-full object-cover">
+                    </picture>
+                </a>
+            </div>
         </div>
     </section>
 

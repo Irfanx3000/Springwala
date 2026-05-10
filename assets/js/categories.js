@@ -6,14 +6,13 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
-  initSidebar();
-  initAdminHeader();
   await loadCategories();
   bindCategoryEvents();
 });
 
 let editCategoryId = null;
 let modalType = 'category'; // 'category' | 'subcategory'
+let selectedCategories = new Set();
 
 // ── Load All Categories ────────────────────────────────────────────────────────
 async function loadCategories(search = '') {
@@ -61,6 +60,8 @@ function buildCategoryRow(cat) {
   const subCount = cat.subcategories?.length || 0;
   const productCount = cat.productCount || 0;
   const dateStr = new Date(cat.createdAt || Date.now()).toLocaleDateString('en-GB');
+  const fallback = '../assets/images/deafult.png';
+  const isSelected = selectedCategories.has(cat._id);
 
   const subRows = (cat.subcategories || []).map(sub => `
     <div class="grid grid-cols-[60px_60px_1fr_150px_150px_150px_120px] gap-4 items-center px-4 py-3 bg-[#FAFAFA] border-b border-[#EFEFEF] hover:bg-gray-50 transition">
@@ -68,7 +69,7 @@ function buildCategoryRow(cat) {
         <div class="w-4 h-4 border border-gray-300 rounded-[3px] bg-white hidden sm:block"></div>
       </div>
       <div class="w-10 h-10 rounded-[5px] border border-[#EDEDED] overflow-hidden bg-white flex items-center justify-center mx-auto">
-        ${sub.banner ? `<img src="${imageUrl(sub.banner)}" class="w-full h-full object-cover">` : `<svg class="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>`}
+        <img src="${imageUrl(sub.banner)}" class="w-full h-full object-cover" onerror="this.src='${fallback}'">
       </div>
       <p class="font-['Roboto'] font-medium text-[15px] text-[#1E1E1E] truncate">${sub.name}</p>
       <p class="font-['Roboto'] text-[15px] text-center text-black">-</p>
@@ -90,12 +91,12 @@ function buildCategoryRow(cat) {
   return `
     <div class="category-wrapper border-b border-[#D7D7D7] last:border-0" data-cat-id="${cat._id}">
       <div class="category-header grid grid-cols-[60px_60px_1fr_150px_150px_150px_120px] gap-4 items-center px-4 py-3 bg-white hover:bg-gray-50/50 transition cursor-pointer">
-        <div class="flex items-center gap-2 relative pl-1" onclick="event.stopPropagation()">
-          <div class="w-[14px] h-[14px] border border-gray-400 rounded-[3px] bg-white shrink-0 cursor-pointer hover:bg-gray-100"></div>
+        <div class="flex items-center gap-2 relative pl-1">
+          <input type="checkbox" class="cat-checkbox w-4 h-4 cursor-pointer accent-[#BE2229]" ${isSelected ? 'checked' : ''} onclick="toggleCategorySelection('${cat._id}', event)">
           <svg class="chevron cursor-pointer w-4 h-4 text-black transition-transform duration-200 rotate-0 shrink-0 select-none pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </div>
         <div class="w-10 h-10 rounded-[5px] border border-[#EDEDED] overflow-hidden bg-white flex items-center justify-center mx-auto">
-          ${cat.banner ? `<img src="${imageUrl(cat.banner)}" class="w-full h-full object-cover">` : `<svg class="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>`}
+          <img src="${imageUrl(cat.banner)}" class="w-full h-full object-cover" onerror="this.src='${fallback}'">
         </div>
         <p class="font-['Roboto'] font-medium text-[15px] text-[#1E1E1E] truncate">${cat.name}</p>
         <p class="font-['Roboto'] text-[15px] text-center text-black">${subCount}</p>
@@ -332,4 +333,64 @@ function bindCategoryEvents() {
   document.getElementById('category-sort')?.addEventListener('change', () => {
     loadCategories(document.getElementById('category-search')?.value?.trim() || '');
   });
+}
+// ─── Selection Logic ────────────────────────────────────────────────────────
+function toggleCategorySelection(id, event) {
+  if (event) event.stopPropagation();
+  if (selectedCategories.has(id)) selectedCategories.delete(id);
+  else selectedCategories.add(id);
+  renderOnlySelection();
+}
+
+function toggleCategorySelection(id, event) {
+  if (event) event.stopPropagation();
+  if (selectedCategories.has(id)) selectedCategories.delete(id);
+  else selectedCategories.add(id);
+  renderOnlySelection();
+}
+
+function renderOnlySelection() {
+  document.querySelectorAll('.category-wrapper').forEach(wrapper => {
+    const id = wrapper.dataset.catId;
+    const checkbox = wrapper.querySelector('.cat-checkbox');
+    if (checkbox) checkbox.checked = selectedCategories.has(id);
+  });
+}
+
+async function bulkDelete() {
+  if (!selectedCategories.size) return Toast.error('Please select categories to delete');
+  
+  const ok = await Confirm.show(`Delete ${selectedCategories.size} categories?`, 'This will also delete their subcategories and cannot be undone.', 'Delete All');
+  if (!ok) return;
+
+  try {
+    const ids = Array.from(selectedCategories);
+    // Assuming backend supports bulk delete or we loop
+    let successCount = 0;
+    for (const id of ids) {
+      const res = await api.delete(`/categories/${id}`);
+      if (res) successCount++;
+    }
+
+    Toast.success(`Successfully deleted ${successCount} categories`);
+    selectedCategories.clear();
+    loadCategories();
+  } catch (err) {
+    Toast.error('Bulk delete failed: ' + err.message);
+  }
+}
+
+// Bind bulk delete button
+function bindCategoryEvents() {
+    const bulkBtn = document.getElementById('bulk-delete-categories');
+    if (bulkBtn) bulkBtn.onclick = bulkDelete;
+
+    const searchInput = document.getElementById('category-search');
+    searchInput?.addEventListener('input', (e) => {
+        loadCategories(e.target.value);
+    });
+
+    ['category-filter-status', 'category-sort'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => loadCategories());
+    });
 }

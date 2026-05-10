@@ -122,6 +122,60 @@ body {
     display: none;
 }
 
+/* --- Banner Slot System --- */
+.banner-slot {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: #f0f0f0; /* Fallback background */
+}
+
+.banner-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.banner-slot:hover img {
+    transform: scale(1.02);
+}
+
+/* Specific Section Ratios */
+.promo-slot {
+    aspect-ratio: 600 / 220;
+}
+
+.features-slot {
+    aspect-ratio: 400 / 120;
+}
+
+.advertisement-slot {
+    aspect-ratio: 600 / 180;
+}
+
+.informational-slot {
+    aspect-ratio: 1200 / 180;
+}
+
+@media (max-width: 768px) {
+    .promo-slot {
+        aspect-ratio: 1 / 0.4;
+    }
+    .features-slot {
+        aspect-ratio: 1 / 0.3;
+    }
+    .advertisement-slot {
+        aspect-ratio: 1 / 0.35;
+    }
+    .informational-slot {
+        aspect-ratio: 1 / 0.4;
+    }
+}
+
+
 /* =========================================
    MOBILE RESPONSIVE (Max-width 768px)
    ========================================= */

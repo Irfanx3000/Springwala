@@ -21,7 +21,7 @@
 
 <body class="bg-[#F7F7F7] text-gray-900 font-['Roboto']" data-page="orders">
 
-    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center">
+    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center" data-banner-type="informational" data-banner-position="99">
         <span class="text-white text-[13px]">Get discount on every selected product</span>
     </div>
 
@@ -155,7 +155,7 @@
             </ul>
 
             <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
-                <img src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
+                <img id="customer-support-slot" src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
             </div>
         </div>
     </div>
@@ -248,8 +248,8 @@
 
                 <!-- RIGHT COLUMN (340px sidebar) -->
                 <div class="w-[340px] flex-shrink-0">
-                    <div
-                        class="w-[340px] h-full min-h-[462px] bg-[#E8E8E8] rounded-[7px] overflow-hidden flex items-center justify-center p-[40px]">
+                    <div id="orders-sidebar-banner"
+                        class="w-[340px] h-full min-h-[462px] bg-[#E8E8E8] rounded-[7px] overflow-hidden flex items-center justify-center p-[40px]" data-banner-type="advertisement" data-banner-position="1">
                         <img src="assets/images/deafult.png" alt="Advertisement Banner"
                             class="w-full object-contain mix-blend-multiply opacity-[0.65]">
                     </div>

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initHome() {
-    // loadBanners(); // Centralized in app.js
+    loadBanners(); // Load all types isolated
     loadCategories();
     loadTopSold();
     loadFeatured();
@@ -26,19 +26,37 @@ async function initHome() {
     loadTopCategories(); 
 }
 
-// ─── Banners ──────────────────────────────────────────────────────────────────
+// ─── Banners (STRICT TYPE ISOLATION) ──────────────────────────────────────────
 async function loadBanners() {
+    // Each section explicitly requests its own type
+    fetchAndRenderBanners('homepage', renderMainBanners);
+    fetchAndRenderBanners('promotional', renderPromoBanners, 'promo-banners-container');
+    fetchAndRenderBanners('features', renderStandardBanners, 'features-banners-container');
+    fetchAndRenderBanners('advertisement', renderStandardBanners, 'advertisement-banners-container');
+    fetchAndRenderBanners('informational', renderInfoBanners, 'informational-banners-container');
+    fetchAndRenderBanners('category', renderCategoryPoster, 'categories-poster');
+}
+
+async function fetchAndRenderBanners(type, renderFn, containerId = null) {
     try {
-        const data = await api.get('/user/banners', { isActive: 'true' });
-        if (!data?.success) return;
+        const data = await api.get('/user/banners', { type, isActive: 'true' });
+        if (!data?.success || !data.banners.length) {
+            if (containerId) {
+                const container = document.getElementById(containerId);
+                if (container) container.closest('section')?.classList.add('hidden');
+            }
+            return;
+        }
+        
+        // Ensure container is visible if it was hidden
+        if (containerId) {
+            const container = document.getElementById(containerId);
+            if (container) container.closest('section')?.classList.remove('hidden');
+        }
 
-        const mainBanners = data.banners.filter(b => b.type === 'main');
-        const promoBanners = data.banners.filter(b => b.type === 'promotional');
-
-        renderMainBanners(mainBanners);
-        renderPromoBanners(promoBanners);
+        renderFn(data.banners);
     } catch (err) {
-        console.error('Error loading banners:', err);
+        console.warn(`[Banner] Failed to load ${type}:`, err);
     }
 }
 
@@ -55,7 +73,10 @@ function renderMainBanners(banners) {
         html += `
             <div class="hero-box main-banner">
                 <a href="${main.link || '#'}">
-                    <img src="${imageUrl(main.image)}" alt="${main.altText}">
+                    <picture>
+                        <source media="(max-width: 768px)" srcset="${imageUrl(main.mobileImage || main.image)}">
+                        <img src="${imageUrl(main.image)}" alt="${main.altText}" class="w-full h-full object-cover">
+                    </picture>
                 </a>
             </div>
             <div class="hero-right-col">
@@ -66,7 +87,10 @@ function renderMainBanners(banners) {
             html += `
                 <div class="hero-box small-banner">
                     <a href="${b.link || '#'}">
-                        <img src="${imageUrl(b.image)}" alt="${b.altText}">
+                        <picture>
+                            <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                            <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-full object-cover">
+                        </picture>
                     </a>
                 </div>
             `;
@@ -81,7 +105,10 @@ function renderMainBanners(banners) {
         mobileContainer.innerHTML = `
             <div class="mobile-banner-box">
                 <a href="${b.link || '#'}">
-                    <img src="${imageUrl(b.mobileImage || b.image)}" alt="${b.altText}">
+                    <picture>
+                        <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                        <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-full object-cover">
+                    </picture>
                 </a>
             </div>
         `;
@@ -92,13 +119,66 @@ function renderPromoBanners(banners) {
     const container = document.getElementById('promo-banners-container');
     if (!container || !banners.length) return;
 
-    container.innerHTML = banners.slice(0, 2).map(b => `
-        <div class="flex-1 rounded-[10px] overflow-hidden">
+    container.innerHTML = banners.slice(0, 3).map(b => `
+        <div class="flex-1 rounded-[10px] overflow-hidden shadow-sm hover:shadow-md transition">
             <a href="${b.link || '#'}">
-                <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-auto object-cover mix-blend-multiply">
+                <picture>
+                    <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                    <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-auto object-cover">
+                </picture>
             </a>
         </div>
     `).join('');
+}
+
+function renderStandardBanners(banners) {
+    // Generic renderer for features and advertisement strips
+    const container = banners[0].type === 'features' 
+        ? document.getElementById('features-banners-container')
+        : document.getElementById('advertisement-banners-container');
+
+    if (!container) return;
+
+    container.innerHTML = banners.map(b => `
+        <div class="flex-1 rounded-[10px] overflow-hidden shadow-sm hover:shadow-md transition">
+            <a href="${b.link || '#'}">
+                <picture>
+                    <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                    <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-auto object-cover">
+                </picture>
+            </a>
+        </div>
+    `).join('');
+}
+
+function renderInfoBanners(banners) {
+    const container = document.getElementById('informational-banners-container');
+    if (!container) return;
+
+    const b = banners[0]; // Usually just one wide strip
+    container.innerHTML = `
+        <a href="${b.link || '#'}" class="block w-full rounded-[10px] overflow-hidden hover:opacity-95 transition shadow-sm">
+            <picture>
+                <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-auto object-cover">
+            </picture>
+        </a>
+    `;
+}
+
+function renderCategoryPoster(banners) {
+    const container = document.getElementById('categories-poster');
+    if (!container) return;
+
+    const b = banners[0];
+    container.innerHTML = `
+        <a href="${b.link || '#'}">
+            <picture>
+                <source media="(max-width: 768px)" srcset="${imageUrl(b.mobileImage || b.image)}">
+                <img src="${imageUrl(b.image)}" alt="${b.altText}" class="w-full h-full object-cover rounded-[10px]">
+            </picture>
+        </a>
+    `;
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────

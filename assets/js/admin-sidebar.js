@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSidebar();
     initDropdowns();
     initActiveLink();
+    initAdminHeader();
 });
 
 /**
@@ -73,7 +74,7 @@ function initSidebar() {
  */
 function initDropdowns() {
     const dropdowns = [
-        { btnId: 'products-menu-btn', subId: 'products-submenu', chevId: 'products-menu-chevron', keywords: ['products/', 'categories.html'] },
+        { btnId: 'products-menu-btn', subId: 'products-submenu', chevId: 'products-menu-chevron', keywords: ['products/'] },
         { btnId: 'banners-menu-btn', subId: 'banners-submenu', chevId: 'banners-menu-chevron', keywords: ['banners/'] }
     ];
 
@@ -154,4 +155,14 @@ function initActiveLink() {
             }
         }
     });
+}
+
+/**
+ * Inject admin name/role in header
+ */
+function initAdminHeader() {
+    const admin = Auth.getAdmin();
+    if (!admin) return;
+    document.querySelectorAll('.admin-name').forEach(el => el.textContent = admin.name || 'Admin');
+    document.querySelectorAll('.admin-role').forEach(el => el.textContent = admin.role || '');
 }

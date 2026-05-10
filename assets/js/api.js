@@ -40,7 +40,18 @@ async function apiFetch(endpoint, opts = {}) {
   }
 
   let data;
-  try { data = await res.json(); } catch { throw new Error('Invalid server response'); }
+  try { 
+    const text = await res.text();
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // If not JSON, use the raw text or a default message
+      throw new Error(text || `Server error ${res.status}`);
+    }
+  } catch (e) { 
+    throw new Error(e.message || 'Invalid server response'); 
+  }
+  
   if (!res.ok) throw new Error(data.message || `Server error ${res.status}`);
   return data;
 }
@@ -125,9 +136,22 @@ function timeAgo(d) {
 }
 
 function imageUrl(path) {
-  if (!path) return '';
+  if (!path) return '../assets/images/deafult.png';
   if (path.startsWith('http')) return path;
-  return `${BASE_URL}${path}`;
+  if (path.startsWith('data:')) return path;
+
+  // 1. Normalize the path (ensure no leading slash for logic)
+  let cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+  // 2. Intelligence: If the path does NOT start with 'uploads/' or 'assets/', 
+  // and doesn't look like a direct root file, assume it's an upload
+  if (!cleanPath.startsWith('uploads/') && !cleanPath.startsWith('assets/')) {
+    cleanPath = 'uploads/' + cleanPath;
+  }
+
+  // 3. Construct full URL using BASE_URL (ensuring no trailing slash on base)
+  const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  return `${cleanBase}/${cleanPath}`;
 }
 
 function orderStatusBadge(s) {
@@ -164,46 +188,6 @@ function buildPagination(containerId, currentPage, totalPages, onPage) {
 
   el.querySelector('.prev-page-btn').onclick = () => onPage(currentPage - 1);
   el.querySelector('.next-page-btn').onclick = () => onPage(currentPage + 1);
-}
-
-// Inject admin name/role in header
-function initAdminHeader() {
-  const admin = Auth.getAdmin();
-  if (!admin) return;
-  document.querySelectorAll('.admin-name').forEach(el => el.textContent = admin.name || 'Admin');
-  document.querySelectorAll('.admin-role').forEach(el => el.textContent = admin.role || '');
-}
-
-// Sidebar submenu toggle (reused across all pages)
-function initSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  const openBtn = document.getElementById('open-sidebar');
-  const closeBtn = document.getElementById('close-sidebar');
-
-  if (!sidebar || !openBtn) return;
-  if (openBtn.dataset.sidebarInit) return; // Guard against double init
-  openBtn.dataset.sidebarInit = 'true';
-
-  const toggle = () => { 
-    sidebar.classList.toggle('-translate-x-full'); 
-    overlay?.classList.toggle('hidden'); 
-  };
-  openBtn.addEventListener('click', toggle);
-  closeBtn?.addEventListener('click', toggle);
-  overlay?.addEventListener('click', toggle);
-
-  ['products', 'banners'].forEach(key => {
-    const btn = document.getElementById(`${key}-menu-btn`);
-    const sub = document.getElementById(`${key}-submenu`);
-    const chev = document.getElementById(`${key}-menu-chevron`);
-    btn?.addEventListener('click', e => {
-      e.preventDefault();
-      const hidden = sub.classList.contains('hidden');
-      if (hidden) { sub.classList.remove('hidden'); sub.classList.add('flex'); chev?.classList.add('rotate-180'); }
-      else { sub.classList.add('hidden'); sub.classList.remove('flex'); chev?.classList.remove('rotate-180'); }
-    });
-  });
 }
 
 // ─── Global Search ─────────────────────────────────────────────────────────────
@@ -359,7 +343,6 @@ function initGlobalSearch() {
 
 // Auto-init common features
 document.addEventListener('DOMContentLoaded', () => {
-  initSidebar();
-  initAdminHeader();
+  // UI features like sidebar are now handled by admin-sidebar.js
   initGlobalSearch();
 });
