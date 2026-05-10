@@ -12,6 +12,7 @@ const Auth = window.Auth = {
     state: {
         isInitialized: false,
         isValidating: false,
+        validationPromise: null,
         admin: null,
         token: null
     },
@@ -23,6 +24,7 @@ const Auth = window.Auth = {
     init: async function() {
         if (this.state.isInitialized) return this.isLoggedIn();
 
+        console.log("[AUTH] Hydrating state from storage...");
         this.state.token = localStorage.getItem(this.TOKEN_KEY);
         try {
             const userData = localStorage.getItem(this.USER_KEY);
@@ -33,7 +35,10 @@ const Auth = window.Auth = {
         }
 
         this.state.isInitialized = true;
-        console.log("[AUTH] State Hydrated:", { loggedIn: !!this.state.token });
+        console.log("[AUTH] State Hydrated:", { 
+            hasToken: !!this.state.token, 
+            admin: this.state.admin?.email || 'none' 
+        });
         
         // Show body if hidden by bootstrap
         document.documentElement.classList.add('auth-initialized');
@@ -44,6 +49,7 @@ const Auth = window.Auth = {
     },
 
     getToken: function() {
+        // SSOT: Always prefer memory state if initialized, otherwise storage
         return this.state.token || localStorage.getItem(this.TOKEN_KEY);
     },
 
@@ -52,6 +58,7 @@ const Auth = window.Auth = {
     },
 
     setSession: function(token, admin) {
+        console.log("[AUTH] Setting new session for:", admin.email);
         this.state.token = token;
         this.state.admin = admin;
         localStorage.setItem(this.TOKEN_KEY, token);
@@ -60,6 +67,7 @@ const Auth = window.Auth = {
     },
 
     clearSession: function() {
+        console.log("[AUTH] Clearing session and local storage");
         this.state.token = null;
         this.state.admin = null;
         localStorage.removeItem(this.TOKEN_KEY);
@@ -70,10 +78,11 @@ const Auth = window.Auth = {
         return !!this.getToken();
     },
 
-    logout: function(message) {
-        if (message) console.warn("[AUTH] Logout triggered:", message);
+    logout: function(reason = "Manual") {
+        console.warn(`[AUTH] Logout triggered. Reason: ${reason}`);
         this.clearSession();
         if (!window.location.pathname.includes('login.html')) {
+            console.log("[AUTH] Redirecting to login page...");
             window.location.href = '/admin/login.html';
         }
     },
@@ -90,52 +99,68 @@ const Auth = window.Auth = {
      * Prevents race conditions on dashboard load.
      */
     requireAdminAuth: function() {
-        const token = localStorage.getItem(this.TOKEN_KEY);
+        const token = this.getToken();
         if (!token) {
-            console.warn("[AUTH] No token found during sync check. Redirecting...");
-            this.logout();
+            console.warn("[AUTH] No token found during requirement check. Redirecting...");
+            this.logout("Missing Token");
             return false;
         }
         return true;
     },
 
     /**
-     * Async validation with retry logic.
+     * Async validation with retry logic and execution lock.
      * Prevents logouts due to temporary network blips.
      */
     validate: async function(retries = 1) {
+        // Task 5: Prevent duplicate concurrent validation
+        if (this.state.validationPromise) {
+            console.log("[AUTH] Validation already in progress, awaiting existing promise...");
+            return this.state.validationPromise;
+        }
+
         const token = this.getToken();
         if (!token) return false;
 
-        this.state.isValidating = true;
-        try {
-            const res = await fetch(`${CONFIG.API_BASE_URL}/auth/admin/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        this.state.validationPromise = (async () => {
+            this.state.isValidating = true;
+            try {
+                console.log("[AUTH] Validating token with server...");
+                const res = await fetch(`${CONFIG.API_BASE_URL}/auth/admin/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-            if (res.status === 401) {
-                this.logout("Session truly expired (401)");
+                if (res.status === 401) {
+                    this.logout("Server 401: Session expired");
+                    return false;
+                }
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                if (data.success) {
+                    console.log("[AUTH] Token validated successfully");
+                    this.setSession(token, data.admin); // Refresh cache
+                    return true;
+                }
                 return false;
+            } catch (err) {
+                console.error(`[AUTH] Validation error (${retries} retries left):`, err.message);
+                if (retries > 0) {
+                    console.log("[AUTH] Retrying validation in 1.5s...");
+                    await new Promise(r => setTimeout(r, 1500));
+                    this.state.validationPromise = null; // Reset lock for retry
+                    return this.validate(retries - 1);
+                }
+                console.warn("[AUTH] Network failure during validation. Preserving session for now.");
+                return true; // Don't logout on network error
+            } finally {
+                this.state.isValidating = false;
+                this.state.validationPromise = null;
             }
+        })();
 
-            if (!res.ok) throw new Error(`Server returned ${res.status}`);
-            
-            const data = await res.json();
-            if (data.success) {
-                this.setSession(token, data.admin); // Refresh cache
-                return true;
-            }
-            return false;
-        } catch (err) {
-            console.error(`[AUTH] Validation attempt failed (${retries} left):`, err.message);
-            if (retries > 0) {
-                await new Promise(r => setTimeout(r, 1000));
-                return this.validate(retries - 1);
-            }
-            return true; // Don't logout on network error
-        } finally {
-            this.state.isValidating = false;
-        }
+        return this.state.validationPromise;
     }
 };
 
@@ -146,6 +171,8 @@ const Auth = window.Auth = {
     const isLoginPage = path.includes('login.html');
 
     if (isAdminPage && !isLoginPage) {
+        console.log("[AUTH] Bootstrap started for protected page");
+        
         // Prevent FOPC
         const style = document.createElement('style');
         style.textContent = `
@@ -167,12 +194,20 @@ const Auth = window.Auth = {
         const loader = document.createElement('div');
         loader.id = 'sw-auth-loader';
         loader.innerHTML = '<div class="sw-spinner"></div><p style="margin-top:15px;color:#666;font-size:14px;">Verifying Session...</p>';
-        document.body.appendChild(loader);
+        
+        // Ensure body exists before appending
+        const checkBody = setInterval(() => {
+            if (document.body) {
+                document.body.appendChild(loader);
+                clearInterval(checkBody);
+            }
+        }, 10);
 
         // Run Init
         Auth.init().then(loggedIn => {
             if (!loggedIn) {
-                Auth.logout("Bootstrap: No session found");
+                console.warn("[AUTH] No session found during bootstrap. Redirecting...");
+                Auth.logout("Bootstrap: No session");
             } else {
                 Auth.validate(); // Background verify
             }
