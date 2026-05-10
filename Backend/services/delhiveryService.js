@@ -7,29 +7,33 @@ const axios = require('axios');
 
 const TOKEN = (process.env.DELHIVERY_TOKEN || '').trim();
 const BASE_URL = (process.env.DELHIVERY_BASE_URL || 'https://track.delhivery.com').trim();
+const TRACKING_BASE_URL = (process.env.DELHIVERY_TRACKING_URL || 'https://www.delhivery.com/track/package').trim();
 
-// Pickup location details (Business defaults)
-const PICKUP_LOCATION = {
-  name: "New India Industrial Spring MFG.",
-  add: "C 5, Shiv Bhole Laghu Udyog Nagar, Ambewadi, Near Vitrum Glass Factory, LBS Marg, Vikhroli West, Mumbai - 400083",
-  city: "Mumbai",
-  pin: "400083",
-  phone: "8080192827",
-  email: "newindiaspring@yahoo.com",
-  gstin: "27AABPH9303E1Z3"
+// Registered Pickup Warehouse Name (SSOT for Delhivery Shipment API)
+const PICKUP_WAREHOUSE_NAME = "Springwala";
+
+/**
+ * Normalizes weight to grams with safety bounds (100g to 50000g)
+ * Application SSOT: Weights are stored in grams.
+ */
+exports.normalizeWeightToGrams = (weight) => {
+  let w = parseFloat(weight);
+  if (isNaN(w) || w <= 0) w = 500; // Default 500g fallback
+  
+  // Safety Bounds
+  if (w < 100) w = 100;
+  if (w > 50000) w = 50000;
+  
+  return Math.round(w);
 };
 
 /**
- * Normalizes any weight input to grams for Delhivery
+ * Sanitizes phone numbers to 10-digit Indian mobile format
  */
-exports.normalizeWeightToGrams = (weight, unit = 'kg') => {
-  let w = parseFloat(weight) || 0.5; // Default 500g
-  const u = (unit || 'kg').toLowerCase();
-
-  if (u === 'kg') return w * 1000;
-  if (u === 'g' || u === 'grams') return w;
-  
-  return w * 1000; // Assume kg if unknown
+const sanitizePhone = (phone) => {
+  if (!phone) return "";
+  const digits = phone.toString().replace(/\D/g, '');
+  return digits.slice(-10);
 };
 
 const delhiveryClient = axios.create({
@@ -49,12 +53,15 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
   try {
     if (!TOKEN) return null;
 
+    const originPincode = process.env.PICKUP_PINCODE || "400083";
+    const weightInGrams = exports.normalizeWeightToGrams(weight);
+
     const params = {
-      md: paymentMode === 'COD' || paymentMode === 'Collect' ? 'S' : 'E', // S for Surface/COD usually, E for Express
-      ss: 'R', // R for Reverse if needed, but usually forward
+      md: paymentMode === 'COD' || paymentMode === 'Collect' ? 'S' : 'E',
+      ss: 'R',
       d_pin: pincode,
-      o_pin: PICKUP_LOCATION.pin,
-      cgm: weight || 500, // in grams
+      o_pin: originPincode,
+      cgm: weightInGrams,
       pt: paymentMode === 'COD' || paymentMode === 'Collect' ? 'COD' : 'Prepaid',
       vcl: totalAmount
     };
@@ -62,7 +69,8 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
     const response = await delhiveryClient.get('/api/kinko/v1/invoice/charges/.json', { params });
     const data = response.data;
 
-    if (data && data[0]) {
+    // Delhivery returns an array of possible services. If empty, pincode is unserviceable.
+    if (data && Array.isArray(data) && data.length > 0 && data[0].total_amount !== undefined) {
       console.log(`[DELHIVERY RATE SUCCESS] Pincode: ${pincode}, Charge: ${data[0].total_amount}`);
       return {
         success: true,
@@ -73,10 +81,15 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
       };
     }
 
-    return null;
+    console.warn(`[DELHIVERY RATE] Pincode ${pincode} is UNSERVICEABLE or API returned no rates.`);
+    return {
+      success: true, // API call succeeded
+      serviceable: false,
+      message: "This pincode is currently not serviceable."
+    };
   } catch (err) {
-    console.error(`[DELHIVERY RATE FAILED]`, err.message);
-    return null;
+    console.error(`[DELHIVERY RATE FAILED]`, err.response?.data || err.message);
+    return { success: false, message: "Could not fetch shipping rates" };
   }
 };
 
@@ -85,6 +98,7 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
  * @param {Object} orderData 
  */
 exports.createShipment = async (orderData, retryCount = 0) => {
+  let payload = null;
   try {
     if (!TOKEN) throw new Error("Delhivery Token is missing in .env");
 
@@ -98,61 +112,68 @@ exports.createShipment = async (orderData, retryCount = 0) => {
       totalWeight 
     } = orderData;
 
-    // Weight Normalization
-    const weightInGrams = exports.normalizeWeightToGrams(totalWeight, 'kg');
+    // 1. Pre-validation & Sanitization
+    const sanitizedPhone = sanitizePhone(shippingAddress.phone);
+    const weightInGrams = exports.normalizeWeightToGrams(totalWeight);
+    const amount = Number(parseFloat(finalAmount || 0).toFixed(2));
+    const qty = items.reduce((acc, i) => acc + Number(i.quantity || 1), 0);
 
-    const payload = {
+    if (!orderNumber) throw new Error("Order number is required for shipment");
+    if (!shippingAddress.pincode) throw new Error("Pincode is required for shipment");
+    if (sanitizedPhone.length !== 10) throw new Error(`Invalid 10-digit phone number: ${shippingAddress.phone}`);
+    if (!items || items.length === 0) throw new Error("Items array is required for shipment");
+
+    payload = {
       format: 'json',
       data: {
-        pickup_location: {
-          name: PICKUP_LOCATION.name,
-          add: PICKUP_LOCATION.add,
-          city: PICKUP_LOCATION.city,
-          pin: PICKUP_LOCATION.pin,
-          phone: PICKUP_LOCATION.phone
-        },
+        pickup_location: PICKUP_WAREHOUSE_NAME, // Task 2: String name only
         shipments: [
           {
             name: customerName || shippingAddress.fullName,
             add: `${shippingAddress.addressLine1}, ${shippingAddress.addressLine2 || ''}`.trim(),
-            pin: shippingAddress.pincode,
+            pin: String(shippingAddress.pincode),
             city: shippingAddress.city,
             state: shippingAddress.state,
             country: shippingAddress.country || 'India',
-            phone: shippingAddress.phone,
+            phone: sanitizedPhone, // Task 4: 10 digits only
             order: orderNumber,
             payment_mode: paymentMethod === 'COD' ? 'Collect' : 'Prepaid',
-            total_amount: finalAmount,
-            cod_amount: paymentMethod === 'COD' ? finalAmount : 0,
-            weight: weightInGrams,
+            total_amount: amount, // Task 5: Numeric, 2 precision
+            cod_amount: paymentMethod === 'COD' ? amount : 0,
+            weight: weightInGrams, // Task 1: grams directly
             products_desc: items.map(i => i.name).join(', ').substring(0, 200),
-            hsn_code: items[0]?.hsn || '',
-            quantity: items.reduce((acc, i) => acc + i.quantity, 0).toString()
+            hsn_code: String(items[0]?.hsn || ''),
+            quantity: qty // Task 3: Numeric
           }
         ]
       }
     };
 
-    console.log(`[SHIPMENT CREATE REQUEST] Order: ${orderNumber} (Attempt ${retryCount + 1})...`);
-    console.log(`[DELHIVERY PAYLOAD]`, JSON.stringify(payload, null, 2));
+    console.log(`[SHIPMENT CREATE REQUEST] Order: ${orderNumber} (Attempt ${retryCount + 1})`);
     
     const response = await delhiveryClient.post('/api/cne/json/create/', payload);
     const data = response.data;
 
+    // Task 6: Full response logging on failure
     if (data && data.success) {
       console.log(`[SHIPMENT CREATED] Order: ${orderNumber}, Waybill: ${data.packages[0]?.waybill}`);
       return {
         success: true,
         waybill: data.packages[0]?.waybill,
         shipmentId: data.packages[0]?.client_order_number || data.packages[0]?.waybill,
+        trackingUrl: `${TRACKING_BASE_URL}/${data.packages[0]?.waybill}`,
         rawResponse: data
       };
     } else {
-      console.error(`[SHIPMENT FAILED] API Error for ${orderNumber}:`, JSON.stringify(data, null, 2));
+      console.error(`[SHIPMENT REJECTED BY DELHIVERY] Order: ${orderNumber}`);
+      console.error(`- Status: ${response.status}`);
+      console.error(`- Payload:`, JSON.stringify(payload, null, 2));
+      console.error(`- Response Body:`, JSON.stringify(data, null, 2));
+
       return {
         success: false,
-        message: data?.rmk || "Unknown Delhivery error",
-        errors: data?.packages[0]?.remarks || []
+        message: data?.rmk || "Delhivery validation failed",
+        errors: data?.packages?.[0]?.remarks || []
       };
     }
   } catch (error) {
@@ -163,7 +184,15 @@ exports.createShipment = async (orderData, retryCount = 0) => {
       return exports.createShipment(orderData, retryCount + 1);
     }
 
-    console.error(`[SHIPMENT FAILED] Connection Error for ${orderData.orderNumber}:`, error.message);
+    console.error(`[SHIPMENT API ERROR] Order: ${orderData.orderNumber}`);
+    if (error.response) {
+      console.error(`- Status: ${error.response.status}`);
+      console.error(`- Data:`, JSON.stringify(error.response.data, null, 2));
+      if (payload) console.error(`- Payload Sent:`, JSON.stringify(payload, null, 2));
+    } else {
+      console.error(`- Message: ${error.message}`);
+    }
+
     return {
       success: false,
       message: error.response?.data?.rmk || error.message,

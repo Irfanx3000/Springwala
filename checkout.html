@@ -144,7 +144,10 @@
                         </div>
                         <div class="flex justify-between items-start gap-2 text-[#525252]">
                             <span class="leading-tight">Delivery Charges</span>
-                            <span id="summary-delivery" class="shrink-0">Free</span>
+                            <div class="text-right">
+                                <span id="summary-delivery" class="shrink-0">Calculating...</span>
+                                <div id="shipping-estimate-note" class="text-[10px] text-gray-400 mt-1"></div>
+                            </div>
                         </div>
                         <div class="h-[1px] bg-[#E4E4E4] my-2"></div>
                         <div class="flex justify-between items-center text-[18px] font-bold text-[#242323]">
@@ -153,7 +156,9 @@
                         </div>
                     </div>
 
-                    <button id="place-order-btn" class="w-full bg-[#BE2229] text-white py-4 rounded-lg font-bold text-[16px] hover:bg-red-800 transition-colors shadow-lg">
+                    <div id="shipping-message" class="text-[13px] text-center mb-4 p-2 rounded-lg hidden"></div>
+
+                    <button id="place-order-btn" class="w-full bg-[#BE2229] text-white py-4 rounded-lg font-bold text-[16px] hover:bg-red-800 transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Place Order
                     </button>
                     <p class="text-center text-[12px] text-[#747474] mt-4">By placing an order, you agree to our Terms and Conditions.</p>

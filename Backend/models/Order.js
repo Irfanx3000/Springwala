@@ -77,6 +77,8 @@ const OrderSchema = new mongoose.Schema({
   shipmentPayload: { type: Object }, // Store the exact payload sent to Delhivery
   
   courier: { type: String, default: '' },
+  estimatedDelivery: { type: String, default: '' },
+  shippingEstimate: { type: Object }, // Full response from estimation API
   notes: { type: String, default: '' },
   cancelReason: { type: String, default: '' },
   statusHistory: [{

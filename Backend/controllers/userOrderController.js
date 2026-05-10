@@ -25,30 +25,59 @@ async function getShippingRate({ pincode, weight }) {
 // --- Hybrid Delivery Logic (SSOT) ---
 const getDeliveryCharges = async ({ totalAmount, pincode, weight }) => {
   try {
-    const DEFAULT_CHARGE = Number(process.env.DEFAULT_SHIPPING_CHARGE || 120);
-    const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
+    if (!pincode || pincode.length < 6) {
+      return { charge: 0, serviceable: true, message: "Enter pincode for shipping estimate", isPending: true };
+    }
 
-    // 1. Try real Delhivery Rate API
+    const originPincode = process.env.PICKUP_PINCODE || "400083";
+    const weightInGrams = exports.normalizeWeightToGrams(weight);
+
+    // 1. Try Live Delhivery Rate API
     const estimate = await delhiveryService.getShippingEstimate({
       pincode,
-      weight: weight * 1000, // convert kg to grams for API
-      paymentMode: 'Prepaid', // Default for estimation
+      weight: weightInGrams,
+      paymentMode: 'Prepaid',
       totalAmount
     });
 
     if (estimate && estimate.success) {
-      console.log(`[DELHIVERY RATE SUCCESS] Charge: ${estimate.deliveryCharge}`);
-      return estimate.deliveryCharge;
+      if (!estimate.serviceable) {
+        return { 
+          charge: 0, 
+          serviceable: false, 
+          message: "This pincode is currently not serviceable." 
+        };
+      }
+
+      // Check for Free Shipping Override (Business Logic)
+      const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
+      const finalCharge = totalAmount >= THRESHOLD ? 0 : estimate.deliveryCharge;
+
+      return {
+        charge: finalCharge,
+        serviceable: true,
+        estimatedDays: estimate.estimatedDays,
+        courier: estimate.courier,
+        message: totalAmount >= THRESHOLD ? "Free delivery applied!" : `Standard Delivery: ₹${finalCharge}`
+      };
     }
 
-    // 2. Fallback to Environment Rules if API fails or pincode unserviceable
-    console.log(`[SHIPPING FALLBACK USED] Total: ${totalAmount}, Threshold: ${THRESHOLD}`);
-    return totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
-  } catch (err) {
-    console.error(`[SHIPPING ERROR] Fallback triggered:`, err.message);
+    // 2. SAFE FALLBACK (Task 8: If API fails or timeout)
+    console.warn(`[SHIPPING FALLBACK] Live rates failed for ${pincode}. Using default rules.`);
     const DEFAULT_CHARGE = Number(process.env.DEFAULT_SHIPPING_CHARGE || 120);
     const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
-    return totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
+    const fallbackCharge = totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
+
+    return {
+      charge: fallbackCharge,
+      serviceable: true,
+      isFallback: true,
+      message: "Standard delivery applied."
+    };
+
+  } catch (err) {
+    console.error(`[SHIPPING CRITICAL ERROR]`, err.message);
+    return { charge: 0, serviceable: false, message: "Error calculating shipping. Please check pincode." };
   }
 };
 
@@ -143,14 +172,13 @@ const calculatePricing = async (bodyItems, pincode) => {
   }
 
   // Delivery Charges calculation
-  let deliveryCharges = await getDeliveryCharges({
+  const delivery = await getDeliveryCharges({
     totalAmount: subtotal,
     pincode,
     weight: totalWeight
   });
 
-  if (!deliveryCharges || isNaN(deliveryCharges)) deliveryCharges = 0;
-
+  const deliveryCharges = delivery.charge;
   const finalAmount = subtotal + deliveryCharges;
 
   console.log(`[PRICING SUMMARY] Subtotal: ${subtotal}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
@@ -161,7 +189,8 @@ const calculatePricing = async (bodyItems, pincode) => {
     deliveryCharges,
     finalAmount,
     totalWeight,
-    totalUnits
+    totalUnits,
+    shippingInfo: delivery
   };
 };
 
@@ -196,7 +225,13 @@ exports.placeOrder = async (req, res) => {
       }
     }
 
-    const { totalAmount, deliveryCharges, finalAmount, items: validatedItems, totalWeight, totalUnits } = pricing;
+    const { totalAmount, deliveryCharges, finalAmount, items: validatedItems, totalWeight, totalUnits, shippingInfo } = pricing;
+    
+    // Task 6: Final Serviceability Guard
+    if (shippingInfo && !shippingInfo.serviceable) {
+      return res.status(400).json({ success: false, message: shippingInfo.message || 'This pincode is currently not serviceable.' });
+    }
+
     console.log(`[DELIVERY] Total: ${totalAmount}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
 
     // 3. Generate Unique Order Number
@@ -223,6 +258,9 @@ exports.placeOrder = async (req, res) => {
       paymentDetails: req.body.paymentDetails || {},
       orderStatus: 'Ordered',
       notes: notes || '',
+      courier: shippingInfo?.courier || 'Delhivery',
+      estimatedDelivery: shippingInfo?.estimatedDays || '',
+      shippingEstimate: shippingInfo, // Task 11
       statusHistory: [{ status: 'Ordered', updatedBy: 'User', note: req.body.paymentStatus === 'Completed' ? 'Order placed & Paid online' : 'Order placed' }]
     });
 
@@ -397,7 +435,8 @@ exports.getOrderSummary = async (req, res) => {
       deliveryCharges: pricing.deliveryCharges,
       finalAmount: pricing.finalAmount,
       totalWeight: pricing.totalWeight,
-      totalUnits: pricing.totalUnits
+      totalUnits: pricing.totalUnits,
+      shippingInfo: pricing.shippingInfo
     });
   } catch (err) {
     console.error('[SUMMARY CRITICAL ERROR]', err);

@@ -14,17 +14,11 @@ var BASE_URL = CONFIG.IMAGE_BASE_URL;
 // ─── Core Fetch ───────────────────────────────────────────────────────────────
 async function apiFetch(endpoint, opts = {}) {
   const url = `${API_BASE}${endpoint}`;
-  console.log(`[API-DEBUG] Fetching: ${url}`);
   const headers = { ...opts.headers };
-  const token = localStorage.getItem("token") || Auth.getToken();
+  const token = Auth.getToken();
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-  } else {
-    const isProtected = endpoint.includes('/user/') || endpoint.includes('/payment/');
-    if (isProtected) {
-      console.warn(`[API-WARN] Protected route requested but token is null: ${endpoint}`);
-    }
   }
 
   if (!(opts.body instanceof FormData)) headers['Content-Type'] = 'application/json';
@@ -34,10 +28,16 @@ async function apiFetch(endpoint, opts = {}) {
     res = await fetch(url, { ...opts, headers });
   } catch (e) {
     console.error(`[API-ERROR] Fetch failed for ${url}:`, e);
-    throw new Error('Cannot reach server. Is the backend running on port 5000?');
+    // Don't throw for simple network failures, just return null or rethrow
+    throw new Error('Network error. Please check your connection.');
   }
 
-  if (res.status === 401) { Auth.clearSession(); window.location.href = '/admin/login.html'; return null; }
+  // 401 Handling: Only logout if it's a legitimate auth failure
+  if (res.status === 401) {
+    console.warn(`[API-WARN] 401 Unauthorized at ${endpoint}. Triggering logout.`);
+    Auth.logout("API 401 Failure");
+    return null;
+  }
 
   let data;
   try { data = await res.json(); } catch { throw new Error('Invalid server response'); }

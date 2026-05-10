@@ -41,7 +41,7 @@ exports.createOrderShipment = async (req, res) => {
       items: order.items,
       finalAmount: order.finalAmount,
       paymentMethod: order.paymentMethod,
-      totalWeight: totalWeight // delhiveryService will normalize kg to grams
+      totalWeight: totalWeight
     };
 
     console.log(`[SHIPMENT CREATE REQUEST] Order: ${order.orderNumber}`);
@@ -55,7 +55,7 @@ exports.createOrderShipment = async (req, res) => {
       order.delhiveryShipmentId = result.shipmentId;
       order.shipmentStatus = 'Manifested';
       order.trackingNumber = result.waybill;
-      order.trackingUrl = `https://www.delhivery.com/track/package/${result.waybill}`;
+      order.trackingUrl = result.trackingUrl || `https://www.delhivery.com/track/package/${result.waybill}`;
       order.shipmentPayload = result.rawResponse;
       order.shipmentCreatedAt = new Date();
       order.shippingProvider = 'Delhivery';

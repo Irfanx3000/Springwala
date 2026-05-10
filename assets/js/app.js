@@ -2302,21 +2302,65 @@ async function initCheckoutPage() {
   };
 
   const fetchSummary = async (pincode = "") => {
+    const msgEl = document.getElementById('shipping-message');
+    const noteEl = document.getElementById('shipping-estimate-note');
+    const placeBtn = document.getElementById('place-order-btn');
+    
     try {
+      // Show Loading State
+      if (totalsContainer.delivery) totalsContainer.delivery.textContent = 'Calculating...';
+      if (noteEl) noteEl.textContent = '';
+      if (msgEl) msgEl.classList.add('hidden');
+      if (placeBtn) placeBtn.disabled = true;
+
       const summaryRes = await apiCall('/user/orders/summary', 'POST', {
         items: cart.map(i => ({ product: i.productId, quantity: i.quantity, batchQuantity: i.batchQuantity || 1 })),
         pincode: pincode
       }, true);
       
       if (summaryRes.success) {
+        // Update UI Totals
         if (totalsContainer.items) totalsContainer.items.textContent = `₹${summaryRes.totalAmount.toFixed(2)}`;
         if (totalsContainer.delivery) totalsContainer.delivery.textContent = summaryRes.deliveryCharges > 0 ? `₹${summaryRes.deliveryCharges.toFixed(2)}` : 'Free';
         if (totalsContainer.total) totalsContainer.total.textContent = `₹${summaryRes.finalAmount.toFixed(2)}`;
         
+        // Handle Shipping Metadata
+        const info = summaryRes.shippingInfo;
+        if (info) {
+           if (noteEl && info.estimatedDays) noteEl.textContent = `Est. Delivery: ${info.estimatedDays}`;
+           
+           if (!info.serviceable) {
+              if (msgEl) {
+                msgEl.textContent = info.message || 'This pincode is currently not serviceable.';
+                msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
+                msgEl.classList.remove('hidden');
+              }
+              if (placeBtn) placeBtn.disabled = true;
+           } else {
+              if (msgEl && info.isFallback) {
+                msgEl.textContent = info.message;
+                msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-blue-50 text-blue-600 border border-blue-100';
+                msgEl.classList.remove('hidden');
+              } else if (msgEl) {
+                msgEl.classList.add('hidden');
+              }
+              if (placeBtn) placeBtn.disabled = false;
+           }
+        } else if (placeBtn) {
+           placeBtn.disabled = false;
+        }
+        
         return summaryRes;
+      } else {
+        if (msgEl) {
+            msgEl.textContent = summaryRes.message || 'Failed to calculate shipping.';
+            msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
+            msgEl.classList.remove('hidden');
+        }
       }
     } catch (err) {
       console.error('[SUMMARY ERROR]', err);
+      if (totalsContainer.delivery) totalsContainer.delivery.textContent = 'Error';
     }
     return null;
   };
@@ -2330,6 +2374,8 @@ async function initCheckoutPage() {
     if (pin.length === 6) {
       console.log('[CHECKOUT] Updating totals for pincode:', pin);
       backendSummary = await fetchSummary(pin);
+    } else if (pin.length === 0) {
+      fetchSummary(""); // Reset to default
     }
   }, 500));
 
@@ -2344,6 +2390,10 @@ async function initCheckoutPage() {
       fill('ship-city', user.shippingAddress.city || '');
       fill('ship-state', user.shippingAddress.state || '');
       fill('ship-pincode', user.shippingAddress.zip || '');
+      
+      // Task 3: Auto-trigger estimate after pre-fill
+      const savedPin = user.shippingAddress.zip;
+      if (savedPin && savedPin.length === 6) fetchSummary(savedPin);
     }
   }
 
