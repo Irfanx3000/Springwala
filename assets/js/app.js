@@ -20,6 +20,8 @@ function debounce(func, wait) {
   };
 }
 
+const CART_SCHEMA_VERSION = 'v2';
+
 // ─── API Configuration ────────────────────────────────────────────────────────
 var API_BASE = CONFIG.API_BASE_URL;
 var BASE_URL = CONFIG.IMAGE_BASE_URL;
@@ -217,7 +219,10 @@ function navigateToAccount() {
 // ─── Cart ─────────────────────────────────────────────────────────────────────
 const Cart = {
   // Returns local guest cart array
-  getGuestCart: () => { try { return JSON.parse(localStorage.getItem('guestCart') || '[]'); } catch { return []; } },
+  getGuestCart: () => { 
+    Cart.ensureMigration();
+    try { return JSON.parse(localStorage.getItem('guestCart') || '[]'); } catch { return []; } 
+  },
   saveGuestCart: (items) => {
     localStorage.setItem('guestCart', JSON.stringify(items));
     Cart.updateBadge();
@@ -229,13 +234,64 @@ const Cart = {
 
   // Hybrid get: returns guest items or server items (if cached/provided)
   get: () => {
+    Cart.ensureMigration();
     if (!Auth.isLoggedIn()) return Cart.getGuestCart();
     try { return JSON.parse(localStorage.getItem('cart') || '[]'); } catch { return []; }
   },
 
-  save: (items) => {
-    localStorage.setItem('cart', JSON.stringify(items));
-    Cart.updateBadge();
+  ensureMigration: () => {
+    if (localStorage.getItem('cart_schema_version') !== CART_SCHEMA_VERSION) {
+      Cart.migrate();
+    }
+  },
+
+  migrate: () => {
+    console.log('[Cart] Running schema migration check...');
+    const migrateItem = (item) => {
+      // 1. SAFE PRODUCT ID NORMALIZATION
+      let pid = null;
+      if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
+      else if (item.productId) pid = String(item.productId);
+      else if (item.product) pid = String(item.product);
+      else if (item._id) pid = String(item._id);
+
+      if (!pid || pid === 'undefined' || pid === 'null' || pid === '[object Object]') {
+          console.warn('[Cart Migration] Skipping invalid item:', item);
+          return null;
+      }
+
+      // 2. SUPPORT LEGACY FIELDS & PRESERVE PRICING
+      return {
+        ...item, // Preserve existing snapshots if they exist
+        productId: pid,
+        product: pid,
+        quantity: Math.max(1, Number(item.quantity || item.qty || 1)),
+        batchQuantity: Math.max(1, Number(item.batchQuantity || 1)),
+        finalPrice: Number(item.finalPrice || item.price || item.displayPrice || item.pricePerUnit || 0),
+        name: item.name || item.nameSnapshot || 'Product',
+        image: item.image || item.imageSnapshot || '',
+        // Preserve Context
+        selectedBatch: item.selectedBatch || null,
+        pricingSnapshot: item.pricingSnapshot || null,
+        productSnapshot: item.productSnapshot || null
+      };
+    };
+
+    ['cart', 'guestCart'].forEach(key => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const items = JSON.parse(raw);
+          if (Array.isArray(items)) {
+            const migrated = items.map(migrateItem).filter(Boolean);
+            localStorage.setItem(key, JSON.stringify(migrated));
+          }
+        }
+      } catch (e) { console.warn('Cart migration failed for ' + key, e); }
+    });
+
+    localStorage.setItem('cart_schema_version', CART_SCHEMA_VERSION);
+    console.log('[Cart] Migration complete.');
   },
 
   // Add item
@@ -285,10 +341,6 @@ const Cart = {
       Cart.saveGuestCart(items);
     } else {
       try {
-        // Logged-in remove (uses cart item ID usually, but backend handles productId if needed)
-        // If your backend uses productId for remove, otherwise we need to find itemId
-        // Our controller uses req.params.itemId. We'll need to handle that in renderCart.
-        // For simplicity, let's assume we pass the itemId if we have it, else use productId.
         const res = await apiCall(`/user/cart/${productId}`, 'DELETE', null, true);
         if (res.success) {
           Cart.updateBadge();
@@ -329,7 +381,6 @@ const Cart = {
 
     console.log('🔄 Merging guest cart...');
     try {
-      // Step 2: For each item in guestCart, POST to add
       for (const item of guestItems) {
         await apiCall('/user/cart/add', 'POST', {
           productId: item.productId,
@@ -337,15 +388,10 @@ const Cart = {
           batchQuantity: item.batchQuantity || 1
         }, true);
       }
-
-      // Step 3: Clear guestCart from localStorage
       Cart.clearGuestCart();
       console.log('✅ Guest cart merged successfully');
-
-      // Step 4: Refresh UI + badge
       Cart.updateBadge();
       if (typeof renderCart === 'function' && window.location.pathname.includes('cart.html')) renderCart();
-
     } catch (err) {
       console.error('❌ Cart merge failed:', err);
     }
@@ -353,7 +399,7 @@ const Cart = {
 
   count: () => {
     if (!Auth.isLoggedIn()) return Cart.getGuestCart().reduce((s, i) => s + i.quantity, 0);
-    const serverCart = Cart.get(); // Relies on loadCartCount to keep this updated
+    const serverCart = Cart.get();
     return serverCart.reduce((s, i) => s + i.quantity, 0);
   },
 
@@ -364,7 +410,6 @@ const Cart = {
   }
 };
 
-// ─── Wishlist ─────────────────────────────────────────────────────────────────
 const Wishlist = {
   items: [], // Array of product IDs (strings)
 
@@ -493,24 +538,11 @@ const Wishlist = {
   const token = params.get("token");
   if (token) {
     localStorage.setItem("token", token);
-    // Remove token from URL for clean look
     window.history.replaceState({}, document.title, window.location.pathname);
     console.log("✅ Google Auth Token stored successfully");
-    // Merge guest cart if any
-    // Auto-migrate legacy cart data to ensure finalPrice exists
-    try {
-      ['cart', 'guestCart'].forEach(key => {
-        const raw = localStorage.getItem(key);
-        if (raw) {
-          const items = JSON.parse(raw);
-          const migrated = items.map(item => ({
-            ...item,
-            finalPrice: Number(item.finalPrice || item.price || item.pricePerUnit || 0)
-          }));
-          localStorage.setItem(key, JSON.stringify(migrated));
-        }
-      });
-    } catch (e) { console.warn("Cart migration failed:", e); }
+    
+    // Trigger migration and merge
+    Cart.migrate();
 
     setTimeout(() => {
       if (typeof Cart !== 'undefined' && Cart.mergeGuestCart) Cart.mergeGuestCart();
@@ -529,15 +561,23 @@ async function loadCartCount() {
     try {
       const data = await apiCall('/user/cart', 'GET', null, true);
       // Map server items to match our local structure for Cart.get()
-      const mappedItems = (data.cart?.items || []).map(item => ({
-        productId: item.product?._id || item.product,
-        itemId: item._id,
-        name: item.name,
-        image: item.image,
-        finalPrice: Number(item.finalPrice || item.pricePerUnit || 0) || 0,
-        quantity: item.quantity,
-        batchQuantity: item.batchQuantity || 1,
-      }));
+      // SSOT: batchQuantity MUST be preserved so batch pricing works on cart/checkout pages
+            const mappedItems = (data.cart?.items || []).map(item => {
+        const pid = item.product?._id || item.product;
+        return {
+          productId: pid,
+          product: pid,
+          itemId: item._id,
+          name: item.name,
+          image: item.image,
+          finalPrice: Number(item.finalPrice || 0) || 0,
+          quantity: item.quantity,
+          batchQuantity: Number(item.batchQuantity) || 1,
+          selectedBatch: item.selectedBatch || null,
+          pricingSnapshot: item.pricingSnapshot || null,
+          productSnapshot: item.productSnapshot || null
+        };
+      });
 
       // Cache server cart in 'cart' key
       localStorage.setItem('cart', JSON.stringify(mappedItems));
@@ -617,43 +657,52 @@ function productImg(product) {
   return getImageUrl(img);
 }
 
-// ─── Product Card HTML ────────────────────────────────────────────────────────
+// ─── Product Card HTML ────────────────────────────────────────────────
+// PHASE 13: Crash-safe — one malformed product must NEVER break the grid
 function buildProductCard(p, className = '', showRemove = false) {
-  const pricing = Pricing.calculate(p);
-  const finalPrice = Number(pricing.finalPrice || 0);
-  const basePrice = Number(p.basePrice || p.price || finalPrice);
-  const discount = Number(pricing.discount || 0);
+  // Guard: product must exist and have a valid ID
+  if (!p || !p._id) return '';
 
-  const img = productImg(p);
-  const link = `product.html?id=${p._id}`;
-  const isOutOfStock = (p.stock || 0) <= 0;
-  const isInWishlist = Wishlist.items.includes(String(p._id));
+  try {
+    const pricing = Pricing.calculate(p);
+    const finalPrice = Number(pricing?.finalPrice || 0);
+    const basePrice = Number(p.basePrice || p.price || finalPrice);
+    const discount = Number(pricing?.discount || 0);
 
-  const catSlug = p.category?.name ? p.category.name.toLowerCase().replace(/\s+/g, '-') : '';
+    const img = productImg(p);
+    const link = `product.html?id=${p._id}`;
+    const isOutOfStock = Number(p.stock || 0) <= 0;
+    const isInWishlist = Wishlist.items.includes(String(p._id));
+    const catSlug = p.category?.name ? p.category.name.toLowerCase().replace(/\s+/g, '-') : '';
+    const productName = (p.name || 'Product').replace(/'/g, "\\'");
 
-  return `
+    // Guard: batch context — only show if valid
+    const isBatch = !!(pricing?.isBatchProduct && Number(pricing?.unitsPerPack) > 1);
+    const packLabel = isBatch ? `<span class="text-[11px] text-gray-500 block">Pack of ${pricing.unitsPerPack}</span>` : '';
+
+    return `
     <div class="fo-card product-card ${className} ${isOutOfStock ? 'opacity-75' : ''}" data-product-id="${p._id}" data-price="${finalPrice}" data-category="${catSlug}">
       ${isOutOfStock ? `<span class="fo-badge !bg-gray-600 !text-white">OUT OF STOCK</span>` : (discount > 0 ? `<span class="fo-badge">Save ${discount}%</span>` : '')}
       <a href="${isOutOfStock ? '#' : link}" class="fo-image-box ${isOutOfStock ? 'pointer-events-none' : ''}">
-        <img src="${img}" alt="${p.name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+        <img src="${img}" alt="${p.name || 'Product'}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
         ${!isOutOfStock ? `
         <button class="fo-wishlist ${isInWishlist ? 'active' : ''}" data-product-id="${p._id}" onclick="event.preventDefault();toggleWishlist('${p._id}',this)">
           <img src="assets/icons/mobile/${isInWishlist ? 'star-gold.svg' : 'star.svg'}" alt="Wishlist" class="w-6 h-6 wishlist-icon">
         </button>` : ''}
       </a>
       <div class="fo-details">
-        <a href="${isOutOfStock ? '#' : link}" class="fo-prod-name ${isOutOfStock ? 'pointer-events-none' : ''}">${p.name}</a>
+        <a href="${isOutOfStock ? '#' : link}" class="fo-prod-name ${isOutOfStock ? 'pointer-events-none' : ''}">${p.name || 'Product'}</a>
         <div class="fo-pricing">
           <span class="fo-price">₹${finalPrice.toFixed(2)}</span>
           ${basePrice > finalPrice ? `<span class="fo-old-price">₹${basePrice.toFixed(2)}</span>` : ''}
-          ${pricing.isBatchProduct ? `<span class="text-[11px] text-gray-500 block">Pack of ${pricing.unitsPerPack}</span>` : ''}
+          ${packLabel}
         </div>
 
         ${isOutOfStock ? `
         <button class="fo-cart-btn !bg-gray-400 cursor-not-allowed" disabled>
           Out of Stock
         </button>` : `
-        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${p.name.replace(/'/g, "\\'")}','${img}',${finalPrice},${pricing.unitsPerPack},this)">
+        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${productName}','${img}',${finalPrice},${isBatch ? pricing.unitsPerPack : 1},this)">
           Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart" class="w-4 h-4 ml-2">
         </button>`}
         ${showRemove ? `
@@ -662,6 +711,11 @@ function buildProductCard(p, className = '', showRemove = false) {
         </button>` : ''}
       </div>
     </div>`;
+  } catch (err) {
+    // PHASE 13: Card errors must NEVER break the page
+    console.warn('[buildProductCard] Render error for product', p?._id, ':', err.message);
+    return '';
+  }
 }
 
 function addToCartFromCard(productId, name, image, finalPrice, batchQuantity = 1, btn) {
@@ -675,13 +729,8 @@ function addToCartFromCard(productId, name, image, finalPrice, batchQuantity = 1
   }
 }
 
-// ─── Wishlist toggle (visual only; extend with API if needed) ─────────────────
-function toggleWishlist(productId, btn) {
-  const img = btn.querySelector('img');
-  const active = img.src.includes('star-gold');
-  img.src = active ? 'assets/icons/mobile/star.svg' : 'assets/icons/mobile/star-gold.svg';
-  showToast(active ? 'Removed from wishlist' : 'Added to wishlist', 'info');
-}
+// ─── Wishlist toggle — delegated to Wishlist.toggle() SSOT ────────────────────
+// NOTE: Second definition at line ~1621 is the real one. This stub is removed.
 
 // ─── Toast Notification ───────────────────────────────────────────────────────
 function showToast(message, type = 'success') {
@@ -2089,10 +2138,15 @@ async function renderCart() {
   }
 
   // ─── Fetch Summary from Backend (Source of Truth) ───
+  // CRITICAL: batchQuantity MUST be included — backend uses it to identify the batch
   try {
     const userLoc = JSON.parse(localStorage.getItem('userLocation') || '{}');
     const summaryRes = await apiCall('/user/orders/summary', 'POST', {
-      items: items.map(i => ({ product: i.productId, quantity: i.quantity })),
+      items: items.map(i => ({
+        product: i.productId,
+        quantity: i.quantity,
+        batchQuantity: Number(i.batchQuantity) || 1  // SSOT: required for batch pricing
+      })),
       pincode: userLoc.pincode || "" // Pass pincode if available
     }, Auth.isLoggedIn());
 
@@ -2217,20 +2271,28 @@ async function initCheckoutPage() {
   const itemsContainer = document.getElementById('checkout-items');
   const totals = Cart.totals();
 
-  // Render items
+  // Render items — show batch context when applicable
   if (itemsContainer) {
-    itemsContainer.innerHTML = cart.map(item => `
+    itemsContainer.innerHTML = cart.map(item => {
+      const batchQty = Number(item.batchQuantity) || 1;
+      const isBatch = batchQty > 1;
+      const subtotal = Number(item.finalPrice || 0) * item.quantity;
+      const qtyLabel = isBatch
+        ? `Qty: ${item.quantity} pack${item.quantity !== 1 ? 's' : ''} × ${batchQty} = ${item.quantity * batchQty} units`
+        : `Qty: ${item.quantity}`;
+      return `
       <div class="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0">
         <div class="w-[60px] h-[60px] bg-gray-50 rounded flex-shrink-0">
           <img src="${productImg({ images: [item.image] })}" class="w-full h-full object-contain" onerror="this.src='assets/images/deafult.png'">
         </div>
         <div class="flex-1 min-w-0">
           <h4 class="text-[14px] font-medium text-[#242323] truncate">${item.name}</h4>
-          <p class="text-[12px] text-[#A8A3A3]">Qty: ${item.quantity}</p>
+          <p class="text-[12px] text-[#A8A3A3]">${qtyLabel}</p>
         </div>
-        <div class="text-[14px] font-bold text-[#BE2229]">₹${(Number(item.finalPrice || 0) * item.quantity).toFixed(2)}</div>
+        <div class="text-[14px] font-bold text-[#BE2229]">₹${subtotal.toFixed(2)}</div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   const totalsContainer = {
@@ -2369,40 +2431,64 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
 
   if (precalculatedItems && precalculatedItems.length > 0) {
     // Use pre-validated items from backend summary
-    finalItems = precalculatedItems.map(item => ({
-      product: item.product || item.productId,
-      productId: item.product || item.productId,
-      name: item.name,
-      quantity: item.quantity,
-      selectedBatch: item.selectedBatch,
-      finalPrice: item.finalPrice || item.price,
-      subtotal: item.subtotal,
-      image: item.image,
-      isBatchProduct: item.isBatchProduct,
-      batchQuantity: item.batchQuantity,
-      hsn: item.hsn
-    }));
+        finalItems = precalculatedItems.map(item => {
+      let pid = null;
+      if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
+      else if (item.productId) pid = String(item.productId);
+      else if (item.product) pid = String(item.product);
+      else if (item._id) pid = String(item._id);
+
+      return {
+        product: pid,
+        productId: pid,
+        name: item.name || item.nameSnapshot,
+        quantity: Number(item.quantity || 1),
+        selectedBatch: item.selectedBatch || null,
+        pricingSnapshot: item.pricingSnapshot || null,
+        productSnapshot: item.productSnapshot || null,
+        finalPrice: Number(item.finalPrice || item.price || item.displayPrice || 0),
+        subtotal: Number(item.subtotal || 0),
+        image: item.image || item.imageSnapshot || '',
+        isBatchProduct: !!item.isBatchProduct,
+        batchQuantity: Number(item.batchQuantity) || 1,
+        hsn: item.hsn || ''
+      };
+    });
   } else {
     // Fallback: Generate from local cart (e.g. for COD if summary check skipped)
     if (typeof PricingEngine === 'undefined') {
-        console.error('PricingEngine missing during checkout finalization');
-        alert('Pricing engine error. Please refresh the page.');
-        return;
+      console.error('PricingEngine missing during checkout finalization');
+      showToast('Pricing engine error. Please refresh the page.', 'error');
+      return null;
     }
     const totals = PricingEngine.calculateOrderTotals(cart, 0);
-    finalItems = totals.items.map(item => ({
-      product: item.productId,
-      productId: item.productId,
-      name: item.name,
-      quantity: item.quantity,
-      selectedBatch: item.selectedBatch,
-      finalPrice: item.displayPrice,
-      subtotal: item.subtotal,
-      image: item.image,
-      isBatchProduct: item.isBatchProduct,
-      batchQuantity: item.batchQuantity,
-      hsn: item.hsn
-    }));
+        finalItems = totals.items.map(item => {
+      let pid = null;
+      if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
+      else if (item.productId) pid = String(item.productId);
+      else if (item.product) pid = String(item.product);
+      else if (item._id) pid = String(item._id);
+
+      return {
+        product: pid,
+        productId: pid,
+        name: item.name || item.nameSnapshot,
+        quantity: Number(item.quantity || 1),
+        selectedBatch: item.selectedBatch || null,
+        pricingSnapshot: item.pricingSnapshot || null,
+        productSnapshot: item.productSnapshot || null,
+        finalPrice: Number(item.displayPrice || item.finalPrice || 0),
+        subtotal: Number(item.subtotal || 0),
+        image: item.image || item.imageSnapshot || '',
+        isBatchProduct: !!item.isBatchProduct,
+        batchQuantity: Number(item.batchQuantity) || 1,
+        hsn: item.hsn || ''
+      };
+    }).filter(item => item.product); // Guard: drop any items with no product ID
+
+    if (!finalItems.length) {
+      throw new Error('Cart items could not be validated. Please refresh and try again.');
+    }
   }
 
   const payload = {
@@ -2430,6 +2516,11 @@ async function handleCODFlow(shippingAddress, backendSummary) {
     const amount = backendSummary.finalAmount;
     const items = backendSummary.items || [];
     const payload = prepareOrderPayload(shippingAddress, 'COD', 'Pending', {}, items);
+
+    // Guard: prepareOrderPayload returns null if PricingEngine is missing
+    if (!payload) {
+      throw new Error('Failed to prepare order. Please refresh and try again.');
+    }
 
     const res = await apiCall('/user/orders', 'POST', payload, true);
     if (res.success) {
@@ -2476,13 +2567,42 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
     // ---------------------------------------------------
     console.log('[PAYMENT] Creating Razorpay order...');
 
+        // STRICT NORMALIZATION: Ensure backend always gets exactly what it expects
+        const normalizedItems = items.map(item => {
+      let pid = null;
+      if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
+      else if (item.productId) pid = String(item.productId);
+      else if (item.product) pid = String(item.product);
+      else if (item._id) pid = String(item._id);
+
+      if (!pid) return null;
+
+      return {
+        productId: pid,
+        product: pid,
+        quantity: Math.max(1, Number(item.quantity || item.qty || 1)),
+        batchQuantity: Math.max(1, Number(item.batchQuantity) || 1),
+        finalPrice: Number(item.finalPrice || item.price || item.displayPrice || 0),
+        name: item.name || item.nameSnapshot || 'Product',
+        image: item.image || item.imageSnapshot || '',
+        selectedBatch: item.selectedBatch || null,
+        pricingSnapshot: item.pricingSnapshot || null,
+        productSnapshot: item.productSnapshot || null
+      };
+    }).filter(Boolean);
+
+    if (normalizedItems.length === 0) {
+      throw new Error('Could not normalize cart items. Cart appears malformed.');
+    }
+
     const paymentPayload = {
       amount,
-      items,
+      items: normalizedItems,
       shippingAddress
     };
 
-    console.log('[PAYMENT] Payload sent to backend:', paymentPayload);
+    console.log('[PAYMENT] STRICT PAYLOAD:', JSON.stringify(paymentPayload, null, 2));
+
 
     const rzpOrderRes = await apiCall(
       '/payment/create-order',
@@ -2813,7 +2933,15 @@ async function addOrderToCart(orderId) {
     const data = await apiCall(`/user/orders/${orderId}`, 'GET', null, true);
     if (data.order?.items) {
       data.order.items.forEach(item => {
-        Cart.add(item.product, item.name, item.image, item.price, item.discountedPrice, item.quantity);
+        // Cart.add signature: (productId, name, image, finalPrice, quantity, batchQuantity)
+        Cart.add(
+          item.product,
+          item.name,
+          item.image,
+          Number(item.finalPrice || item.unitPrice || 0),
+          item.quantity,
+          Number(item.batchQuantity) || 1
+        );
       });
       showToast('Items added to cart!', 'success');
     }
@@ -3224,6 +3352,9 @@ async function initCategoriesPage() {
 
 // ─── Initialise ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Run Cart Migration on every page load to ensure device consistency
+  if (typeof Cart !== 'undefined' && Cart.migrate) Cart.migrate();
+
   // DEBUG MODE: Log auth state for mobile troubleshooting
   console.log("--- [Springwala Auth Debug] ---");
   console.log("Page:", window.location.pathname);
@@ -3252,7 +3383,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show a subtle loading state to prevent stale UI flicker
     const loader = document.createElement('div');
     loader.id = 'auth-loader';
-    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-center; opacity:0.8; transition: opacity 0.3s;';
+    // FIX: 'justify-center' is not valid CSS — must be 'justify-content:center'
+    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; opacity:0.8; transition: opacity 0.3s;';
     loader.innerHTML = '<div style="width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #BE2229; border-radius:50%; animation: spin 1s linear infinite;"></div>';
     document.body.appendChild(loader);
 

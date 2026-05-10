@@ -59,21 +59,45 @@ const getDeliveryCharges = async ({ totalAmount, pincode, weight }) => {
 const PricingEngine = require('../utils/pricingEngine');
 
 const calculatePricing = async (bodyItems, pincode) => {
+  console.log('[PRICING ENGINE] Initializing calculation for items:', JSON.stringify(bodyItems));
+
+  if (!bodyItems || !Array.isArray(bodyItems)) {
+    throw new Error('Invalid items format. Expected an array of cart items.');
+  }
+
   let subtotal = 0;
   let totalUnits = 0;
   let totalWeight = 0;
   const validatedItems = [];
 
-  for (const item of bodyItems) {
-    const product = await Product.findById(item.product);
-    if (!product) continue;
+  for (let i = 0; i < bodyItems.length; i++) {
+    const item = bodyItems[i];
+    
+    // Normalize Product Identifier (Support product, productId, _id)
+    const productIdentifier = item.product || item.productId || item._id;
+    if (!productIdentifier) {
+      console.warn(`[PRICING ENGINE] Skipping item at index ${i} - missing product identifier.`);
+      continue;
+    }
+
+    const product = await Product.findById(productIdentifier);
+    if (!product) {
+      console.warn(`[PRICING ENGINE] Skipping item ${productIdentifier} - not found in database.`);
+      continue;
+    }
+    if (!product.isActive) {
+      console.warn(`[PRICING ENGINE] Skipping item ${product.name} - product is inactive.`);
+      continue;
+    }
 
     // Determine batch if specified
     let selectedBatch = null;
-    if (item.batchQuantity && product.batches) {
-      selectedBatch = product.batches.find(b => b.quantity === item.batchQuantity);
+    const batchQty = Number(item.batchQuantity || 1);
+    if (batchQty > 1 && product.batches) {
+      selectedBatch = product.batches.find(b => Number(b.quantity) === batchQty);
     }
 
+    // Call Centralized Pricing Engine
     const calc = PricingEngine.calculateCartItem({
       product,
       quantity: Number(item.quantity || 1),
@@ -114,6 +138,10 @@ const calculatePricing = async (bodyItems, pincode) => {
     totalWeight += calc.deliveryEligibleWeight;
   }
 
+  if (validatedItems.length === 0) {
+    throw new Error('No valid items found in cart. All products may be unavailable or deleted.');
+  }
+
   // Delivery Charges calculation
   let deliveryCharges = await getDeliveryCharges({
     totalAmount: subtotal,
@@ -124,6 +152,8 @@ const calculatePricing = async (bodyItems, pincode) => {
   if (!deliveryCharges || isNaN(deliveryCharges)) deliveryCharges = 0;
 
   const finalAmount = subtotal + deliveryCharges;
+
+  console.log(`[PRICING SUMMARY] Subtotal: ${subtotal}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
 
   return {
     items: validatedItems,

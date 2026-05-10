@@ -85,9 +85,13 @@ const PricingEngine = {
     if (!selectedBatch) {
       if (product.batches && product.batches.length > 0) {
         selectedBatch = this.autoRecoverBatch(product);
-      } else if (item.batchQuantity && item.batchQuantity > 0) {
-        // Reconstruct from snapshots if full batch list is missing
-        selectedBatch = { quantity: item.batchQuantity, price: item.finalPrice || item.price || item.displayPrice };
+      } else if (item.batchQuantity && item.batchQuantity > 1) {
+        // Reconstruct from cart snapshot — item.finalPrice is the batch pack price
+        // NOTE: item.displayPrice is a PricingEngine OUTPUT field and does NOT exist on raw cart items
+        const reconstructedPrice = Number(item.finalPrice || item.price || 0);
+        if (reconstructedPrice > 0) {
+          selectedBatch = { quantity: Number(item.batchQuantity), price: reconstructedPrice };
+        }
       }
     }
 

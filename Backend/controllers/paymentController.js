@@ -22,14 +22,43 @@ const razorpay = new Razorpay({
  */
 exports.createRazorpayOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, currency = "INR", receipt = `rcpt_${Date.now()}` } = req.body;
+    console.log('[RAZORPAY] Create Order Payload:', JSON.stringify(req.body, null, 2));
+    const { items: rawItems, shippingAddress, currency = "INR", receipt = `rcpt_${Date.now()}` } = req.body;
 
-    if (!items || !items.length) {
-      return res.status(400).json({ success: false, message: 'Items are required' });
+    // 1. Strict Validation & Normalization
+    if (!rawItems) {
+      return res.status(400).json({ success: false, message: 'Items array is missing from payload' });
+    }
+    if (!Array.isArray(rawItems)) {
+      return res.status(400).json({ success: false, message: 'Items must be a valid array' });
+    }
+    if (rawItems.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty. Items are required to create a payment order.' });
     }
 
-    // 1. Calculate amount on backend (SSOT)
-    // We import calculatePricing from userOrderController
+    // Normalize items to ensure backend compatibility (Support legacy formats)
+    const items = rawItems.map((item, index) => {
+      const productId = item.productId || item.product || item._id;
+      const quantity = Number(item.quantity || 0);
+
+      if (!productId) {
+        throw new Error(`Item at index ${index} is missing a product identifier (productId/product/_id)`);
+      }
+      if (quantity <= 0) {
+        throw new Error(`Item at index ${index} (${item.name || productId}) has an invalid quantity: ${quantity}`);
+      }
+
+      return {
+        ...item,
+        product: productId, // Standardize on 'product' for calculatePricing
+        productId: productId,
+        quantity: quantity
+      };
+    });
+
+    console.log('[RAZORPAY] Normalized Items:', JSON.stringify(items, null, 2));
+
+    // 2. Calculate amount on backend (SSOT)
     const { calculatePricing } = require('./userOrderController');
     const pincode = shippingAddress?.pincode;
     
@@ -37,7 +66,12 @@ exports.createRazorpayOrder = async (req, res) => {
     const amount = pricing.finalAmount;
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid calculated amount' });
+      console.error('[RAZORPAY] Calculation failed. Resulting pricing:', pricing);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Could not calculate valid order amount. Some items may be unavailable.',
+        details: pricing
+      });
     }
 
     const options = {
@@ -58,10 +92,10 @@ exports.createRazorpayOrder = async (req, res) => {
       key: KEY_ID,
     });
   } catch (error) {
-    console.error('[RAZORPAY] Create Order Error:', error);
-    res.status(error.statusCode || 500).json({ 
+    console.error('[RAZORPAY] Create Order Error:', error.message);
+    res.status(400).json({ 
       success: false, 
-      message: error.description || error.message || 'Payment initiation failed' 
+      message: error.message || 'Payment initiation failed' 
     });
   }
 };
