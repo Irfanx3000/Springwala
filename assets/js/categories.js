@@ -333,6 +333,10 @@ function bindCategoryEvents() {
   document.getElementById('category-sort')?.addEventListener('change', () => {
     loadCategories(document.getElementById('category-search')?.value?.trim() || '');
   });
+
+  // Bulk delete
+  const bulkBtn = document.getElementById('bulk-delete-categories');
+  if (bulkBtn) bulkBtn.onclick = bulkDelete;
 }
 // ─── Selection Logic ────────────────────────────────────────────────────────
 function toggleCategorySelection(id, event) {
@@ -342,12 +346,6 @@ function toggleCategorySelection(id, event) {
   renderOnlySelection();
 }
 
-function toggleCategorySelection(id, event) {
-  if (event) event.stopPropagation();
-  if (selectedCategories.has(id)) selectedCategories.delete(id);
-  else selectedCategories.add(id);
-  renderOnlySelection();
-}
 
 function renderOnlySelection() {
   document.querySelectorAll('.category-wrapper').forEach(wrapper => {
@@ -358,39 +356,26 @@ function renderOnlySelection() {
 }
 
 async function bulkDelete() {
-  if (!selectedCategories.size) return Toast.error('Please select categories to delete');
-  
-  const ok = await Confirm.show(`Delete ${selectedCategories.size} categories?`, 'This will also delete their subcategories and cannot be undone.', 'Delete All');
-  if (!ok) return;
-
-  try {
-    const ids = Array.from(selectedCategories);
-    // Assuming backend supports bulk delete or we loop
-    let successCount = 0;
-    for (const id of ids) {
-      const res = await api.delete(`/categories/${id}`);
-      if (res) successCount++;
-    }
-
-    Toast.success(`Successfully deleted ${successCount} categories`);
-    selectedCategories.clear();
-    loadCategories();
-  } catch (err) {
-    Toast.error('Bulk delete failed: ' + err.message);
+  if (!selectedCategories.size) {
+    showToast('Please select categories to delete', 'error');
+    return;
   }
-}
-
-// Bind bulk delete button
-function bindCategoryEvents() {
-    const bulkBtn = document.getElementById('bulk-delete-categories');
-    if (bulkBtn) bulkBtn.onclick = bulkDelete;
-
-    const searchInput = document.getElementById('category-search');
-    searchInput?.addEventListener('input', (e) => {
-        loadCategories(e.target.value);
-    });
-
-    ['category-filter-status', 'category-sort'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', () => loadCategories());
-    });
+  showConfirm(
+    `Delete ${selectedCategories.size} categories?<br><small class="text-gray-500">This will also delete their subcategories and cannot be undone.</small>`,
+    async () => {
+      try {
+        const ids = Array.from(selectedCategories);
+        let successCount = 0;
+        for (const id of ids) {
+          const res = await api.delete(`/categories/${id}`);
+          if (res) successCount++;
+        }
+        showToast(`Successfully deleted ${successCount} categories`, 'success');
+        selectedCategories.clear();
+        await loadCategories();
+      } catch (err) {
+        showToast('Bulk delete failed: ' + err.message, 'error');
+      }
+    }
+  );
 }

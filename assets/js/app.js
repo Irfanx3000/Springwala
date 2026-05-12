@@ -219,9 +219,9 @@ function navigateToAccount() {
 // ─── Cart ─────────────────────────────────────────────────────────────────────
 const Cart = {
   // Returns local guest cart array
-  getGuestCart: () => { 
+  getGuestCart: () => {
     Cart.ensureMigration();
-    try { return JSON.parse(localStorage.getItem('guestCart') || '[]'); } catch { return []; } 
+    try { return JSON.parse(localStorage.getItem('guestCart') || '[]'); } catch { return []; }
   },
   saveGuestCart: (items) => {
     localStorage.setItem('guestCart', JSON.stringify(items));
@@ -256,8 +256,8 @@ const Cart = {
       else if (item._id) pid = String(item._id);
 
       if (!pid || pid === 'undefined' || pid === 'null' || pid === '[object Object]') {
-          console.warn('[Cart Migration] Skipping invalid item:', item);
-          return null;
+        console.warn('[Cart Migration] Skipping invalid item:', item);
+        return null;
       }
 
       // 2. SUPPORT LEGACY FIELDS & PRESERVE PRICING
@@ -540,7 +540,7 @@ const Wishlist = {
     localStorage.setItem("token", token);
     window.history.replaceState({}, document.title, window.location.pathname);
     console.log("✅ Google Auth Token stored successfully");
-    
+
     // Trigger migration and merge
     Cart.migrate();
 
@@ -562,7 +562,7 @@ async function loadCartCount() {
       const data = await apiCall('/user/cart', 'GET', null, true);
       // Map server items to match our local structure for Cart.get()
       // SSOT: batchQuantity MUST be preserved so batch pricing works on cart/checkout pages
-            const mappedItems = (data.cart?.items || []).map(item => {
+      const mappedItems = (data.cart?.items || []).map(item => {
         const pid = item.product?._id || item.product;
         return {
           productId: pid,
@@ -652,7 +652,7 @@ const BannerEngine = {
       const type = el.dataset.bannerType;
       const position = el.dataset.bannerPosition || null;
       const slotId = el.id || `slot-${type}-${position || 'any'}-${Math.random().toString(36).substr(2, 4)}`;
-      
+
       if (!BannerEngine.slots.has(slotId) || BannerEngine.slots.get(slotId).el !== el) {
         BannerEngine.slots.set(slotId, { el, type, position });
       }
@@ -662,7 +662,7 @@ const BannerEngine = {
   // 3. Native Picture Injection: Production-grade responsive rendering
   applyToSlot: (container, banner) => {
     if (!container || !banner) return;
-    
+
     // Safety: Link handling
     const link = container.tagName === 'A' ? container : container.querySelector('a');
     if (link && banner.link) link.href = banner.link;
@@ -677,9 +677,9 @@ const BannerEngine = {
     }
 
     // Surgical Slot Takeover: Hide static content for complex slots
-    const isComplexSlot = container.querySelector('span, p, h1, h2, h3') || 
-                          (container.children.length > 1 && !container.querySelector('picture, img'));
-    
+    const isComplexSlot = container.querySelector('span, p, h1, h2, h3') ||
+      (container.children.length > 1 && !container.querySelector('picture, img'));
+
     if ((banner.image || banner.mobileImage) && isComplexSlot) {
       container.style.padding = '0';
       if (container.classList.contains('bg-[#E8E8E8]') || container.classList.contains('bg-[#F9C71D]')) {
@@ -721,7 +721,7 @@ const BannerEngine = {
       img = document.createElement('img');
       picture.appendChild(img);
     }
-    
+
     img.src = BannerEngine.resolveUrl(banner, false);
     img.alt = banner.altText || banner.title;
     img.dataset.bannerId = banner._id;
@@ -733,7 +733,7 @@ const BannerEngine = {
     img.style.height = '100%';
     img.style.objectFit = 'cover';
     img.style.opacity = '1';
-    
+
     // Cleanup legacy classes
     img.classList.remove('hidden', 'md:block', 'block', 'md:hidden', 'opacity-[0.65]', 'mix-blend-multiply', 'object-contain');
   },
@@ -741,7 +741,7 @@ const BannerEngine = {
   // 4. Carousel Renderer: Using native picture implementation
   renderCarousel: (container, banners) => {
     if (!container || !banners || !banners.length) return;
-    
+
     if (container.dataset.carouselActive === 'true') return;
     container.dataset.carouselActive = 'true';
 
@@ -791,13 +791,13 @@ const BannerEngine = {
 
       if (filtered.length === 0) {
         // Keep fallback — do not clear container
-        return; 
+        return;
       }
 
       if (filtered.length > 1 && slot.el.classList.contains('hero-box')) {
-         BannerEngine.renderCarousel(slot.el, filtered);
+        BannerEngine.renderCarousel(slot.el, filtered);
       } else {
-         BannerEngine.applyToSlot(slot.el, filtered[0]);
+        BannerEngine.applyToSlot(slot.el, filtered[0]);
       }
     } catch (err) {
       console.warn(`[BannerEngine] Error processing slot ${slotId}:`, err);
@@ -815,7 +815,7 @@ const BannerEngine = {
       BannerEngine.discoverSlots();
 
       const types = [...new Set([...BannerEngine.slots.values()].map(s => s.type))];
-      
+
       // Load types in parallel for speed
       await Promise.all(types.map(async (type) => {
         try {
@@ -848,7 +848,7 @@ const BannerEngine = {
       BannerEngine._initializing = false;
     }
   },
-  
+
   // 7. Backward Compatibility Helpers
   isDynamic: (el) => {
     if (!el) return false;
@@ -887,7 +887,7 @@ function getImageUrl(image) {
 
   // Ensure leading slash if not present and not starting with http
   const path = image.startsWith('/') ? image : '/' + image;
-  
+
   // If it's already a full assets path, return it
   if (image.startsWith('assets/')) return image;
 
@@ -1275,7 +1275,7 @@ async function loadPageBanners() {
     'product-bottom-promo-1': { type: 'promotional', position: 3 },
     'product-bottom-promo-2': { type: 'promotional', position: 4 },
     // Multi-slot container parents (these are not slots themselves, their children are)
-    'promo-banners-container-parent': { type: 'promotional' }, 
+    'promo-banners-container-parent': { type: 'promotional' },
     'features-banners-container-parent': { type: 'features' },
     'advertisement-banners-container-parent': { type: 'advertisement' },
     'informational-banners-container-parent': { type: 'informational' },
@@ -1860,31 +1860,31 @@ async function initWishlistPage() {
   const empty = document.getElementById('wishlist-empty');
   if (!grid) return;
 
-    async function render() {
-      if (grid) grid.classList.remove('hidden');
-      if (empty) empty.classList.add('hidden');
+  async function render() {
+    if (grid) grid.classList.remove('hidden');
+    if (empty) empty.classList.add('hidden');
 
-      try {
-        let products = [];
-        if (Auth.isLoggedIn()) {
-          const data = await apiCall('/user/wishlist', 'GET', null, true);
-          console.log("Wishlist page load response:", data);
-          products = data.products || [];
-          console.log("Rendering products:", products);
-          // Sync items array from full objects
-          Wishlist.items = products.map(p => String(p._id));
-        } else {
-          const data = await apiCall('/user/products?limit=1000');
-          const all = data.products || [];
-          products = all.filter(p => Wishlist.items.includes(String(p._id)));
-        }
+    try {
+      let products = [];
+      if (Auth.isLoggedIn()) {
+        const data = await apiCall('/user/wishlist', 'GET', null, true);
+        console.log("Wishlist page load response:", data);
+        products = data.products || [];
+        console.log("Rendering products:", products);
+        // Sync items array from full objects
+        Wishlist.items = products.map(p => String(p._id));
+      } else {
+        const data = await apiCall('/user/products?limit=1000');
+        const all = data.products || [];
+        products = all.filter(p => Wishlist.items.includes(String(p._id)));
+      }
 
-        if (products.length === 0) {
-          if (grid) grid.classList.add('hidden');
-          if (empty) empty.classList.remove('hidden');
-          Wishlist.updateBadge();
-          return;
-        }
+      if (products.length === 0) {
+        if (grid) grid.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+        Wishlist.updateBadge();
+        return;
+      }
       grid.innerHTML = products.map(p => buildProductCard(p, 'product-card', true)).join('');
     } catch (err) {
       grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Failed to load wishlist.</div>`;
@@ -2027,7 +2027,7 @@ async function initProductPage() {
         setVal(`summary-batch${s}`, data.isBatchProduct ? `Pack of ${data.batchQuantity}` : "N/A");
         setVal(`summary-hsn${s}`, data.hsn);
         setVal(`summary-unit-price${s}`, `₹${data.unitPrice.toFixed(2)}`);
-        
+
         // Large Display Price
         const displayPrice = `₹${data.displayPrice.toFixed(2)}`;
         setVal(`product-price-desktop`, displayPrice);
@@ -2491,7 +2491,7 @@ async function initCheckoutPage() {
     const msgEl = document.getElementById('shipping-message');
     const noteEl = document.getElementById('shipping-estimate-note');
     const placeBtn = document.getElementById('place-order-btn');
-    
+
     try {
       // Show Loading State
       if (totalsContainer.delivery) totalsContainer.delivery.textContent = 'Calculating...';
@@ -2503,45 +2503,45 @@ async function initCheckoutPage() {
         items: cart.map(i => ({ product: i.productId, quantity: i.quantity, batchQuantity: i.batchQuantity || 1 })),
         pincode: pincode
       }, true);
-      
+
       if (summaryRes.success) {
         // Update UI Totals
         if (totalsContainer.items) totalsContainer.items.textContent = `₹${summaryRes.totalAmount.toFixed(2)}`;
         if (totalsContainer.delivery) totalsContainer.delivery.textContent = summaryRes.deliveryCharges > 0 ? `₹${summaryRes.deliveryCharges.toFixed(2)}` : 'Free';
         if (totalsContainer.total) totalsContainer.total.textContent = `₹${summaryRes.finalAmount.toFixed(2)}`;
-        
+
         // Handle Shipping Metadata
         const info = summaryRes.shippingInfo;
         if (info) {
-           if (noteEl && info.estimatedDays) noteEl.textContent = `Est. Delivery: ${info.estimatedDays}`;
-           
-           if (!info.serviceable) {
-              if (msgEl) {
-                msgEl.textContent = info.message || 'This pincode is currently not serviceable.';
-                msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
-                msgEl.classList.remove('hidden');
-              }
-              if (placeBtn) placeBtn.disabled = true;
-           } else {
-              if (msgEl && info.isFallback) {
-                msgEl.textContent = info.message;
-                msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-blue-50 text-blue-600 border border-blue-100';
-                msgEl.classList.remove('hidden');
-              } else if (msgEl) {
-                msgEl.classList.add('hidden');
-              }
-              if (placeBtn) placeBtn.disabled = false;
-           }
+          if (noteEl && info.estimatedDays) noteEl.textContent = `Est. Delivery: ${info.estimatedDays}`;
+
+          if (!info.serviceable) {
+            if (msgEl) {
+              msgEl.textContent = info.message || 'This pincode is currently not serviceable.';
+              msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
+              msgEl.classList.remove('hidden');
+            }
+            if (placeBtn) placeBtn.disabled = true;
+          } else {
+            if (msgEl && info.isFallback) {
+              msgEl.textContent = info.message;
+              msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-blue-50 text-blue-600 border border-blue-100';
+              msgEl.classList.remove('hidden');
+            } else if (msgEl) {
+              msgEl.classList.add('hidden');
+            }
+            if (placeBtn) placeBtn.disabled = false;
+          }
         } else if (placeBtn) {
-           placeBtn.disabled = false;
+          placeBtn.disabled = false;
         }
-        
+
         return summaryRes;
       } else {
         if (msgEl) {
-            msgEl.textContent = summaryRes.message || 'Failed to calculate shipping.';
-            msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
-            msgEl.classList.remove('hidden');
+          msgEl.textContent = summaryRes.message || 'Failed to calculate shipping.';
+          msgEl.className = 'text-[13px] text-center mb-4 p-2 rounded-lg block bg-red-50 text-red-600 border border-red-100';
+          msgEl.classList.remove('hidden');
         }
       }
     } catch (err) {
@@ -2576,7 +2576,7 @@ async function initCheckoutPage() {
       fill('ship-city', user.shippingAddress.city || '');
       fill('ship-state', user.shippingAddress.state || '');
       fill('ship-pincode', user.shippingAddress.zip || '');
-      
+
       // Task 3: Auto-trigger estimate after pre-fill
       const savedPin = user.shippingAddress.zip;
       if (savedPin && savedPin.length === 6) fetchSummary(savedPin);
@@ -2658,7 +2658,7 @@ async function initCheckoutPage() {
  */
 function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paymentDetails = {}, precalculatedItems = null) {
   const cart = Cart.get();
-  
+
   if ((!cart || !cart.length) && (!precalculatedItems || !precalculatedItems.length)) {
     throw new Error('Your cart is empty. Please add items before checking out.');
   }
@@ -2667,7 +2667,7 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
 
   if (precalculatedItems && precalculatedItems.length > 0) {
     // Use pre-validated items from backend summary
-        finalItems = precalculatedItems.map(item => {
+    finalItems = precalculatedItems.map(item => {
       let pid = null;
       if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
       else if (item.productId) pid = String(item.productId);
@@ -2698,7 +2698,7 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
       return null;
     }
     const totals = PricingEngine.calculateOrderTotals(cart, 0);
-        finalItems = totals.items.map(item => {
+    finalItems = totals.items.map(item => {
       let pid = null;
       if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
       else if (item.productId) pid = String(item.productId);
@@ -2735,8 +2735,8 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
     paymentDetails
   };
 
-  console.log('[PAYLOAD GENERATED]', { 
-    method: paymentMethod, 
+  console.log('[PAYLOAD GENERATED]', {
+    method: paymentMethod,
     itemsCount: finalItems.length,
     firstItem: finalItems[0] ? { name: finalItems[0].name, price: finalItems[0].finalPrice } : 'NONE'
   });
@@ -2803,8 +2803,8 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
     // ---------------------------------------------------
     console.log('[PAYMENT] Creating Razorpay order...');
 
-        // STRICT NORMALIZATION: Ensure backend always gets exactly what it expects
-        const normalizedItems = items.map(item => {
+    // STRICT NORMALIZATION: Ensure backend always gets exactly what it expects
+    const normalizedItems = items.map(item => {
       let pid = null;
       if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
       else if (item.productId) pid = String(item.productId);
@@ -3550,7 +3550,7 @@ window.loadProfileImage = loadProfileImage;
 
 function fillProfileLocationFields(location) {
   if (!location) return;
-  
+
   const countryEl = document.getElementById('profile-country');
   const stateEl = document.getElementById('profile-state');
 

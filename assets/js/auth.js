@@ -6,7 +6,7 @@
 const Auth = window.Auth = {
     TOKEN_KEY: 'sw_admin_token',
     USER_KEY: 'sw_admin',
-    
+
     state: {
         isInitialized: false,
         isValidating: false,
@@ -17,7 +17,7 @@ const Auth = window.Auth = {
     /**
      * Optimistic hydration. Instant access if token exists.
      */
-    init: function() {
+    init: function () {
         if (this.state.isInitialized) return this.isLoggedIn();
 
         this.state.token = localStorage.getItem(this.TOKEN_KEY);
@@ -29,7 +29,7 @@ const Auth = window.Auth = {
         }
 
         this.state.isInitialized = true;
-        
+
         // Instant UI stabilization
         document.documentElement.classList.add('auth-initialized');
         const loader = document.getElementById('sw-auth-loader');
@@ -38,15 +38,15 @@ const Auth = window.Auth = {
         return this.isLoggedIn();
     },
 
-    getToken: function() {
+    getToken: function () {
         return this.state.token || localStorage.getItem(this.TOKEN_KEY);
     },
 
-    getAdmin: function() {
+    getAdmin: function () {
         return this.state.admin;
     },
 
-    setSession: function(token, admin) {
+    setSession: function (token, admin) {
         this.state.token = token;
         this.state.admin = admin;
         localStorage.setItem(this.TOKEN_KEY, token);
@@ -54,18 +54,18 @@ const Auth = window.Auth = {
         this.state.isInitialized = true;
     },
 
-    clearSession: function() {
+    clearSession: function () {
         this.state.token = null;
         this.state.admin = null;
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
     },
 
-    isLoggedIn: function() {
+    isLoggedIn: function () {
         return !!this.getToken();
     },
 
-    logout: function(reason = "Manual") {
+    logout: function (reason = "Manual") {
         console.warn(`[AUTH] Logout: ${reason}`);
         this.clearSession();
         if (!window.location.pathname.includes('login.html')) {
@@ -73,7 +73,7 @@ const Auth = window.Auth = {
         }
     },
 
-    requireAuth: function() {
+    requireAuth: function () {
         return this.requireAdminAuth();
     },
 
@@ -81,7 +81,7 @@ const Auth = window.Auth = {
      * OPTIMISTIC GUARD: Only check if token exists.
      * Never blocks dashboard rendering.
      */
-    requireAdminAuth: function() {
+    requireAdminAuth: function () {
         if (!this.getToken()) {
             this.logout("Session missing");
             return false;
@@ -93,7 +93,7 @@ const Auth = window.Auth = {
      * SILENT BACKGROUND VALIDATION
      * Runs after page load. Non-blocking.
      */
-    validate: async function() {
+    validate: async function () {
         if (this.state.isValidating) return;
         const token = this.getToken();
         if (!token) return false;
@@ -119,7 +119,7 @@ const Auth = window.Auth = {
             return true;
         } catch (err) {
             // Network failure: Preserve session
-            return true; 
+            return true;
         } finally {
             this.state.isValidating = false;
         }
@@ -127,7 +127,7 @@ const Auth = window.Auth = {
 };
 
 // ─── Auth Bootstrap ──────────────────────────────────────────────────
-(function() {
+(function () {
     const path = window.location.pathname;
     const isLoginPage = path.includes('login.html');
     const isAdminPage = path.includes('/admin/');
@@ -154,13 +154,13 @@ const Auth = window.Auth = {
         const loader = document.createElement('div');
         loader.id = 'sw-auth-loader';
         loader.innerHTML = '<div class="sw-spinner"></div><p style="margin-top:15px;color:#666;font-size:14px;">Initializing...</p>';
-        
+
         // Ensure body exists before appending
         const checkBody = setInterval(() => {
             if (document.body) {
                 document.body.appendChild(loader);
                 clearInterval(checkBody);
-                
+
                 // Optimistic Init after loader is attached
                 const loggedIn = Auth.init();
                 if (!loggedIn) {

@@ -27,7 +27,7 @@ function initSidebar() {
 
     function toggleSidebar() {
         const isOpen = !sidebar.classList.contains('-translate-x-full');
-        
+
         if (isOpen) {
             // Closing
             sidebar.classList.add('-translate-x-full');
@@ -58,9 +58,9 @@ function initSidebar() {
 
     // Handle window resize to reset mobile states on desktop view
     window.addEventListener('resize', () => {
-        const isDesktop = window.innerWidth >= 1280 || 
-                         (window.innerWidth >= 768 && !sidebar.classList.contains('xl:sticky'));
-        
+        const isDesktop = window.innerWidth >= 1280 ||
+            (window.innerWidth >= 768 && !sidebar.classList.contains('xl:sticky'));
+
         if (isDesktop) {
             overlay.classList.add('hidden');
             document.body.style.overflow = '';
@@ -88,7 +88,7 @@ function initDropdowns() {
         if (btn && sub) {
             // Check if this menu should be open by default based on URL
             const shouldBeOpen = config.keywords.some(k => currentPath.includes(k));
-            
+
             if (shouldBeOpen) {
                 sub.classList.remove('hidden');
                 sub.classList.add('flex');
@@ -100,7 +100,7 @@ function initDropdowns() {
                 e.stopPropagation();
 
                 const isHidden = sub.classList.contains('hidden');
-                
+
                 // Toggle
                 if (isHidden) {
                     sub.classList.remove('hidden');
@@ -125,7 +125,7 @@ function initDropdowns() {
 function initActiveLink() {
     const currentPath = window.location.pathname;
     const currentFile = currentPath.split('/').pop() || 'dashboard.html';
-    
+
     // 1. Regular Sidebar Items
     const mainItems = document.querySelectorAll('.sidebar-item:not(button)');
     mainItems.forEach(item => {
@@ -143,7 +143,7 @@ function initActiveLink() {
             // Highlight sub-link
             link.classList.add('text-[#BE2229]', 'font-medium');
             link.classList.remove('text-slate-500', 'text-black', 'text-gray-500');
-            
+
             // Also ensure parent button is styled correctly if not already active
             const parentBtn = link.closest('.group')?.querySelector('button.sidebar-item');
             if (parentBtn) {
@@ -161,8 +161,15 @@ function initActiveLink() {
  * Inject admin name/role in header
  */
 function initAdminHeader() {
+    document.querySelectorAll('.admin-name').forEach(el => {
+        el.textContent = 'Springwala';
+    });
+    
+    // We can still keep the role dynamic if needed, or hide it if it's not part of the branding
     const admin = Auth.getAdmin();
-    if (!admin) return;
-    document.querySelectorAll('.admin-name').forEach(el => el.textContent = admin.name || 'Admin');
-    document.querySelectorAll('.admin-role').forEach(el => el.textContent = admin.role || '');
+    if (admin) {
+        document.querySelectorAll('.admin-role').forEach(el => {
+            el.textContent = admin.role || '';
+        });
+    }
 }

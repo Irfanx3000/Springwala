@@ -23,7 +23,7 @@ async function initHome() {
     loadTopSold();
     loadFeatured();
     loadLatest();
-    loadTopCategories(); 
+    loadTopCategories();
 }
 
 // ─── Banners (STRICT TYPE ISOLATION) ──────────────────────────────────────────
@@ -47,7 +47,7 @@ async function fetchAndRenderBanners(type, renderFn, containerId = null) {
             }
             return;
         }
-        
+
         // Ensure container is visible if it was hidden
         if (containerId) {
             const container = document.getElementById(containerId);
@@ -81,7 +81,7 @@ function renderMainBanners(banners) {
             </div>
             <div class="hero-right-col">
         `;
-        
+
         for (let i = 1; i < 3; i++) {
             const b = banners[i] || banners[0]; // fallback
             html += `
@@ -133,7 +133,7 @@ function renderPromoBanners(banners) {
 
 function renderStandardBanners(banners) {
     // Generic renderer for features and advertisement strips
-    const container = banners[0].type === 'features' 
+    const container = banners[0].type === 'features'
         ? document.getElementById('features-banners-container')
         : document.getElementById('advertisement-banners-container');
 
@@ -258,7 +258,7 @@ function updatePagination(sectionKey, paginationId) {
     const end = Math.min(page * HOME_LIMIT, total);
 
     pag.querySelector('.page-info').textContent = `${start}-${end} of ${total}`;
-    
+
     const prevBtn = pag.querySelector('.prev-btn');
     const nextBtn = pag.querySelector('.next-btn');
 
@@ -284,7 +284,7 @@ function updatePagination(sectionKey, paginationId) {
 }
 
 function reloadSection(sectionKey) {
-    switch(sectionKey) {
+    switch (sectionKey) {
         case 'topSold': loadTopSold(); break;
         case 'featured': loadFeatured(); break;
         case 'latest': loadLatest(); break;
