@@ -7,8 +7,24 @@ const AdminSchema = new mongoose.Schema({
   password: { type: String, required: [true, 'Password is required'], minlength: 6, select: false },
   role: { type: String, enum: ['superadmin', 'admin', 'manager'], default: 'admin' },
   avatar: { type: String, default: '' },
+  
+  // New Production-Grade Status Fields
+  emailVerified: { type: Boolean, default: true }, // Default true for existing admins
+  approvalStatus: { 
+    type: String, 
+    enum: ['pending', 'approved', 'rejected'], 
+    default: 'approved' // Default approved for existing admins
+  },
+  accountStatus: { 
+    type: String, 
+    enum: ['active', 'inactive'], 
+    default: 'active' // Default active for existing admins
+  },
+
+  // Legacy fields (kept for compatibility)
   isApproved: { type: Boolean, default: true },
   isActive: { type: Boolean, default: true },
+  
   lastLogin: { type: Date },
   loginOtp: { type: String },
   loginOtpExpiry: { type: Date },

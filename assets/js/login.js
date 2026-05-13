@@ -106,11 +106,11 @@ function initAuthHandlers() {
                 const res = await api.post('/admin/request-access', { name, email });
                 if (res.success) {
                     localStorage.setItem('adminEmail', email);
-                    showToast('Request submitted successfully!', 'success');
-                    switchState('pending');
+                    showToast('OTP sent to your email!', 'success');
+                    switchState('otp'); // Go to OTP verification immediately
                 } else {
-                    // If already approved/verified, try to resume onboarding
-                    if (res.message.toLowerCase().includes('approved') || res.message.toLowerCase().includes('verified')) {
+                    // If already in a later stage, resume onboarding
+                    if (res.message.toLowerCase().includes('pending approval') || res.message.toLowerCase().includes('already an admin')) {
                         localStorage.setItem('adminEmail', email);
                         checkAdminState();
                     } else {
@@ -193,9 +193,9 @@ function initAuthHandlers() {
             try {
                 const res = await api.post('/admin/set-password', { email, password });
                 if (res.success) {
-                    showToast('Setup complete! Please login.', 'success');
-                    localStorage.removeItem('adminEmail');
-                    setTimeout(() => window.location.reload(), 1500);
+                    showToast('Password set! Waiting for approval.', 'success');
+                    // switch to pending approval state
+                    switchState('pending');
                 } else {
                     showError(res.message);
                 }
@@ -232,20 +232,22 @@ async function checkAdminState() {
 
         switch (data.status) {
             case 'pending':
-                switchState('pending');
-                break;
-            case 'approved':
-                // Automatically send OTP first time they land here
+                // Initial onboarding phase - Need OTP
                 switchState('otp');
-                // We can optionally call send-otp here if we want to automate it
                 break;
             case 'verified':
+                // OTP verified - Need Password
                 switchState('password');
                 break;
+            case 'pending_approval':
+                // Password set - Waiting for Superadmin
+                switchState('pending');
+                break;
             case 'completed':
+                // Fully approved
                 localStorage.removeItem('adminEmail');
-                showToast('Registration complete! Redirecting to login...', 'success');
-                setTimeout(() => window.location.reload(), 1500);
+                showToast('Registration complete! You can now login.', 'success');
+                switchState('login');
                 break;
             case 'rejected':
                 switchState('rejected');

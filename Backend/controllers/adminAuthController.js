@@ -15,8 +15,23 @@ exports.getRequestStatus = async (req, res) => {
     const email = req.query.email || req.body.email;
     if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
+    // 1. Check if an Admin record already exists (post-onboarding phase)
+    const admin = await Admin.findOne({ email });
+    if (admin) {
+      if (admin.approvalStatus === 'approved' && admin.accountStatus === 'active') {
+        return res.json({ success: true, status: 'completed', message: 'Account is fully active' });
+      }
+      if (admin.approvalStatus === 'pending') {
+        return res.json({ success: true, status: 'pending_approval', message: 'Waiting for superadmin approval' });
+      }
+      if (admin.approvalStatus === 'rejected') {
+        return res.json({ success: true, status: 'rejected', message: 'Request was rejected' });
+      }
+    }
+
+    // 2. Check the Onboarding Request phase
     const request = await AdminRequest.findOne({ email });
-    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (!request) return res.status(404).json({ success: false, message: 'No request found for this email' });
 
     res.json({ success: true, status: request.status });
   } catch (err) {
@@ -32,32 +47,42 @@ exports.requestAccess = async (req, res) => {
 
     // 1. Check if user is already an ACTIVE admin
     const admin = await Admin.findOne({ email });
-    if (admin && admin.isApproved && admin.isActive) {
-      return res.status(400).json({ success: false, message: 'You are already an admin. Please login.' });
+    if (admin) {
+      if (admin.approvalStatus === 'approved' && admin.accountStatus === 'active') {
+        return res.status(400).json({ success: false, message: 'You are already an admin. Please login.' });
+      }
+      if (admin.approvalStatus === 'pending') {
+        return res.status(400).json({ success: false, message: 'Your verified request is already pending approval.' });
+      }
     }
 
-    // 2. Check if there is an ACTIVE request in progress
-    const activeRequest = await AdminRequest.findOne({ 
-      email, 
-      status: { $in: ['pending', 'approved', 'verified'] } 
-    });
+    // 2. Check if there is an Onboarding Request in progress
+    // We allow retrying the onboarding if they haven't set a password yet (Admin record not created or pending)
 
-    if (activeRequest) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `A request is already in progress (Status: ${activeRequest.status})` 
-      });
-    }
-
-    // 3. Handle re-request: Update existing completed/rejected request or create new
-    // We can just use findOneAndUpdate with upsert to keep it clean
-    await AdminRequest.findOneAndUpdate(
+    // 3. Re-use or Create Request
+    const otpCode = otpService.generateOTP();
+    const request = await AdminRequest.findOneAndUpdate(
       { email },
-      { name, status: 'pending', reviewedBy: null, reviewedAt: null, onboardingOtp: null, onboardingOtpExpiry: null },
+      { 
+        name, 
+        status: 'pending', 
+        reviewedBy: null, 
+        reviewedAt: null, 
+        onboardingOtp: otpCode, 
+        onboardingOtpExpiry: new Date(Date.now() + 10 * 60 * 1000) 
+      },
       { upsert: true, new: true }
     );
 
-    res.json({ success: true, message: 'Access request submitted successfully' });
+    // 4. Send OTP Immediately (Verified-First Flow)
+    console.log("[OTP] Sending onboarding OTP to:", email, "Code:", otpCode);
+    await sendOTPEmail(email, otpCode);
+
+    res.json({ 
+      success: true, 
+      message: 'OTP sent to your email. Please verify to continue.',
+      status: 'pending' // Still in onboarding phase
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -66,19 +91,24 @@ exports.requestAccess = async (req, res) => {
 // GET /api/admin/requests (Superadmin only)
 exports.getAdminRequests = async (req, res) => {
   try {
-    const requests = await AdminRequest.find().sort({ createdAt: -1 });
+    // Only show requests that have completed the onboarding (verified + password set)
+    const requests = await AdminRequest.find({ status: 'completed' }).sort({ updatedAt: -1 });
     
-    // Enrich with adminExists flag
     const enrichedRequests = await Promise.all(
       requests.map(async (r) => {
         const admin = await Admin.findOne({ email: r.email });
         return {
           ...r.toObject(),
-          adminExists: !!admin
+          adminExists: !!admin,
+          approvalStatus: admin ? admin.approvalStatus : 'n/a',
+          accountStatus: admin ? admin.accountStatus : 'n/a'
         };
       })
     );
 
+    // Filter to only show those still needing attention (pending or recently approved)
+    // or just return all completed ones and let the UI handle it.
+    // The requirement says "ONLY see verified onboarding requests".
     res.json({ success: true, requests: enrichedRequests });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -88,17 +118,35 @@ exports.getAdminRequests = async (req, res) => {
 // POST /api/admin/approve (Superadmin only)
 exports.approveAdminRequest = async (req, res) => {
   try {
-    const { requestId, role } = req.body;
-    const request = await AdminRequest.findById(requestId);
-    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    const { requestId, role, email } = req.body;
+    
+    // Approval now primarily happens on the Admin record
+    // but we can still identify by requestId (AdminRequest ID) or email
+    let targetEmail = email;
+    if (requestId) {
+      const request = await AdminRequest.findById(requestId);
+      if (request) {
+        targetEmail = request.email;
+        request.status = 'completed';
+        request.reviewedBy = req.admin._id;
+        request.reviewedAt = new Date();
+        await request.save();
+      }
+    }
 
-    request.status = 'approved';
-    request.role = role || 'admin';
-    request.reviewedBy = req.admin._id;
-    request.reviewedAt = new Date();
-    await request.save();
+    if (!targetEmail) return res.status(400).json({ success: false, message: 'Email or Request ID is required' });
 
-    res.json({ success: true, message: 'Request approved. Admin can now proceed with OTP verification.' });
+    const admin = await Admin.findOne({ email: targetEmail });
+    if (!admin) return res.status(404).json({ success: false, message: 'Admin account not found for this request' });
+
+    admin.approvalStatus = 'approved';
+    admin.accountStatus = 'active';
+    admin.isApproved = true; // Legacy support
+    admin.isActive = true;   // Legacy support
+    admin.role = role || admin.role || 'admin';
+    await admin.save({ validateBeforeSave: false });
+
+    res.json({ success: true, message: 'Admin approved successfully. They can now login.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -115,6 +163,12 @@ exports.rejectAdminRequest = async (req, res) => {
     request.reviewedBy = req.admin._id;
     request.reviewedAt = new Date();
     await request.save();
+
+    // Also update Admin record if it exists
+    await Admin.findOneAndUpdate(
+      { email: request.email },
+      { approvalStatus: 'rejected', isApproved: false }
+    );
 
     res.json({ success: true, message: 'Admin request rejected' });
   } catch (err) {
@@ -133,10 +187,17 @@ exports.login = async (req, res) => {
     if (!admin)
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     
-    if (!admin.isApproved)
-      return res.status(403).json({ success: false, message: 'Your account is pending approval' });
+    // NEW HARDENED VALIDATION
+    if (!admin.emailVerified)
+      return res.status(403).json({ success: false, message: 'Email not verified' });
+
+    if (admin.approvalStatus === 'pending')
+      return res.status(403).json({ success: false, message: 'Your account is pending superadmin approval' });
+
+    if (admin.approvalStatus === 'rejected')
+      return res.status(403).json({ success: false, message: 'Your access request was rejected' });
       
-    if (!admin.isActive)
+    if (admin.accountStatus !== 'active' || !admin.isActive)
       return res.status(401).json({ success: false, message: 'Account is deactivated' });
 
     const isMatch = await admin.comparePassword(password);
@@ -275,21 +336,36 @@ exports.setPassword = async (req, res) => {
 
     const request = await AdminRequest.findOne({ email });
     if (!request || request.status !== 'verified') 
-      return res.status(400).json({ success: false, message: 'Unauthorized: OTP verification required' });
+      return res.status(400).json({ success: false, message: 'Unauthorized: OTP verification required first' });
 
-    // Create Admin
-    await Admin.create({
-      name: request.name,
-      email: request.email,
-      password,
-      role: request.role,
-      isApproved: true
-    });
+    if (password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
 
+    // 1. Create/Update Admin in VERIFIED_PENDING state
+    await Admin.findOneAndUpdate(
+      { email },
+      {
+        name: request.name,
+        email: request.email,
+        password,
+        role: request.role || 'admin',
+        emailVerified: true,
+        approvalStatus: 'pending',
+        accountStatus: 'inactive',
+        isApproved: false, // Legacy support
+        isActive: false    // Legacy support
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+
+    // 2. Update Request Status
     request.status = 'completed';
     await request.save();
 
-    res.json({ success: true, message: 'Password set successfully. You can now login.' });
+    res.json({ 
+      success: true, 
+      message: 'Password set successfully. Your request is now waiting for Superadmin approval.',
+      status: 'pending_approval'
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
