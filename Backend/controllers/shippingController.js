@@ -46,39 +46,33 @@ exports.createOrderShipment = async (req, res) => {
 
     console.log(`[SHIPMENT CREATE REQUEST] Order: ${order.orderNumber}`);
     
-    // 3. Call Delhivery
+    // ─── TEMPORARY MANUAL SHIPPING MODE ───
+    /* ─── COMMENTED OUT: LIVE DELHIVERY SHIPMENT CREATION ───
     const result = await delhiveryService.createShipment(delhiveryData);
+    if (result.success) { ... }
+    */
 
-    if (result.success) {
-      order.waybill = result.waybill;
-      order.awb = result.waybill;
-      order.delhiveryShipmentId = result.shipmentId;
-      order.shipmentStatus = 'Manifested';
-      order.trackingNumber = result.waybill;
-      order.trackingUrl = result.trackingUrl || `https://www.delhivery.com/track/package/${result.waybill}`;
-      order.shipmentPayload = result.rawResponse;
-      order.shipmentCreatedAt = new Date();
-      order.shippingProvider = 'Delhivery';
-      
-      order.statusHistory.push({
-        status: order.orderStatus,
-        updatedBy: req.admin?.name || 'Admin',
-        note: `Shipment created via Delhivery. Waybill: ${result.waybill}`
-      });
+    // Manual Logic: Just mark as Shipped and add tracking number manually if provided
+    order.shipmentStatus = 'Manual';
+    order.shippingProvider = 'Manual';
+    order.orderStatus = 'Shipped';
+    order.trackingNumber = `MANUAL-${order.orderNumber}`;
+    order.trackingUrl = '#'; // Manual tracking via status updates
+    order.shipmentCreatedAt = new Date();
+    
+    order.statusHistory.push({
+      status: 'Shipped',
+      updatedBy: req.admin?.name || 'Admin',
+      note: 'Shipment marked as Shipped (Manual Fulfillment Mode).'
+    });
 
-      await order.save();
+    await order.save();
 
-      return res.json({
-        success: true,
-        message: 'Shipment created successfully',
-        waybill: result.waybill
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: result.message || 'Delhivery shipment creation failed'
-      });
-    }
+    return res.json({
+      success: true,
+      message: 'Order marked as Shipped (Manual Mode)',
+      trackingNumber: order.trackingNumber
+    });
   } catch (err) {
     console.error('[SHIPPING CONTROLLER ERROR]', err.message);
     res.status(500).json({ success: false, message: err.message });
@@ -98,19 +92,16 @@ exports.trackAndSyncShipment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found for this waybill.' });
     }
 
+    // ─── TEMPORARILY DISABLED: MANUAL MODE ───
+    return res.json({
+      success: true,
+      status: order.shipmentStatus,
+      message: "Manual fulfillment: tracking is based on order status updates."
+    });
+    /*
     const result = await exports.syncOrderWithDelhivery(order);
-
-    if (result.success) {
-      return res.json({
-        success: true,
-        status: result.status,
-        mappedStatus: result.mappedStatus,
-        scans: result.scans,
-        expectedDelivery: result.expectedDelivery
-      });
-    } else {
-      return res.status(400).json({ success: false, message: result.message });
-    }
+    ...
+    */
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -120,54 +111,14 @@ exports.trackAndSyncShipment = async (req, res) => {
  * Internal logic to sync a single order with Delhivery
  */
 exports.syncOrderWithDelhivery = async (order) => {
+  // ─── TEMPORARILY DISABLED: MANUAL MODE ───
+  return { success: true, message: "Manual mode active" };
+  /*
   try {
     const tracking = await delhiveryService.trackShipment(order.waybill || order.awb);
-    
-    if (tracking.success) {
-      const mappedStatus = delhiveryService.mapStatus(tracking.status);
-      
-      if (mappedStatus && mappedStatus !== order.shipmentStatus) {
-        const oldStatus = order.shipmentStatus;
-        order.shipmentStatus = mappedStatus;
-        
-        // Update overall order status if appropriate
-        if (mappedStatus === 'Delivered') {
-          order.orderStatus = 'Delivered';
-          order.paymentStatus = 'Completed';
-        } else if (mappedStatus === 'In Transit' || mappedStatus === 'Out for Delivery') {
-          if (['Ordered', 'Pending'].includes(order.orderStatus)) {
-            order.orderStatus = 'Shipped';
-          }
-        } else if (mappedStatus === 'RTO' || mappedStatus === 'Returned') {
-          order.orderStatus = 'Returned';
-        } else if (mappedStatus === 'Cancelled') {
-          order.orderStatus = 'Cancelled';
-        }
-
-        // Add to history only if status changed
-        order.statusHistory.push({
-          status: order.orderStatus,
-          updatedBy: 'System (Delhivery Sync)',
-          note: `Shipment status updated from ${oldStatus} to ${mappedStatus}. Courier Status: ${tracking.status}`
-        });
-
-        await order.save();
-      }
-
-      return {
-        success: true,
-        status: tracking.status,
-        mappedStatus: mappedStatus,
-        scans: tracking.scans,
-        expectedDelivery: tracking.expectedDeliveryDate
-      };
-    }
-    
-    return { success: false, message: tracking.message || "Failed to fetch tracking" };
-  } catch (err) {
-    console.error(`[SYNC ERROR] Order ${order.orderNumber}:`, err.message);
-    return { success: false, message: err.message };
+    ...
   }
+  */
 };
 
 /**
@@ -175,38 +126,6 @@ exports.syncOrderWithDelhivery = async (order) => {
  * @route   POST /api/shipping/sync-all
  */
 exports.syncAllActiveShipments = async (req, res) => {
-  try {
-    console.log('[TRACKING SYNC START]');
-    
-    // Find orders that are shipped but not yet delivered/cancelled/returned
-    const activeOrders = await Order.find({
-      waybill: { $exists: true, $ne: '' },
-      shipmentStatus: { $nin: ['Delivered', 'Cancelled', 'Returned', 'RTO'] }
-    }).limit(50); // Batch size for safety
-
-    let successCount = 0;
-    let failedCount = 0;
-
-    for (const order of activeOrders) {
-      const result = await exports.syncOrderWithDelhivery(order);
-      if (result.success) successCount++;
-      else failedCount++;
-      
-      // Subtle delay to avoid hitting rate limits too hard during loop
-      await new Promise(r => setTimeout(r, 200));
-    }
-
-    console.log(`[TRACKING SYNC COMPLETE] Success: ${successCount}, Failed: ${failedCount}`);
-
-    if (res) {
-      res.json({
-        success: true,
-        message: `Sync complete. Processed ${activeOrders.length} orders.`,
-        details: { success: successCount, failed: failedCount }
-      });
-    }
-  } catch (err) {
-    console.error('[TRACKING SYNC CRITICAL ERROR]', err.message);
-    if (res) res.status(500).json({ success: false, message: err.message });
-  }
+  // ─── TEMPORARILY DISABLED: MANUAL MODE ───
+  if (res) res.json({ success: true, message: "Sync skipped (Manual Mode Active)" });
 };

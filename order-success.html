@@ -161,42 +161,65 @@
         <a href="index.html" class="secondary-btn">Continue Shopping</a>
     </div>
 
+    <script src="assets/js/api.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('id');
-        const amount = params.get('amount');
+        const amountParam = params.get('amount');
         const isPaid = params.get('payment') === 'success';
-        const awb = params.get('awb');
-        const trackingUrl = params.get('tracking');
+        const awbParam = params.get('awb');
         
-        if (orderId) {
-            document.getElementById('display-order-id').textContent = orderId;
+        // Initial sync from URL for immediate feedback
+        if (orderId) document.getElementById('display-order-id').textContent = orderId;
+        if (amountParam) document.getElementById('display-order-amount').textContent = '₹' + parseFloat(amountParam).toFixed(2);
+
+        async function loadOrderDetails() {
+            if (!orderId) return;
+            try {
+                // We use the public tracking/detail endpoint or user order endpoint
+                // Assuming we have an endpoint that returns order by ID for the owner
+                const res = await apiCall(`/user/orders/${orderId}`, 'GET', null, true);
+                const order = res.order;
+                if (!order) return;
+
+                // [ORDER-SYNC] Use persisted totalAmount as Single Source of Truth
+                const grandTotal = Number(order.totalAmount || order.finalAmount || 0);
+                document.getElementById('display-order-amount').textContent = '₹' + grandTotal.toFixed(2);
+                
+                console.log('[ORDER-SYNC] Success Page Verified Totals:', {
+                    subtotal: order.subtotal,
+                    shipping: order.shippingCharge,
+                    grandTotal: grandTotal
+                });
+                const statusEl = document.getElementById('display-status');
+                statusEl.textContent = `${order.orderStatus} (${order.paymentMethod})`;
+                if (order.paymentStatus === 'Completed') {
+                    statusEl.style.background = '#dcfce7';
+                    statusEl.style.color = '#166534';
+                }
+
+                // Shipping / Tracking (ORDER-SYNC: Support internal trackingNumber)
+                const waybill = order.waybill || order.awb || order.trackingNumber || awbParam;
+                if (waybill) {
+                    document.getElementById('awb-row').style.display = 'flex';
+                    document.getElementById('display-awb').textContent = waybill;
+                    const trackBtn = document.getElementById('track-order-btn');
+                    if (trackBtn) trackBtn.href = `track-order.html?awb=${waybill}`;
+                }
+
+                // If items breakdown UI existed, we'd inject here
+                console.log('[ORDER-SYNC] Verified Totals:', {
+                    subtotal: order.subtotal,
+                    shipping: order.shippingCharge,
+                    grandTotal: grandTotal
+                });
+
+            } catch (err) {
+                console.warn('Could not fetch live order details:', err);
+            }
         }
 
-        if (amount) {
-            document.getElementById('display-order-amount').textContent = '₹' + parseFloat(amount).toFixed(2);
-        }
-
-        if (isPaid) {
-            const statusEl = document.getElementById('display-status');
-            statusEl.textContent = 'Completed (Online)';
-            statusEl.style.background = '#dcfce7';
-            statusEl.style.color = '#166534';
-        }
-
-        if (awb) {
-            document.getElementById('awb-row').style.display = 'flex';
-            document.getElementById('display-awb').textContent = awb;
-            
-            // Dynamic link to new track-order page
-            const trackBtn = document.getElementById('track-order-btn');
-            if (trackBtn) trackBtn.href = `track-order.html?awb=${awb}`;
-        }
-
-        if (trackingUrl) {
-            document.getElementById('tracking-row').style.display = 'flex';
-            document.getElementById('display-tracking-link').href = decodeURIComponent(trackingUrl);
-        }
+        if (orderId) loadOrderDetails();
     </script>
 </body>
 </html>

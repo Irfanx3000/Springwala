@@ -232,6 +232,12 @@ const Cart = {
     Cart.updateBadge();
   },
 
+  clear: () => {
+    localStorage.removeItem('cart');
+    localStorage.removeItem('guestCart');
+    Cart.updateBadge();
+  },
+
   // Hybrid get: returns guest items or server items (if cached/provided)
   get: () => {
     Cart.ensureMigration();
@@ -564,6 +570,7 @@ async function loadCartCount() {
       // SSOT: batchQuantity MUST be preserved so batch pricing works on cart/checkout pages
       const mappedItems = (data.cart?.items || []).map(item => {
         const pid = item.product?._id || item.product;
+        const price = formatCurrency((item.finalPrice || item.price || 0) * item.quantity);
         return {
           productId: pid,
           product: pid,
@@ -2337,9 +2344,15 @@ async function renderCart() {
     }, Auth.isLoggedIn());
 
     if (summaryRes.success) {
-      totals.itemsTotal = summaryRes.totalAmount;
-      totals.deliveryCharge = summaryRes.deliveryCharges;
-      totals.totalPayable = summaryRes.finalAmount;
+      totals.itemsTotal = Number(summaryRes.subtotal || summaryRes.totalAmount || 0);
+      totals.deliveryCharge = Number(summaryRes.shippingCharge || summaryRes.deliveryCharges || 0);
+      totals.totalPayable = Number(summaryRes.totalAmount || summaryRes.finalAmount || 0);
+
+      console.log('[ORDER-SYNC] Cart Summary (SSOT):', {
+        subtotal: totals.itemsTotal,
+        shipping: totals.deliveryCharge,
+        grandTotal: totals.totalPayable
+      });
     }
   } catch (err) {
     console.warn('[CART SUMMARY] Using local fallback:', err.message);
@@ -2454,6 +2467,11 @@ async function initCheckoutPage() {
     return;
   }
 
+  // ─── STATE CLEANUP: CLEAR STALE PAYMENT FLAGS ───
+  localStorage.removeItem('selectedPaymentMethod');
+  localStorage.removeItem('checkout_payment_method');
+  sessionStorage.removeItem('last_payment_method');
+
   const itemsContainer = document.getElementById('checkout-items');
   const totals = Cart.totals();
 
@@ -2481,10 +2499,45 @@ async function initCheckoutPage() {
     }).join('');
   }
 
-  const totalsContainer = {
-    items: document.getElementById('summary-items-total'),
-    delivery: document.getElementById('summary-delivery'),
-    total: document.getElementById('summary-total')
+  // ─── ONE FRONTEND PRICING STATE (SSOT) ───
+  let checkoutPricing = {
+    subtotal: 0,
+    shippingCharge: 0,
+    grandTotal: 0
+  };
+
+  const renderPricingUI = (pricing) => {
+    console.log('[ORDER-SYNC] Rendering UI with pricing:', pricing);
+    
+    // Desktop / Standard Elements
+    const elements = {
+      subtotal: document.getElementById('summary-items-total'),
+      shipping: document.getElementById('summary-delivery') || document.getElementById('summary-delivery-charges'),
+      total: document.getElementById('summary-total') || document.getElementById('summary-total-payable')
+    };
+
+    if (elements.subtotal) elements.subtotal.textContent = `₹${pricing.subtotal.toFixed(2)}`;
+    if (elements.shipping) {
+      elements.shipping.textContent = pricing.shippingCharge > 0 ? `₹${pricing.shippingCharge.toFixed(2)}` : 'Free';
+      if (pricing.shippingCharge === 0) elements.shipping.classList.add('text-green-600');
+      else elements.shipping.classList.remove('text-green-600');
+    }
+    if (elements.total) elements.total.textContent = `₹${pricing.grandTotal.toFixed(2)}`;
+
+    // Mobile specific elements (from cart.html/checkout integration)
+    const mobileElements = {
+      subtotal: document.getElementById('mobile-summary-items-total'),
+      shipping: document.getElementById('mobile-summary-delivery'),
+      total: document.getElementById('mobile-summary-grand-total')
+    };
+
+    if (mobileElements.subtotal) mobileElements.subtotal.textContent = `₹${pricing.subtotal.toFixed(2)}`;
+    if (mobileElements.shipping) mobileElements.shipping.textContent = pricing.shippingCharge > 0 ? `₹${pricing.shippingCharge.toFixed(2)}` : 'Free';
+    if (mobileElements.total) mobileElements.total.textContent = `₹${pricing.grandTotal.toFixed(2)}`;
+
+    console.log('[UI] Rendering subtotal:', pricing.subtotal);
+    console.log('[UI] Rendering shipping:', pricing.shippingCharge);
+    console.log('[UI] Rendering total:', pricing.grandTotal);
   };
 
   const fetchSummary = async (pincode = "") => {
@@ -2494,7 +2547,8 @@ async function initCheckoutPage() {
 
     try {
       // Show Loading State
-      if (totalsContainer.delivery) totalsContainer.delivery.textContent = 'Calculating...';
+      const deliveryEl = document.getElementById('summary-delivery') || document.getElementById('summary-delivery-charges') || document.getElementById('mobile-summary-delivery');
+      if (deliveryEl) deliveryEl.textContent = 'Calculating...';
       if (noteEl) noteEl.textContent = '';
       if (msgEl) msgEl.classList.add('hidden');
       if (placeBtn) placeBtn.disabled = true;
@@ -2505,10 +2559,19 @@ async function initCheckoutPage() {
       }, true);
 
       if (summaryRes.success) {
-        // Update UI Totals
-        if (totalsContainer.items) totalsContainer.items.textContent = `₹${summaryRes.totalAmount.toFixed(2)}`;
-        if (totalsContainer.delivery) totalsContainer.delivery.textContent = summaryRes.deliveryCharges > 0 ? `₹${summaryRes.deliveryCharges.toFixed(2)}` : 'Free';
-        if (totalsContainer.total) totalsContainer.total.textContent = `₹${summaryRes.finalAmount.toFixed(2)}`;
+        console.log('[CHECKOUT-UI]\nsummary object received:', summaryRes);
+
+        // Update State from Backend SSOT
+        checkoutPricing = {
+          subtotal: Number(summaryRes.subtotal),
+          shippingCharge: Number(summaryRes.shippingCharge),
+          grandTotal: Number(summaryRes.totalAmount)
+        };
+
+        console.log('[UI] Checkout state updated:', checkoutPricing);
+
+        // Update UI
+        renderPricingUI(checkoutPricing);
 
         // Handle Shipping Metadata
         const info = summaryRes.shippingInfo;
@@ -2546,7 +2609,8 @@ async function initCheckoutPage() {
       }
     } catch (err) {
       console.error('[SUMMARY ERROR]', err);
-      if (totalsContainer.delivery) totalsContainer.delivery.textContent = 'Error';
+      const deliveryEl = document.getElementById('summary-delivery') || document.getElementById('summary-delivery-charges') || document.getElementById('mobile-summary-delivery');
+      if (deliveryEl) deliveryEl.textContent = 'Error';
     }
     return null;
   };
@@ -2584,7 +2648,7 @@ async function initCheckoutPage() {
   }
 
   // Payment Method Selection Logic
-  let selectedMethod = 'COD';
+  let selectedMethod = 'Online'; // TEMPORARY: FORCE ONLINE AS DEFAULT
   const methodItems = document.querySelectorAll('.payment-method-item');
   methodItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -2632,17 +2696,33 @@ async function initCheckoutPage() {
       placeBtn.innerHTML = '<span class="flex items-center gap-2"><div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...</span>';
 
       try {
-        // Re-fetch summary to ensure latest pricing from backend
-        backendSummary = await fetchSummary();
+        // [ORDER-SYNC] Re-fetch summary with active pincode to ensure latest verified pricing
+        const activePincode = getVal('ship-pincode');
+        console.log('[ORDER-SYNC] Verifying final totals with pincode:', activePincode);
+        
+        backendSummary = await fetchSummary(activePincode);
         if (!backendSummary) throw new Error('Could not verify order totals');
 
+        console.log('[ORDER-SYNC] Verified Summary Snapshot:', {
+          subtotal: backendSummary.subtotal,
+          shipping: backendSummary.shippingCharge,
+          grandTotal: backendSummary.totalAmount
+        });
+
+        console.log('[CHECKOUT] Active Payment Method:', selectedMethod);
+        console.log('[CHECKOUT] Executing Online Flow');
+
+        // ─── TEMPORARY: COD DISABLED ───
+        await handleOnlinePaymentFlow(shippingAddress, backendSummary);
+        
+        /* 
         if (selectedMethod === 'Online') {
-          console.log('[CHECKOUT] Starting Online Payment Flow...');
           await handleOnlinePaymentFlow(shippingAddress, backendSummary);
         } else {
-          console.log('[CHECKOUT] Starting COD Flow...');
+          console.log('[CHECKOUT] COD Flow Disabled');
           await handleCODFlow(shippingAddress, backendSummary);
         }
+        */
       } catch (err) {
         console.error('[CHECKOUT ERROR]', err);
         showToast(err.message || 'Payment initiation failed', 'error');
@@ -2655,8 +2735,9 @@ async function initCheckoutPage() {
 
 /**
  * UTILITY: Standardize order payload for both COD and Online flows.
+ * Now includes pricing snapshots for immutable record keeping.
  */
-function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paymentDetails = {}, precalculatedItems = null) {
+function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paymentDetails = {}, precalculatedItems = null, pricingSnapshot = {}) {
   const cart = Cart.get();
 
   if ((!cart || !cart.length) && (!precalculatedItems || !precalculatedItems.length)) {
@@ -2732,21 +2813,29 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
     shippingAddress,
     paymentMethod,
     paymentStatus,
-    paymentDetails
+    paymentDetails,
+    
+    // [ORDER-SYNC] Persist immutable pricing snapshots
+    subtotal: Number(pricingSnapshot.subtotal || 0),
+    shippingCharge: Number(pricingSnapshot.shippingCharge || 0),
+    totalAmount: Number(pricingSnapshot.totalAmount || 0),
+    finalAmount: Number(pricingSnapshot.totalAmount || 0) // Compatibility mirror
   };
 
-  console.log('[PAYLOAD GENERATED]', {
-    method: paymentMethod,
-    itemsCount: finalItems.length,
-    firstItem: finalItems[0] ? { name: finalItems[0].name, price: finalItems[0].finalPrice } : 'NONE'
+  console.log('[ORDER-SYNC] PERSISTED PAYLOAD SNAPSHOT:', {
+    subtotal: payload.subtotal,
+    shipping: payload.shippingCharge,
+    grandTotal: payload.totalAmount
   });
   return payload;
 }
 
 
 /**
+ * ─── TEMPORARY: COD DISABLED ───
  * PRODUCTION COD FLOW
  */
+/*
 async function handleCODFlow(shippingAddress, backendSummary) {
   try {
     const amount = backendSummary.finalAmount;
@@ -2760,7 +2849,7 @@ async function handleCODFlow(shippingAddress, backendSummary) {
 
     const res = await apiCall('/user/orders', 'POST', payload, true);
     if (res.success) {
-      Cart.save([]);
+      Cart.clear();
       showToast('Order placed successfully!', 'success');
       const redirectUrl = `order-success.html?id=${res.orderNumber}&amount=${amount}&awb=${res.tracking?.awb || ''}&tracking=${encodeURIComponent(res.tracking?.url || '')}`;
       window.location.href = redirectUrl;
@@ -2772,6 +2861,7 @@ async function handleCODFlow(shippingAddress, backendSummary) {
     showToast(err.message || 'Failed to place order', 'error');
   }
 }
+*/
 
 /**
  * PRODUCTION ONLINE FLOW (Verify-then-Create)
@@ -2788,7 +2878,19 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       throw new Error('Order summary is missing');
     }
 
-    const amount = backendSummary.finalAmount || backendSummary.totalAmount;
+    const amount = backendSummary.totalAmount || backendSummary.finalAmount; // totalAmount is now the Grand Total SSOT
+    
+    if (!amount || amount <= 0) {
+      console.error('[ORDER-SYNC] Invalid grand total from backend:', backendSummary);
+      throw new Error('Error calculating final total. Please refresh and try again.');
+    }
+
+    console.log('[ORDER-SYNC] Proceeding with payment for amount:', amount);
+    console.log('[ORDER-SYNC] Final Pricing Breakdown:', {
+      subtotal: backendSummary.subtotal,
+      shipping: backendSummary.shippingCharge,
+      total: amount
+    });
 
     // Use items from backend summary (Normalized SSOT)
     const items = backendSummary.items || [];
@@ -2896,9 +2998,15 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
             'Completed',
             {
               transactionId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id
+              razorpayOrderId: response.razorpay_order_id,
+              gateway: 'Razorpay'
             },
-            items // Use normalized items from summary response
+            items, // Use normalized items from summary response
+            {
+              subtotal: backendSummary.subtotal,
+              shippingCharge: backendSummary.shippingCharge,
+              totalAmount: amount
+            }
           );
 
           console.log('[ORDER] Final Order Payload:', orderPayload);
@@ -2921,11 +3029,15 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
           }
 
           // ---------------------------------------------------
-          // 7. Success Cleanup
+          // 7. Success Cleanup & Navigation
           // ---------------------------------------------------
-          Cart.save([]);
+          console.log('[CHECKOUT] Payment Verified');
+          console.log('[CHECKOUT] Order Created');
+          
+          Cart.clear();
 
           showToast('Payment successful!', 'success');
+          console.log('[CHECKOUT] Redirecting To Success Page');
 
           const redirectUrl =
             `order-success.html?id=${finalRes.orderNumber}` +
@@ -3050,118 +3162,8 @@ async function loadRecommendedProducts() {
   }
 }
 
-// ─── Page: orders.html ────────────────────────────────────────────────────────
-async function initOrdersPage() {
-  if (!Auth.isLoggedIn()) {
-    // Show login prompt
-    return;
-  }
-  try {
-    const data = await apiCall('/user/orders?limit=20', 'GET', null, true);
-    const orders = data.orders || [];
-
-    const undelivered = orders.filter(o => !['delivered', 'completed'].includes(o.status));
-    const delivered = orders.filter(o => ['delivered', 'completed'].includes(o.status));
-
-    // Desktop: undelivered tab
-    const desktopLeft = document.querySelector('.hidden.md\\:block .flex-1.min-w-0');
-    if (desktopLeft) {
-      const cardArea = desktopLeft.querySelector('.w-full.bg-white.border');
-      if (orders.length > 0) {
-        // Replace placeholder cards with real data
-        const placeholder = desktopLeft.querySelectorAll('.w-full.bg-white.border.border-\\[\\#E4E4E4\\].rounded-\\[10px\\]');
-        placeholder.forEach((c, i) => {
-          const order = undelivered[i];
-          if (order) {
-            const item = order.items[0];
-            c.querySelector('h3').textContent = item?.name || 'Product';
-            c.querySelector('img').src = item?.image || 'assets/images/deafult.png';
-            const priceEl = c.querySelector('.text-\\[26px\\]');
-            if (priceEl) priceEl.textContent = `₹${order.totalAmount?.toFixed(2) || '0.00'}`;
-            const pill = c.querySelector('.bg-\\[\\#1B99B5\\]');
-            if (pill && order.estimatedDelivery) {
-              pill.querySelector('span').textContent = `Estimated Delivery: ${new Date(order.estimatedDelivery).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-            }
-          } else {
-            c.style.display = 'none';
-          }
-        });
-      }
-    }
-
-    // Mobile sections
-    const mobileUndelivered = document.querySelector('.md\\:hidden .flex.flex-col.gap-4:first-of-type');
-    if (mobileUndelivered && undelivered.length) {
-      mobileUndelivered.innerHTML = undelivered.map(order => {
-        const item = order.items[0];
-        const img = item?.image || 'assets/images/deafult.png';
-        return `
-          <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[16px]">
-            <div class="flex items-start gap-[12px] mb-[12px]">
-              <div class="w-[64px] h-[64px] flex-shrink-0 flex items-center justify-center overflow-hidden">
-                <img src="${img}" alt="${item?.name || 'Product'}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-              </div>
-              <div class="flex flex-col flex-1 min-w-0">
-                <div class="flex justify-between items-start gap-2">
-                  <h3 class="text-[#000000] text-[15px] font-medium font-['Poppins'] leading-[22px] line-clamp-2">${item?.name || 'Product'}</h3>
-                </div>
-                <div class="inline-flex items-center px-[6px] py-[2px] bg-[#1B99B5] rounded-[2px] w-fit mt-[4px]">
-                  <span class="text-white text-[10px] font-medium font-['Poppins'] leading-[15px]">
-                    ${order.estimatedDelivery ? 'Est. Delivery: ' + new Date(order.estimatedDelivery).toLocaleDateString('en-IN') : 'Order placed: ' + new Date(order.createdAt).toLocaleDateString('en-IN')}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-[8px] overflow-x-auto">
-              <button class="bg-[#E2E2E2] rounded-[3px] px-[10px] py-[6px] flex-shrink-0 text-[#4D4848] text-[12px] font-medium">Track Order</button>
-              <button class="bg-[#E2E2E2] rounded-[3px] px-[10px] py-[6px] flex-shrink-0 text-[#4D4848] text-[12px] font-medium">Customer Support</button>
-              <button class="bg-[#E2E2E2] rounded-[3px] px-[10px] py-[6px] flex-shrink-0 text-[#4D4848] text-[12px] font-medium" onclick="addOrderToCart('${order._id}')">Order Again</button>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // Delivered
-    const mobileDelivered = document.querySelectorAll('.md\\:hidden .flex.flex-col.gap-4');
-    const deliveredContainer = mobileDelivered[1];
-    if (deliveredContainer && delivered.length) {
-      deliveredContainer.innerHTML = delivered.map(order => {
-        const item = order.items[0];
-        const img = item?.image || 'assets/images/deafult.png';
-        return `
-          <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[16px]">
-            <div class="flex items-start gap-[12px] mb-[12px]">
-              <div class="w-[64px] h-[64px] flex-shrink-0 flex items-center justify-center overflow-hidden">
-                <img src="${img}" alt="${item?.name || 'Product'}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-              </div>
-              <div class="flex flex-col flex-1 min-w-0">
-                <h3 class="text-[15px] font-medium font-['Poppins'] line-clamp-2">${item?.name || 'Product'}</h3>
-                <div class="inline-flex items-center px-[6px] py-[2px] bg-[#096709] rounded-[2px] w-fit mt-[4px]">
-                  <span class="text-white text-[10px] font-medium">Delivered on ${new Date(order.updatedAt).toLocaleDateString('en-IN')}</span>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-[8px] overflow-x-auto">
-              <button class="bg-[#E2E2E2] rounded-[3px] px-[10px] py-[6px] flex-shrink-0 text-[12px] font-medium">Write a Review</button>
-              <button class="bg-[#42AD42] rounded-[3px] px-[10px] py-[6px] flex-shrink-0 text-white text-[12px] font-medium" onclick="addOrderToCart('${order._id}')">Re-order</button>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // Related products slider
-    const relatedSlider = document.getElementById('orders-product-slider');
-    if (relatedSlider) {
-      try {
-        const featData = await apiCall('/user/products/featured?limit=12');
-        relatedSlider.innerHTML = (featData.products || []).map(p => buildProductCard(p, 'min-w-[171px] max-w-[171px]')).join('');
-      } catch { }
-    }
-
-  } catch (e) {
-    console.warn('Orders load failed:', e.message);
-  }
-}
+// [ORDER-SYNC] Duplicate initOrdersPage removed from app.js. 
+// Using centralized implementation in assets/js/orders.js instead.
 
 async function addOrderToCart(orderId) {
   showToast('Adding items to cart...', 'info');

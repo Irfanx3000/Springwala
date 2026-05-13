@@ -11,7 +11,7 @@ const AdminRequestSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Name is required'] },
   status: { 
     type: String, 
-    enum: ['pending', 'approved', 'verified', 'completed', 'rejected'], 
+    enum: ['pending', 'approved', 'verified', 'awaiting_approval', 'completed', 'rejected'], 
     default: 'pending' 
   },
   role: { 

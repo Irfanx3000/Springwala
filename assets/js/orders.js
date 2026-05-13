@@ -30,9 +30,10 @@ async function initOrdersPage() {
         if (orders.length === 0) {
             renderEmptyState();
         } else {
-            // 5. STATUS SEGREGATION
+            // 5. STATUS SEGREGATION (ORDER-SYNC)
+            console.log('[ORDER-SYNC] Processing orders for UI rendering...');
             const undelivered = orders.filter(o =>
-                ['pending', 'processing', 'shipped', 'ordered'].includes(o.orderStatus?.toLowerCase())
+                ['pending', 'processing', 'shipped', 'ordered', 'cancelled', 'returned'].includes(o.orderStatus?.toLowerCase())
             );
             const delivered = orders.filter(o =>
                 ['delivered', 'completed'].includes(o.orderStatus?.toLowerCase())
@@ -115,7 +116,7 @@ function buildDesktopOrderCard(order, item) {
     const product = item.product || {};
     const title = product.name || 'Product Name';
     const image = productImg(product);
-    const price = formatCurrency(item.price * item.quantity);
+    const price = formatCurrency((item.finalPrice || item.price || 0) * item.quantity);
     const dateStr = formatDate(order.orderStatus?.toLowerCase() === 'delivered' ? order.deliveryDate : (order.estimatedDeliveryDate || order.createdAt));
     const statusLabel = order.orderStatus?.toLowerCase() === 'delivered' ? 'Delivered on' : 'Estimated Delivery by';
     const statusColor = order.orderStatus?.toLowerCase() === 'delivered' ? '#096709' : '#1B99B5';
@@ -148,7 +149,7 @@ function buildDesktopOrderCard(order, item) {
                         <div class="flex flex-col gap-2">
                              ${order.waybill || order.awb ? `<div class="flex items-center gap-2"><span class="text-[11px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
                             <div class="flex gap-[16px]">
-                                <button onclick="handleTracking('${order.waybill || order.awb || ''}', '${order._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
+                                <button onclick="handleTracking('${order.awb || order.trackingNumber || ''}', '${order._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
                                     <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Track Order</span>
                                 </button>
                                 <button onclick="contactSupport()" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
@@ -196,7 +197,7 @@ function buildMobileOrderCard(order, item) {
             <div class="mb-3">
                 ${order.waybill || order.awb ? `<div class="flex items-center gap-2 mb-2"><span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
                 <div class="flex items-center justify-start gap-[8px] w-full overflow-x-auto hide-scrollbar flex-nowrap">
-                    <button onclick="handleTracking('${order.waybill || order.awb || ''}', '${order._id}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                    <button onclick="handleTracking('${order.awb || order.trackingNumber || ''}', '${order._id}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
                         <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Track Order</span>
                     </button>
                     <button onclick="contactSupport()" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
@@ -303,17 +304,12 @@ function initSliderControls(totalCards) {
     updatePageInfo();
 }
 
-function handleTracking(awb, orderId) {
-    if (awb) {
-        window.location.href = `track-order.html?awb=${awb}`;
+function handleTracking(identifier, orderId) {
+    console.log('[ORDER-SYNC] Navigating to tracking for:', identifier || orderId);
+    if (identifier) {
+        window.location.href = `track-order.html?awb=${identifier}`;
     } else {
-        Swal.fire({
-            title: 'Shipment Pending',
-            text: 'Your order is being processed. Tracking will be available once it is handed over to the courier.',
-            icon: 'info',
-            confirmButtonText: 'Got it',
-            confirmButtonColor: '#BE2229'
-        });
+        window.location.href = `track-order.html?orderId=${orderId}`;
     }
 }
 

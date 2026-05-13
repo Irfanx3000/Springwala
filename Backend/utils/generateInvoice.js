@@ -1,6 +1,24 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const SiteSettings = require('../models/SiteSettings');
+
+/**
+ * Helper to fetch site settings singleton
+ */
+async function getSettings() {
+  try {
+    const settings = await SiteSettings.findOne({ _singleton: 'global' });
+    return settings || { 
+      siteName: 'Springwala', 
+      contactEmail: 'support@springwala.com', 
+      contactNumber: '+91 8879 241085', 
+      address: 'Shop No. 5, Near Station, Mumbai 400083' 
+    };
+  } catch (e) {
+    return { siteName: 'Springwala' };
+  }
+}
 
 /**
  * Generates a PDF invoice for an order.
@@ -8,6 +26,8 @@ const path = require('path');
  * @returns {Promise<string>} - Absolute path to the generated PDF.
  */
 const generateInvoice = async (order) => {
+  const settings = await getSettings();
+
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ margin: 50 });
@@ -25,18 +45,28 @@ const generateInvoice = async (order) => {
       doc.pipe(stream);
 
       // --- Header ---
-      doc.fillColor('#444444')
-         .fontSize(20)
-         .text('SPRINGWALA', 50, 57)
+      doc.fillColor('#BE2229') // Corporate color
+         .fontSize(22)
+         .font('Helvetica-Bold')
+         .text((settings.siteName || 'SPRINGWALA').toUpperCase(), 50, 57)
          .fontSize(10)
-         .text('INVOICE', 200, 65, { align: 'right' })
+         .fillColor('#444444')
+         .font('Helvetica')
+         .text('TAX INVOICE', 200, 65, { align: 'right' })
          .moveDown();
+
+      // Seller Details
+      doc.fontSize(8)
+         .text(settings.address || '', 50, 80, { width: 250 })
+         .text(`Email: ${settings.contactEmail || ''} | Phone: ${settings.contactNumber || ''}`, 50, 92);
+      
+      doc.moveTo(50, 105).lineTo(560, 105).stroke();
 
       doc.fillColor('#444444')
          .fontSize(10)
-         .text(`Order Number: ${order.orderNumber}`, 50, 100)
-         .text(`Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 50, 115)
-         .text(`Status: ${order.orderStatus}`, 50, 130);
+         .text(`Order ID: ${order.orderNumber}`, 350, 120, { align: 'right' })
+         .text(`Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 350, 135, { align: 'right' })
+         .text(`Status: ${order.orderStatus}`, 350, 150, { align: 'right' });
 
       if (order.courier || order.waybill) {
         doc.text(`Courier: ${order.courier || 'Delhivery'}`, 50, 145);
@@ -90,7 +120,7 @@ const generateInvoice = async (order) => {
       const subtotalY = tableTop + 35 + (i * 25);
       doc.moveTo(50, subtotalY).lineTo(560, subtotalY).stroke();
 
-      // --- Financials ---
+      // --- Financials (ORDER-SYNC: Use Persisted Snapshots) ---
       const finalY = subtotalY + 20;
       doc.text('Subtotal:', 380, finalY, { width: 100, align: 'right' });
       doc.text(`₹${safe(order.subtotal)}`, 480, finalY, { width: 70, align: 'right' });
@@ -99,17 +129,22 @@ const generateInvoice = async (order) => {
       doc.text(`₹${safe(order.gstAmount)}`, 480, finalY + 15, { width: 70, align: 'right' });
 
       doc.text('Shipping:', 380, finalY + 30, { width: 100, align: 'right' });
-      const shipping = order.deliveryCharges || order.shippingCharge || 0;
+      const shipping = order.shippingCharge || order.deliveryCharges || 0;
       doc.text(shipping === 0 ? 'FREE' : `₹${safe(shipping)}`, 480, finalY + 30, { width: 70, align: 'right' });
 
       doc.font('Helvetica-Bold')
          .text('Grand Total:', 380, finalY + 50, { width: 100, align: 'right' })
-         .text(`₹${safe(order.finalAmount || order.totalAmount)}`, 480, finalY + 50, { width: 70, align: 'right' });
+         .text(`₹${safe(order.totalAmount || order.finalAmount)}`, 480, finalY + 50, { width: 70, align: 'right' });
+
+      console.log(`[ORDER-SYNC] Invoice Generated: Order=${order.orderNumber}, Total=${order.totalAmount}`);
 
       // --- Footer ---
       doc.font('Helvetica')
-         .fontSize(10)
-         .text('Thank you for shopping with Springwala!', 50, 700, { align: 'center', width: 500 });
+         .fontSize(9)
+         .text(`Thank you for shopping with ${settings.siteName || 'Springwala'}!`, 50, 720, { align: 'center', width: 500 })
+         .fontSize(8)
+         .fillColor('#999999')
+         .text('This is a computer generated invoice and does not require a physical signature.', 50, 735, { align: 'center', width: 500 });
 
       doc.end();
 

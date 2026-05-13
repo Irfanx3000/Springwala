@@ -29,55 +29,37 @@ const getDeliveryCharges = async ({ totalAmount, pincode, weight }) => {
       return { charge: 0, serviceable: true, message: "Enter pincode for shipping estimate", isPending: true };
     }
 
-    const originPincode = process.env.PICKUP_PINCODE || "400083";
-    const weightInGrams = exports.normalizeWeightToGrams(weight);
+    // ─── TEMPORARY MANUAL SHIPPING MODE ───
+    console.log(`[ORDER-SYNC] Calculating shipping for Pincode: ${pincode}, Subtotal: ${totalAmount}`);
 
-    // 1. Try Live Delhivery Rate API
-    const estimate = await delhiveryService.getShippingEstimate({
-      pincode,
-      weight: weightInGrams,
-      paymentMode: 'Prepaid',
-      totalAmount
-    });
+    let manualCharge = 350; // Default Standard
+    const prefix = pincode.substring(0, 3);
+    const statePrefix = pincode.substring(0, 2);
 
-    if (estimate && estimate.success) {
-      if (!estimate.serviceable) {
-        return { 
-          charge: 0, 
-          serviceable: false, 
-          message: "This pincode is currently not serviceable." 
-        };
-      }
-
-      // Check for Free Shipping Override (Business Logic)
-      const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
-      const finalCharge = totalAmount >= THRESHOLD ? 0 : estimate.deliveryCharge;
-
-      return {
-        charge: finalCharge,
-        serviceable: true,
-        estimatedDays: estimate.estimatedDays,
-        courier: estimate.courier,
-        message: totalAmount >= THRESHOLD ? "Free delivery applied!" : `Standard Delivery: ₹${finalCharge}`
-      };
+    if (prefix === '400' || prefix === '401') {
+      manualCharge = 79; // Local Mumbai/Thane
+    } else if (statePrefix === '40' || statePrefix === '41' || statePrefix === '42' || statePrefix === '43' || statePrefix === '44') {
+      manualCharge = 199; // Maharashtra Regional
+    } else {
+      manualCharge = 350; // National
     }
 
-    // 2. SAFE FALLBACK (Task 8: If API fails or timeout)
-    console.warn(`[SHIPPING FALLBACK] Live rates failed for ${pincode}. Using default rules.`);
-    const DEFAULT_CHARGE = Number(process.env.DEFAULT_SHIPPING_CHARGE || 120);
-    const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1000);
-    const fallbackCharge = totalAmount >= THRESHOLD ? 0 : DEFAULT_CHARGE;
+    // Check for Free Shipping Override (Business Logic)
+    const THRESHOLD = Number(process.env.FREE_SHIPPING_THRESHOLD || 1500);
+    const finalCharge = totalAmount >= THRESHOLD ? 0 : manualCharge;
+
+    console.log(`[ORDER-SYNC] Shipping Result: ₹${finalCharge} (Threshold: ₹${THRESHOLD})`);
 
     return {
-      charge: fallbackCharge,
+      charge: finalCharge,
       serviceable: true,
-      isFallback: true,
-      message: "Standard delivery applied."
+      courier: "Manual Fulfillment",
+      message: totalAmount >= THRESHOLD ? "Free delivery applied!" : `Manual Shipping: ₹${finalCharge}`,
+      isManual: true
     };
-
   } catch (err) {
-    console.error(`[SHIPPING CRITICAL ERROR]`, err.message);
-    return { charge: 0, serviceable: false, message: "Error calculating shipping. Please check pincode." };
+    console.error(`[ORDER-SYNC] SHIPPING CRITICAL ERROR:`, err.message);
+    return { charge: 150, serviceable: true, message: "Standard Shipping Applied" };
   }
 };
 
@@ -101,7 +83,7 @@ const calculatePricing = async (bodyItems, pincode) => {
 
   for (let i = 0; i < bodyItems.length; i++) {
     const item = bodyItems[i];
-    
+
     // Normalize Product Identifier (Support product, productId, _id)
     const productIdentifier = item.product || item.productId || item._id;
     if (!productIdentifier) {
@@ -139,11 +121,11 @@ const calculatePricing = async (bodyItems, pincode) => {
       name: product.name,
       image: item.image || (product.images && product.images[0]) || '',
       quantity: Number(item.quantity || 1),
-      finalPrice: calc.displayPrice, 
+      finalPrice: calc.displayPrice,
       subtotal: calc.subtotal,
       total: calc.subtotal,
       hsn: calc.hsn || product.hsnCode || '',
-      
+
       // Snapshots for Invoice & Admin
       isBatchProduct: calc.isBatchProduct,
       batchQuantity: calc.batchQuantity,
@@ -179,15 +161,16 @@ const calculatePricing = async (bodyItems, pincode) => {
   });
 
   const deliveryCharges = delivery.charge;
-  const finalAmount = subtotal + deliveryCharges;
+  const finalAmount = Number((subtotal + deliveryCharges).toFixed(2));
 
-  console.log(`[PRICING SUMMARY] Subtotal: ${subtotal}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
+  console.log(`[ORDER-SYNC] FINAL CALCULATION - Subtotal: ${subtotal}, Shipping: ${deliveryCharges}, Grand Total: ${finalAmount}`);
 
   return {
     items: validatedItems,
-    totalAmount: subtotal,
-    deliveryCharges,
-    finalAmount,
+    subtotal: Number(subtotal.toFixed(2)),
+    shippingCharge: deliveryCharges,
+    totalAmount: finalAmount, // Standardize on totalAmount as Grand Total
+    finalAmount: finalAmount, // Mirror for compatibility
     totalWeight,
     totalUnits,
     shippingInfo: delivery
@@ -200,7 +183,12 @@ exports.calculatePricing = calculatePricing;
 // ─── POST /api/user/orders ────────────────────────────────────────────────────
 exports.placeOrder = async (req, res) => {
   try {
-    const { items: bodyItems, shippingAddress, paymentMethod = 'COD', notes } = req.body;
+    const { items: bodyItems, shippingAddress, paymentMethod = 'Online', notes } = req.body;
+
+    // ─── TEMPORARY FALLBACK: ONLINE ONLY ───
+    if (paymentMethod === 'COD') {
+      return res.status(400).json({ success: false, message: 'Cash on Delivery is temporarily disabled. Please use Online Payment.' });
+    }
 
     // 1. Validation
     if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.addressLine1 || !shippingAddress.city || !shippingAddress.pincode) {
@@ -225,42 +213,46 @@ exports.placeOrder = async (req, res) => {
       }
     }
 
-    const { totalAmount, deliveryCharges, finalAmount, items: validatedItems, totalWeight, totalUnits, shippingInfo } = pricing;
-    
+    const { subtotal, shippingCharge, totalAmount: grandTotal, items: validatedItems, totalWeight, totalUnits, shippingInfo } = pricing;
+
     // Task 6: Final Serviceability Guard
     if (shippingInfo && !shippingInfo.serviceable) {
       return res.status(400).json({ success: false, message: shippingInfo.message || 'This pincode is currently not serviceable.' });
     }
 
-    console.log(`[DELIVERY] Total: ${totalAmount}, Delivery: ${deliveryCharges}, Final: ${finalAmount}`);
+    console.log(`[ORDER-SYNC] Creating Order: Subtotal=${subtotal}, Shipping=${shippingCharge}, GrandTotal=${grandTotal}`);
 
     // 3. Generate Unique Order Number
     const orderNumber = await generateOrderNumber();
 
-    // 4. Create Order
+    // 4. Create Order with Internal Tracking ID
     const user = await User.findById(req.user._id);
+    const trackingNumber = `SW-TRK-${orderNumber.replace('SW', '')}`; // e.g. SW-TRK-000001
+    
     let order = await Order.create({
       orderNumber,
+      trackingNumber, // [TRACKING-SYNC] Internal ID for manual fulfillment
       user: req.user._id,
       customerName: user ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Unknown Customer',
       items: validatedItems,
       shippingAddress,
-      subtotal: totalAmount, 
+      subtotal: subtotal,
       gstAmount: validatedItems.reduce((sum, i) => sum + (i.gstAmount || 0), 0),
-      shippingCharge: deliveryCharges,
-      deliveryCharges: deliveryCharges,
-      totalAmount: totalAmount, // Items Total
-      finalAmount: finalAmount, // Grand Total
+      shippingCharge: shippingCharge,
+      deliveryCharges: shippingCharge,
+      totalAmount: grandTotal, // Grand Total (Items + Shipping)
+      finalAmount: grandTotal,
       totalUnits,
       totalWeight,
       paymentMethod,
       paymentStatus: req.body.paymentStatus || 'Pending',
       paymentDetails: req.body.paymentDetails || {},
-      orderStatus: 'Ordered',
+      orderStatus: 'Pending',
       notes: notes || '',
-      courier: shippingInfo?.courier || 'Delhivery',
-      estimatedDelivery: shippingInfo?.estimatedDays || '',
-      shippingEstimate: shippingInfo, // Task 11
+      courier: 'Manual Fulfillment',
+      shippingProvider: 'Manual',
+      estimatedDelivery: shippingInfo?.estimatedDays || '3-7 Business Days',
+      shippingEstimate: shippingInfo,
       statusHistory: [{ status: 'Ordered', updatedBy: 'User', note: req.body.paymentStatus === 'Completed' ? 'Order placed & Paid online' : 'Order placed' }]
     });
 
@@ -304,14 +296,14 @@ exports.placeOrder = async (req, res) => {
       $inc: { totalOrders: 1, totalSpent: totalAmount },
     });
 
-    res.status(201).json({ 
-      success: true, 
-      message: 'Order placed successfully', 
+    res.status(201).json({
+      success: true,
+      message: 'Order placed successfully',
       orderId: order._id,
       orderNumber: order.orderNumber,
       totalAmount: order.totalAmount,
       tracking: {
-        awb: order.awb,
+        awb: order.awb || order.trackingNumber || order.orderNumber,
         url: order.trackingUrl
       }
     });
@@ -417,7 +409,7 @@ exports.cancelOrder = async (req, res) => {
 exports.getOrderSummary = async (req, res) => {
   try {
     const { items: bodyItems, pincode } = req.body;
-    
+
     console.log('[SUMMARY REQUEST] Items count:', bodyItems?.length, 'Pincode:', pincode);
 
     if (!bodyItems || !bodyItems.length) {
@@ -431,8 +423,9 @@ exports.getOrderSummary = async (req, res) => {
     res.json({
       success: true,
       items: pricing.items,
+      subtotal: pricing.subtotal,
+      shippingCharge: pricing.shippingCharge,
       totalAmount: pricing.totalAmount,
-      deliveryCharges: pricing.deliveryCharges,
       finalAmount: pricing.finalAmount,
       totalWeight: pricing.totalWeight,
       totalUnits: pricing.totalUnits,
@@ -441,8 +434,8 @@ exports.getOrderSummary = async (req, res) => {
   } catch (err) {
     console.error('[SUMMARY CRITICAL ERROR]', err);
     // Even on error, try to return a safe response if possible or a clear message
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Order summary calculation failed. This might be due to invalid product data or cart corruption.',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
@@ -450,11 +443,19 @@ exports.getOrderSummary = async (req, res) => {
 };
 
 
-// ─── GET /api/user/orders/track/:awb ─────────────────────────────────────────
+// ─── GET /api/user/orders/track/:identifier ─────────────────────────────────
 exports.trackOrder = async (req, res) => {
   try {
-    const { awb } = req.params;
-    const order = await Order.findOne({ awb }).select('awb shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier');
+    const { identifier } = req.params;
+    
+    // Support tracking by AWB, trackingNumber, or orderNumber
+    const order = await Order.findOne({
+      $or: [
+        { awb: identifier },
+        { trackingNumber: identifier },
+        { orderNumber: identifier }
+      ]
+    }).select('awb trackingNumber orderNumber shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier statusHistory');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Tracking information not found for this ID.' });
@@ -463,14 +464,13 @@ exports.trackOrder = async (req, res) => {
     let scans = [];
     let expectedDelivery = null;
 
-    // Fetch live tracking if it's a Delhivery shipment
+    /* ─── TEMPORARILY DISABLED: LIVE COURIER TRACKING ───
     if (order.awb || order.waybill) {
       const liveTracking = await delhiveryService.trackShipment(order.awb || order.waybill);
       if (liveTracking.success) {
         scans = liveTracking.scans || [];
         expectedDelivery = liveTracking.expectedDeliveryDate;
         
-        // Sync status if it's different
         const mappedStatus = delhiveryService.mapStatus(liveTracking.status);
         if (mappedStatus && mappedStatus !== order.shipmentStatus) {
           order.shipmentStatus = mappedStatus;
@@ -478,12 +478,29 @@ exports.trackOrder = async (req, res) => {
         }
       }
     }
+    */
+
+    // Use internal status history as scans for manual tracking
+    scans = (order.statusHistory || []).map(h => ({
+      status: h.status,
+      location: 'Warehouse',
+      time: h.timestamp || h.createdAt,
+      instructions: h.note || `Order status updated to ${h.status}`
+    }));
+
+    // ─── STATUS NORMALIZATION (ORDER-SYNC) ───
+    // If shipmentStatus is Pending but orderStatus is more advanced, use orderStatus
+    let finalStatus = order.shipmentStatus;
+    const advancedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
+    if (finalStatus === 'Pending' && advancedStatuses.includes(order.orderStatus)) {
+      finalStatus = order.orderStatus;
+    }
 
     res.json({
       success: true,
       tracking: {
-        awb: order.awb,
-        status: order.shipmentStatus,
+        awb: order.awb || order.trackingNumber || order.orderNumber,
+        status: (order.courier === 'Manual Fulfillment' && !order.awb) ? `${finalStatus} (Manual Fulfillment Active)` : finalStatus,
         orderStatus: order.orderStatus,
         customer: order.customerName,
         placedAt: order.createdAt,
@@ -491,11 +508,53 @@ exports.trackOrder = async (req, res) => {
         scans: scans,
         expectedDelivery: expectedDelivery,
         trackingUrl: order.trackingUrl,
-        courier: order.courier || 'Delhivery'
+        courier: order.courier || 'Manual Fulfillment'
       }
     });
   } catch (err) {
     console.error('[TRACK ORDER ERROR]', err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── GET /api/user/orders/:id/track ──────────────────────────────────────────
+exports.trackOrderById = async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.user?._id }).select('awb shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier statusHistory');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    const scans = (order.statusHistory || []).map(h => ({
+      status: h.status,
+      location: 'Warehouse',
+      time: h.updatedAt || h.timestamp || h.createdAt,
+      instructions: h.note || `Order status updated to ${h.status}`
+    }));
+
+    let finalStatus = order.shipmentStatus;
+    const advancedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
+    if (finalStatus === 'Pending' && advancedStatuses.includes(order.orderStatus)) {
+      finalStatus = order.orderStatus;
+    }
+
+    res.json({
+      success: true,
+      tracking: {
+        awb: order.awb || order.trackingNumber || order.orderNumber,
+        status: (order.courier === 'Manual Fulfillment' && !order.awb) ? `${finalStatus} (Manual Fulfillment Active)` : finalStatus,
+        orderStatus: order.orderStatus,
+        customer: order.customerName,
+        placedAt: order.createdAt,
+        lastUpdated: order.updatedAt,
+        scans: scans,
+        trackingUrl: order.trackingUrl,
+        courier: order.courier || 'Manual Fulfillment'
+      }
+    });
+  } catch (err) {
+    console.error('[TRACK BY ID ERROR]', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 };

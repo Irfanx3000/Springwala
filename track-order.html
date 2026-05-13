@@ -52,10 +52,16 @@
                                 <p id="expected-delivery" class="text-[12px] text-green-600 font-bold mt-1"></p>
                             </div>
                             <div class="text-right">
-                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Courier</p>
-                                <p id="courier-name" class="text-sm font-bold text-red-600">Delhivery</p>
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Fulfillment</p>
+                                <p id="courier-name" class="text-sm font-bold text-red-600">Direct Delivery</p>
                                 <p id="last-updated-text" class="text-[11px] text-gray-400 mt-1">---</p>
                             </div>
+                        </div>
+
+                        <div class="mb-8 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                            <p class="text-[11px] text-blue-700 leading-tight">
+                                ℹ️ <strong>Note:</strong> Order updates are managed directly by our fulfillment team during this period.
+                            </p>
                         </div>
 
                         <!-- Progress Steps -->
@@ -111,12 +117,14 @@
                                 <!-- Injected Scans -->
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="mt-10">
-                            <a id="full-tracking-url" href="#" target="_blank" class="block w-full py-4 bg-gray-50 border border-gray-200 text-center text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-100 transition">
-                                View Full Tracking on Delhivery Portal
-                            </a>
-                        </div>
+                <div class="mt-4 px-6 pb-10">
+                    <div id="manual-support-msg" class="block w-full py-4 bg-gray-50 border border-gray-200 text-center text-sm font-bold text-gray-700 rounded-xl">
+                        For delivery queries, please contact our support team.
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
@@ -128,21 +136,31 @@
     <script>
         async function initTracking() {
             const params = new URLSearchParams(window.location.search);
-            const awb = params.get('awb');
+            const awb = params.get('awb') || params.get('trackingId'); // [TRACKING-SYNC] Support trackingId param
+            const orderId = params.get('orderId');
 
-            if (!awb) {
+            if (!awb && !orderId) {
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('error-state').classList.remove('hidden');
                 return;
             }
 
-            document.getElementById('display-awb-header').textContent = `Tracking ID: ${awb}`;
+            console.log('[ORDER-SYNC] Fetching latest order status...');
+            document.getElementById('display-awb-header').textContent = awb ? `Tracking Ref: ${awb}` : `Order ID: ${orderId}`;
 
             try {
-                const res = await api.get(`/user/orders/track/${awb}`);
+                let res;
+                if (awb) {
+                    res = await api.get(`/user/orders/track/${awb}`);
+                } else {
+                    res = await api.get(`/user/orders/${orderId}/track`);
+                }
+                
                 if (!res || !res.success) throw new Error("Tracking not found");
+                console.log('[ORDER-SYNC] Live status received:', res.tracking.status);
                 updateUI(res.tracking);
             } catch (err) {
+                console.error('[ORDER-SYNC] Sync failed:', err.message);
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('error-state').classList.remove('hidden');
             }
@@ -152,45 +170,75 @@
             document.getElementById('loading-state').classList.add('hidden');
             document.getElementById('tracking-content').classList.remove('hidden');
 
-            document.getElementById('current-status-text').textContent = tracking.status;
-            document.getElementById('courier-name').textContent = tracking.courier || 'Delhivery';
+            const statusText = document.getElementById('current-status-text');
+            
+            // ─── STATUS → UI MAPPING (ORDER-SYNC) ───
+            const statusMap = {
+                'Pending': 'Order Received',
+                'Ordered': 'Order Received',
+                'Processing': 'Preparing Your Order',
+                'Shipped': 'Shipped',
+                'Delivered': 'Delivered Successfully',
+                'Cancelled': 'Order Cancelled',
+                'Returned': 'Order Returned'
+            };
+            
+            const displayStatus = statusMap[tracking.status] || tracking.status;
+            statusText.textContent = displayStatus;
+            
+            // Apply status-specific colors
+            if (['Cancelled', 'Returned'].includes(tracking.status)) {
+                statusText.classList.add('text-red-600');
+            } else if (tracking.status === 'Delivered') {
+                statusText.classList.add('text-green-600');
+            } else {
+                statusText.classList.add('text-gray-800');
+            }
+
+            document.getElementById('courier-name').textContent = tracking.courier || 'Manual Fulfillment';
             document.getElementById('last-updated-text').textContent = `Updated: ${new Date(tracking.lastUpdated).toLocaleString()}`;
             
             if (tracking.expectedDelivery) {
                 document.getElementById('expected-delivery').textContent = `Exp. Delivery: ${new Date(tracking.expectedDelivery).toLocaleDateString()}`;
+            } else if (tracking.status === 'Pending' || tracking.status === 'Ordered' || tracking.status === 'Processing') {
+                document.getElementById('expected-delivery').textContent = 'Est. 3-7 Business Days';
             }
-
-            const trackUrl = tracking.trackingUrl || `https://www.delhivery.com/track/package/${tracking.awb}`;
-            document.getElementById('full-tracking-url').href = trackUrl;
 
             // Update Progress Steps
-            const status = tracking.status.toLowerCase();
+            const status = (tracking.status || '').toLowerCase();
+            const orderStatus = (tracking.orderStatus || '').toLowerCase();
+            
+            console.log('[ORDER-SYNC] Rendering status timeline for:', status);
+            
             activate('ordered');
             
-            if (status.includes('manifest') || status.includes('ready') || status.includes('process') || status.includes('transit') || status.includes('shipped') || status.includes('delivery') || status.includes('delivered')) {
+            if (['processing', 'shipped', 'delivered', 'in transit', 'out for delivery'].includes(status) || ['processing', 'shipped', 'delivered'].includes(orderStatus)) {
                 activate('processing');
             }
-            if (status.includes('transit') || status.includes('shipped') || status.includes('delivery') || status.includes('delivered')) {
+            if (['shipped', 'delivered', 'in transit', 'out for delivery'].includes(status) || ['shipped', 'delivered'].includes(orderStatus)) {
                 activate('shipped');
             }
-            if (status.includes('delivered')) {
+            if (status === 'delivered' || orderStatus === 'delivered') {
                 activate('delivered');
             }
 
-            // Render Scan History
+            // Render Scan History (ORDER-SYNC Timeline)
             const list = document.getElementById('scan-list');
             document.getElementById('scan-history-section').classList.remove('hidden');
 
             if (tracking.scans && tracking.scans.length > 0) {
-                list.innerHTML = tracking.scans.map((scan, index) => `
+                // Sort scans by time (descending)
+                const sortedScans = [...tracking.scans].sort((a, b) => new Date(b.time) - new Date(a.time));
+                
+                list.innerHTML = sortedScans.map((scan, index) => `
                     <div class="flex gap-4 items-start ${index === 0 ? 'opacity-100' : 'opacity-60'}">
-                        <div class="w-2 h-2 rounded-full bg-red-600 mt-2 shrink-0"></div>
+                        <div class="w-2 h-2 rounded-full ${index === 0 ? 'bg-red-600' : 'bg-gray-400'} mt-2 shrink-0"></div>
                         <div class="flex-1">
                             <div class="flex justify-between items-start">
-                                <h4 class="text-[14px] font-bold text-gray-800">${scan.status}</h4>
+                                <h4 class="text-[14px] font-bold ${index === 0 ? 'text-gray-800' : 'text-gray-600'}">${scan.status}</h4>
                                 <span class="text-[11px] font-medium text-gray-400">${new Date(scan.time).toLocaleDateString()} ${new Date(scan.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                             </div>
-                            <p class="text-[13px] text-gray-500">${scan.location || 'In Transit'}</p>
+                            <p class="text-[13px] text-gray-500">${scan.location || 'Warehouse'}</p>
                             ${scan.instructions ? `<p class="text-[12px] text-gray-400 mt-1 italic">${scan.instructions}</p>` : ''}
                         </div>
                     </div>
@@ -201,8 +249,8 @@
                         <div class="bg-blue-50 text-blue-600 p-3 rounded-lg inline-flex mb-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <p class="text-sm font-medium text-gray-700">Shipment created</p>
-                        <p class="text-xs text-gray-500 mt-1">Tracking updates may take some time to appear as the package is processed by the courier.</p>
+                        <p class="text-sm font-medium text-gray-700">Order Placed</p>
+                        <p class="text-xs text-gray-500 mt-1">Status updates will appear here as your order moves through fulfillment.</p>
                     </div>
                 `;
             }

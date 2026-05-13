@@ -26,7 +26,7 @@ const {
 } = require('../controllers/userCartController');
 
 const {
-  placeOrder, getMyOrders, getOrder, cancelOrder, getOrderSummary, trackOrder,
+  placeOrder, getMyOrders, getOrder, cancelOrder, getOrderSummary, trackOrder, trackOrderById
 } = require('../controllers/userOrderController');
 
 const {
@@ -55,6 +55,7 @@ router.post('/orders', protectUser, placeOrder);
 router.get('/orders', protectUser, getMyOrders);
 router.get('/orders/:id', protectUser, getOrder);
 router.post('/orders/:id/cancel', protectUser, cancelOrder);
+router.get('/orders/:id/track', protectUser, trackOrderById);
 router.get('/orders/track/:awb', trackOrder);
 
 // ── Wishlist ──────────────────────────────────────────────────────────────────

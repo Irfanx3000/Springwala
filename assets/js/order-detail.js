@@ -49,14 +49,22 @@ async function loadOrderDetail(orderId) {
     if (payEl) payEl.innerHTML = paymentStatusBadge(order.paymentStatus);
 
     setText('detail-payment-method', order.paymentMethod);
-    setText('detail-tracking-number', order.trackingNumber || '—');
-    setText('detail-courier', order.courier || '—');
+    setText('detail-tracking-number', order.awb || order.trackingNumber || order.orderNumber);
+    setText('detail-courier', order.courier || 'Manual Fulfillment');
 
-    // Financials
-    setText('detail-subtotal', formatCurrency(order.subtotal));
-    setText('detail-shipping', formatCurrency(order.shippingCharge));
-    setText('detail-discount', formatCurrency(order.discount));
-    setText('detail-total', formatCurrency(order.totalAmount));
+    // Financials (ORDER-SYNC: Use totalAmount as Grand Total SSOT)
+    const grandTotal = Number(order.totalAmount || order.finalAmount || 0);
+    
+    setText('detail-subtotal', formatCurrency(order.subtotal || 0));
+    setText('detail-shipping', formatCurrency(order.shippingCharge || order.deliveryCharges || 0));
+    setText('detail-discount', formatCurrency(order.discount || 0));
+    setText('detail-total', formatCurrency(grandTotal));
+
+    console.log('[ORDER-SYNC] Admin Detail Financial Snapshot:', {
+      subtotal: order.subtotal,
+      shipping: order.shippingCharge,
+      grandTotal: grandTotal
+    });
 
     // Shipping address
     const addr = order.shippingAddress;
@@ -87,15 +95,23 @@ async function loadOrderDetail(orderId) {
         </tr>`).join('');
     }
 
-    // Pre-fill update form
+    // Pre-fill update form (ORDER-SYNC: Autofill Tracking Reference)
     const statusSelect = document.getElementById('status-select');
     const paySelect = document.getElementById('payment-status-select');
     const trackingInput = document.getElementById('tracking-input');
     const courierInput = document.getElementById('courier-input');
+    
     if (statusSelect) statusSelect.value = order.orderStatus;
     if (paySelect) paySelect.value = order.paymentStatus;
-    if (trackingInput) trackingInput.value = order.trackingNumber || '';
-    if (courierInput) courierInput.value = order.courier || '';
+    
+    if (trackingInput) {
+      // Priority: 1. Existing AWB, 2. Internal Tracking ID, 3. Order Number fallback
+      trackingInput.value = order.awb || order.trackingNumber || order.orderNumber || '';
+    }
+    
+    if (courierInput) {
+      courierInput.value = order.courier || 'Manual Fulfillment';
+    }
 
     // Status history
     const historyEl = document.getElementById('status-history-list');

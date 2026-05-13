@@ -18,6 +18,7 @@
     <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
 	<script src="assets/js/config.js"></script>
+    <script src="assets/js/site-settings.js"></script>
 </head>
 <body class="bg-white text-gray-900 font-['Roboto']" data-page="index">
 
@@ -35,7 +36,7 @@
             </button>
 
             <!-- Logo -->
-            <img src="assets/images/header.png" alt="Springwala Logo"
+            <img src="assets/images/header.png" alt="Springwala Logo" data-site-setting="logo"
                 class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
 
             <!-- Cart & Wishlist -->
@@ -90,7 +91,7 @@
         </div>
 
         <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
-            <img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto">
+            <img src="assets/images/header.png" alt="Springwala Logo" data-site-setting="logo" class="h-[40px] w-auto">
 
             <div class="flex items-start gap-2 ml-8">
                 <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
@@ -652,9 +653,9 @@
                 <div class="w-[90%] h-[1px] bg-[#525252]"></div>
 
                 <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
-                    <p>Mumbai, Maharashtra (India)</p>
-                    <p>Phone: +91 8879 241085</p>
-                    <p>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b1c2c4c1c1dec3c5f1c2c1c3d8dfd6c6d0ddd09fd8df">[email&#160;protected]</a></p>
+                    <p data-site-setting="address">Mumbai, Maharashtra (India)</p>
+                    <p>Phone: <a href="tel:+918879241085" data-site-setting="contactNumber">+91 8879 241085</a></p>
+                    <p>Email: <a href="mailto:support@springwala.in" data-site-setting="contactEmail">support@springwala.in</a></p>
                 </div>
 
                 <!-- Line 18 -->
@@ -673,10 +674,11 @@
                             class="bg-[#BE2229] text-white px-3 sm:px-4 rounded-r-[5px] font-medium text-[13px] sm:text-[14px] whitespace-nowrap">Subscribe</button>
                     </div>
                     <div class="flex gap-4 mt-2 justify-center">
-                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
-                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6"></a>
-                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
-                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="facebook"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="twitter"><img src="assets/icons/mobile/twitter.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="linkedin"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="instagram"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="whatsapp"><img src="assets/icons/mobile/whatsapp.svg" class="w-6 h-6"></a>
                     </div>
                 </div>
 
@@ -719,7 +721,7 @@
                     <a href="#">Data Protection</a>
                 </div>
 
-                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 All rights reserved</p>
+                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</p>
             </div>
 
             <!-- Desktop Bottom Divider & Links -->
@@ -732,7 +734,7 @@
                 <a href="#">GST Compliance</a>
                 <a href="#">Data Protection</a>
             </div>
-            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 All rights reserved</div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</div>
 
         </div>
     </footer>

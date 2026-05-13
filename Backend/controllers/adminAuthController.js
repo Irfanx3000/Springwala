@@ -29,11 +29,22 @@ exports.getRequestStatus = async (req, res) => {
       }
     }
 
-    // 2. Check the Onboarding Request phase
+    // 2. Check the Onboarding Request phase (pre-password-set stages)
     const request = await AdminRequest.findOne({ email });
     if (!request) return res.status(404).json({ success: false, message: 'No request found for this email' });
 
-    res.json({ success: true, status: request.status });
+    // Map internal statuses to frontend-facing statuses
+    const statusMap = {
+      'pending':            'pending',           // OTP not yet verified
+      'verified':           'verified',           // OTP done, needs password
+      'awaiting_approval':  'pending_approval',   // Password set, waiting for superadmin
+      'approved':           'completed',          // Approved (Admin record should exist)
+      'rejected':           'rejected',
+      'completed':          'completed'
+    };
+
+    const mappedStatus = statusMap[request.status] || request.status;
+    res.json({ success: true, status: mappedStatus });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -91,8 +102,9 @@ exports.requestAccess = async (req, res) => {
 // GET /api/admin/requests (Superadmin only)
 exports.getAdminRequests = async (req, res) => {
   try {
-    // Only show requests that have completed the onboarding (verified + password set)
-    const requests = await AdminRequest.find({ status: 'completed' }).sort({ updatedAt: -1 });
+    // Show only requests that have completed onboarding (OTP verified + password set)
+    // These are marked 'awaiting_approval' — the admin account exists but is inactive/pending
+    const requests = await AdminRequest.find({ status: 'awaiting_approval' }).sort({ updatedAt: -1 });
     
     const enrichedRequests = await Promise.all(
       requests.map(async (r) => {
@@ -106,9 +118,6 @@ exports.getAdminRequests = async (req, res) => {
       })
     );
 
-    // Filter to only show those still needing attention (pending or recently approved)
-    // or just return all completed ones and let the UI handle it.
-    // The requirement says "ONLY see verified onboarding requests".
     res.json({ success: true, requests: enrichedRequests });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -120,14 +129,15 @@ exports.approveAdminRequest = async (req, res) => {
   try {
     const { requestId, role, email } = req.body;
     
-    // Approval now primarily happens on the Admin record
-    // but we can still identify by requestId (AdminRequest ID) or email
     let targetEmail = email;
+
+    // Step 1: Update the AdminRequest record
     if (requestId) {
       const request = await AdminRequest.findById(requestId);
       if (request) {
         targetEmail = request.email;
-        request.status = 'completed';
+        // Mark as 'approved' so it still shows in the panel with Approved badge
+        request.status = 'approved';
         request.reviewedBy = req.admin._id;
         request.reviewedAt = new Date();
         await request.save();
@@ -136,8 +146,9 @@ exports.approveAdminRequest = async (req, res) => {
 
     if (!targetEmail) return res.status(400).json({ success: false, message: 'Email or Request ID is required' });
 
+    // Step 2: Activate the Admin account
     const admin = await Admin.findOne({ email: targetEmail });
-    if (!admin) return res.status(404).json({ success: false, message: 'Admin account not found for this request' });
+    if (!admin) return res.status(404).json({ success: false, message: 'Admin account not found. Onboarding may be incomplete.' });
 
     admin.approvalStatus = 'approved';
     admin.accountStatus = 'active';
@@ -281,15 +292,21 @@ exports.verifyLoginOTP = async (req, res) => {
   }
 };
 
-// POST /api/admin/send-onboarding-otp
+// POST /api/admin/send-onboarding-otp  (resend support)
 exports.sendOnboardingOTP = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
     const request = await AdminRequest.findOne({ email });
-    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
-    if (request.status !== 'approved') return res.status(400).json({ success: false, message: 'Request not approved yet' });
+    if (!request) return res.status(404).json({ success: false, message: 'No onboarding request found for this email' });
+
+    // Allow resend when status is 'pending' (new verified-first flow)
+    // Legacy 'approved' status is also allowed for backward compatibility
+    const resendableStatuses = ['pending', 'approved'];
+    if (!resendableStatuses.includes(request.status)) {
+      return res.status(400).json({ success: false, message: 'OTP cannot be resent at this stage' });
+    }
 
     const otpCode = otpService.generateOTP();
     request.onboardingOtp = otpCode;
@@ -297,9 +314,9 @@ exports.sendOnboardingOTP = async (req, res) => {
     request.otpType = 'onboarding';
     await request.save();
 
-    console.log("[OTP] Sending onboarding OTP to:", email);
+    console.log("[OTP] Resending onboarding OTP to:", email);
     await sendOTPEmail(email, otpCode);
-    res.json({ success: true, message: 'Onboarding OTP sent to your email' });
+    res.json({ success: true, message: 'OTP resent to your email' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -340,30 +357,37 @@ exports.setPassword = async (req, res) => {
 
     if (password.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
 
-    // 1. Create/Update Admin in VERIFIED_PENDING state
+    // STEP 1: Upsert Admin record as VERIFIED + INACTIVE (pending approval)
+    // Using findOneAndUpdate with upsert prevents duplicate admin records.
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     await Admin.findOneAndUpdate(
       { email },
       {
-        name: request.name,
-        email: request.email,
-        password,
-        role: request.role || 'admin',
-        emailVerified: true,
-        approvalStatus: 'pending',
-        accountStatus: 'inactive',
-        isApproved: false, // Legacy support
-        isActive: false    // Legacy support
+        $set: {
+          name: request.name,
+          email: request.email,
+          password: hashedPassword,
+          role: request.role || 'admin',
+          emailVerified: true,
+          approvalStatus: 'pending',
+          accountStatus: 'inactive',
+          isApproved: false, // Legacy support
+          isActive: false    // Legacy support
+        }
       },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, new: true }
     );
 
-    // 2. Update Request Status
-    request.status = 'completed';
+    // STEP 2: Mark AdminRequest as 'awaiting_approval'
+    // This is the status the superadmin approval panel queries for.
+    request.status = 'awaiting_approval';
     await request.save();
 
     res.json({ 
       success: true, 
-      message: 'Password set successfully. Your request is now waiting for Superadmin approval.',
+      message: 'Password set. Your request is now visible to the Superadmin for approval.',
       status: 'pending_approval'
     });
   } catch (err) {

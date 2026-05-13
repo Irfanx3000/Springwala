@@ -66,8 +66,12 @@ exports.getShippingEstimate = async ({ pincode, weight, paymentMode = 'Prepaid',
       vcl: totalAmount
     };
 
+    // ─── TEMPORARY MANUAL MODE: COMMENTED OUT LIVE API ───
+    /*
     const response = await delhiveryClient.get('/kinko/v1/invoice/charges/.json', { params });
     const data = response.data;
+    */
+    const data = null; // Forced fallback to internal logic
 
     // Delhivery returns an array of possible services. If empty, pincode is unserviceable.
     if (data && Array.isArray(data) && data.length > 0 && data[0].total_amount !== undefined) {
@@ -151,8 +155,12 @@ exports.createShipment = async (orderData, retryCount = 0) => {
 
     console.log(`[SHIPMENT CREATE REQUEST] Order: ${orderNumber} (Attempt ${retryCount + 1})`);
     
+    // ─── TEMPORARY MANUAL MODE: COMMENTED OUT LIVE API ───
+    /*
     const response = await delhiveryClient.post('/cmu/create.json', payload);
     const data = response.data;
+    */
+    const data = { success: false, rmk: "Delhivery integration is temporarily disabled. Please use manual shipment." };
 
     // Task 6: Full response logging on failure
     if (data && data.success) {
@@ -209,10 +217,12 @@ exports.trackShipment = async (waybill) => {
   try {
     if (!TOKEN) throw new Error("Delhivery Token is missing in .env");
 
-    // API: GET /api/v1/packages/json/?waybill=<waybill>
+    // ─── TEMPORARY MANUAL MODE: COMMENTED OUT LIVE API ───
+    /*
     const response = await delhiveryClient.get(`/v1/packages/json/?waybill=${waybill}`);
-    
     const data = response.data;
+    */
+    const data = { ShipmentData: [] };
     if (data && data.ShipmentData && data.ShipmentData.length > 0) {
       const shipment = data.ShipmentData[0].Shipment;
       return {
@@ -242,8 +252,12 @@ exports.cancelShipment = async (waybill) => {
       cancellation: true
     };
     
+    // ─── TEMPORARY MANUAL MODE: COMMENTED OUT LIVE API ───
+    /*
     const response = await delhiveryClient.post('/p/edit/', payload);
     return { success: true, data: response.data };
+    */
+    return { success: true, data: { status: "Cancelled (Manual Mode)" } };
   } catch (error) {
     console.error(`[DELHIVERY] Cancel Error:`, error.message);
     return { success: false, message: error.message };

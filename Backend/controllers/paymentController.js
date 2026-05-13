@@ -63,9 +63,11 @@ exports.createRazorpayOrder = async (req, res) => {
     const pincode = shippingAddress?.pincode;
     
     const pricing = await calculatePricing(items, pincode);
-    const amount = pricing.finalAmount;
+    const amountToCharge = pricing.totalAmount; // This is grand total (subtotal + shipping)
 
-    if (!amount || amount <= 0) {
+    console.log(`[ORDER-SYNC] Razorpay Order Request: Subtotal=${pricing.subtotal}, Shipping=${pricing.shippingCharge}, Total=${amountToCharge}`);
+
+    if (!amountToCharge || amountToCharge <= 0) {
       console.error('[RAZORPAY] Calculation failed. Resulting pricing:', pricing);
       return res.status(400).json({ 
         success: false, 
@@ -75,9 +77,9 @@ exports.createRazorpayOrder = async (req, res) => {
     }
 
     const options = {
-      amount: Math.round(amount * 100), // amount in paise
-      currency,
-      receipt,
+      amount: Math.round(amountToCharge * 100), // amount in paise
+      currency: currency || 'INR',
+      receipt: receipt || `receipt_${Date.now()}`,
     };
 
     console.log(`[RAZORPAY] Requesting Gateway Order:`, options);

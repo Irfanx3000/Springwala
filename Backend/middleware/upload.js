@@ -29,5 +29,6 @@ const uploadProduct = multer({ storage: createStorage('products'), fileFilter: i
 const uploadBanner = multer({ storage: createStorage('banners'), fileFilter: imageFilter, limits: { fileSize: 10 * 1024 * 1024 } });
 const uploadUser = multer({ storage: createStorage('users'), fileFilter: imageFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 const uploadBulk = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
+const uploadBranding = multer({ storage: createStorage('branding'), fileFilter: imageFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-module.exports = { uploadCategory, uploadProduct, uploadBanner, uploadUser, uploadBulk };
+module.exports = { uploadCategory, uploadProduct, uploadBanner, uploadUser, uploadBulk, uploadBranding };

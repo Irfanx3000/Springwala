@@ -7,15 +7,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
   initSidebar(); initAdminHeader();
   await loadProfile();
+  
   const admin = Auth.getAdmin();
   if (admin?.role === 'superadmin') { 
     await loadAdminsList(); 
     await loadRequestsList();
+    await loadSiteSettingsAdmin();
     bindAddAdmin(); 
     document.getElementById('refresh-requests-btn')?.addEventListener('click', loadRequestsList);
+  } else {
+    // Hide superadmin-only tabs/sections if not superadmin
+    document.getElementById('tab-admins')?.classList.add('hidden');
+    document.getElementById('content-site')?.classList.add('hidden');
+    document.getElementById('tab-site')?.classList.add('hidden');
+    // Default to profile tab
+    document.getElementById('tab-profile')?.click();
   }
+  
   bindSettingsEvents();
+  bindSiteSettingsEvents();
 });
+
+// ─── ADMIN REQUESTS ──────────────────────────────────────────────────────────
 
 async function loadRequestsList() {
   const tbody = document.getElementById('requests-tbody');
@@ -24,11 +37,10 @@ async function loadRequestsList() {
     const data = await api.get('/admin/requests');
     if (!data || !data.requests) return;
     
-    // Show all except completed/rejected
-    const active = data.requests.filter(r => ['pending', 'approved', 'verified'].includes(r.status));
+    const active = data.requests.filter(r => ['awaiting_approval', 'approved'].includes(r.status));
     
     if (active.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No active access requests.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No pending access requests.</td></tr>';
       return;
     }
 
@@ -37,8 +49,8 @@ async function loadRequestsList() {
       let actions = '';
       let roleDisplay = `<span class="text-sm text-gray-500 capitalize">${r.role}</span>`;
 
-      if (r.status === 'pending') {
-        statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">Pending</span>`;
+      if (r.status === 'awaiting_approval') {
+        statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">Pending Approval</span>`;
         roleDisplay = `
           <select id="role-select-${r._id}" class="bg-gray-100 border-none rounded px-2 py-1 text-sm outline-none">
             <option value="admin">Admin</option>
@@ -49,14 +61,9 @@ async function loadRequestsList() {
           <button onclick="approveRequest('${r._id}')" class="text-green-600 font-semibold text-sm hover:underline">Approve</button>
           <button onclick="rejectRequest('${r._id}')" class="text-red-500 font-semibold text-sm hover:underline">Reject</button>`;
       } 
-      else if (r.status === 'approved' || r.status === 'verified') {
-        if (!r.adminExists) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">Waiting for Setup</span>`;
-          actions = `<button onclick="rejectRequest('${r._id}')" class="text-red-400 text-xs hover:underline">Cancel Request</button>`;
-        } else {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">Onboarded</span>`;
-          actions = `<span class="text-gray-400 text-xs italic">Manage in Admin List</span>`;
-        }
+      else if (r.status === 'approved') {
+        statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">Approved</span>`;
+        actions = `<span class="text-gray-400 text-xs italic">Manage in Admin List</span>`;
       }
 
       return `
@@ -113,6 +120,8 @@ async function rejectRequest(requestId) {
   }
 }
 
+// ─── ADMIN PROFILE ────────────────────────────────────────────────────────────
+
 async function loadProfile() {
   try {
     const data = await api.get('/auth/admin/me');
@@ -125,14 +134,21 @@ async function loadProfile() {
     const emailEl = document.getElementById('edit-email-input');
     if (nameEl)  nameEl.value  = a.name;
     if (emailEl) emailEl.value = a.email;
-  } catch (err) { console.error(err.message); }
+    
+    // Avatar Initials
+    const initials = a.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    const avatarEl = document.getElementById('profile-avatar-initials');
+    if (avatarEl) avatarEl.textContent = initials;
+  } catch (err) { console.error('Failed to load profile:', err.message); }
 }
+
+// ─── ADMIN LIST ───────────────────────────────────────────────────────────────
 
 async function loadAdminsList() {
   const tbody = document.getElementById('admins-tbody');
   if (!tbody) return;
   try {
-    const data = await api.get('/admin/all');
+    const data = await api.get('/settings/admins');
     if (!data) return;
     const me = Auth.getAdmin();
     tbody.innerHTML = data.admins.map(a => `
@@ -159,7 +175,7 @@ async function loadAdminsList() {
             </div>` : '<span class="text-gray-400 text-xs">Current session</span>'}
         </td>
       </tr>`).join('');
-  } catch (err) { console.error(err.message); }
+  } catch (err) { console.error('Failed to load admins:', err.message); }
 }
 
 function bindAddAdmin() {
@@ -187,19 +203,152 @@ function bindAddAdmin() {
 
 async function toggleAdminById(id, name) {
   showConfirm(`Toggle status for admin "<strong>${name}</strong>"?`, async () => {
-    try { await api.patch(`/admin/${id}/toggle`); showToast('Status updated', 'success'); await loadAdminsList(); }
+    try { await api.patch(`/settings/admins/${id}/toggle`); showToast('Status updated', 'success'); await loadAdminsList(); }
     catch (err) { showToast(err.message, 'error'); }
   });
 }
 
 function deleteAdminById(id, name) {
   showConfirm(`Permanently delete admin "<strong>${name}</strong>"?`, async () => {
-    try { await api.delete(`/admin/${id}`); showToast('Admin deleted', 'success'); await loadAdminsList(); }
+    try { await api.delete(`/settings/admins/${id}`); showToast('Admin deleted', 'success'); await loadAdminsList(); }
     catch (err) { showToast(err.message, 'error'); }
   });
 }
 
+// ─── SITE SETTINGS ────────────────────────────────────────────────────────────
+
+async function loadSiteSettingsAdmin() {
+  try {
+    const data = await api.get('/settings/site');
+    if (!data || !data.settings) return;
+    const s = data.settings;
+
+    // Hydrate fields
+    setVal('site-name-input', s.siteName);
+    setVal('contact-email-input', s.contactEmail);
+    setVal('contact-phone-input', s.contactNumber); // Corrected to contactNumber
+    setVal('address-input', s.address);
+
+    setVal('meta-title-input', s.metaTitle);
+    setVal('meta-description-input', s.metaDescription);
+    setVal('meta-keywords-input', s.metaKeywords);
+
+    setVal('instagram-input', s.instagram);
+    setVal('twitter-input', s.twitter);
+    setVal('whatsapp-input', s.whatsapp);
+    setVal('facebook-input', s.facebook);
+    setVal('linkedin-input', s.linkedin);
+
+    // Hydrate branding previews
+    const apiBase = CONFIG.IMAGE_BASE_URL;
+    if (s.logoUrl) document.getElementById('logo-preview').src = s.logoUrl.startsWith('http') ? s.logoUrl : `${apiBase}${s.logoUrl}`;
+    if (s.faviconUrl) document.getElementById('favicon-preview').src = s.faviconUrl.startsWith('http') ? s.faviconUrl : `${apiBase}${s.faviconUrl}`;
+
+    // Update timestamps
+    const updatedStr = s.updatedAt ? `Last Updated: ${new Date(s.updatedAt).toLocaleDateString()}` : 'Last Updated: --';
+    ['site-name','contact-email','contact-phone','address','meta-title','meta-description','meta-keywords','instagram','twitter','whatsapp','facebook','linkedin'].forEach(id => {
+      setText(`${id}-updated`, updatedStr);
+    });
+
+  } catch (err) {
+    console.error('Failed to load site settings:', err);
+    showToast('Failed to load site settings', 'error');
+  }
+}
+
+function bindSiteSettingsEvents() {
+  const saveBtn = document.getElementById('save-site-btn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveSiteSettings);
+  }
+
+  // Branding Previews
+  ['logo-file', 'favicon-file'].forEach(id => {
+    const input = document.getElementById(id);
+    const preview = document.getElementById(id.replace('-file', '-preview'));
+    if (input && preview) {
+      input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => preview.src = e.target.result;
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  });
+}
+
+async function saveSiteSettings() {
+  const btn = document.getElementById('save-site-btn');
+  if (btn) { 
+    btn.disabled = true; 
+    btn.innerHTML = `<span class="flex items-center gap-2">
+      <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      Saving...
+    </span>`; 
+  }
+
+  try {
+    const formData = new FormData();
+    
+    // Mapping model keys to HTML input IDs
+    const fieldMap = {
+      siteName: 'site-name-input',
+      contactEmail: 'contact-email-input',
+      contactNumber: 'contact-phone-input', // UI ID is still contact-phone-input but model is contactNumber
+      address: 'address-input',
+      metaTitle: 'meta-title-input',
+      metaDescription: 'meta-description-input',
+      metaKeywords: 'meta-keywords-input',
+      instagram: 'instagram-input',
+      twitter: 'twitter-input',
+      whatsapp: 'whatsapp-input',
+      facebook: 'facebook-input',
+      linkedin: 'linkedin-input'
+    };
+
+    for (const [key, id] of Object.entries(fieldMap)) {
+      let val = document.getElementById(id)?.value?.trim();
+      
+      // Normalize social links before saving
+      if (['instagram', 'twitter', 'whatsapp', 'facebook', 'linkedin'].includes(key)) {
+        val = normalizeExternalUrl(val);
+      }
+
+      if (val !== undefined) formData.append(key, val);
+    }
+
+    // Handle branding uploads
+    const logoFile = document.getElementById('logo-file')?.files[0];
+    if (logoFile) formData.append('logo', logoFile);
+    
+    const faviconFile = document.getElementById('favicon-file')?.files[0];
+    if (faviconFile) formData.append('favicon', faviconFile);
+
+    const res = await api.put('/settings/site', formData);
+    if (res && res.success) {
+      showToast('Settings saved successfully', 'success');
+      await loadSiteSettingsAdmin();
+      // Update global user settings if the loader is present
+      if (window.loadSiteSettings) window.loadSiteSettings();
+    } else {
+      showToast(res?.message || 'Failed to save settings', 'error');
+    }
+  } catch (err) {
+    showToast('Save failed: ' + err.message, 'error');
+  } finally {
+    if (btn) { 
+      btn.disabled = false; 
+      btn.textContent = 'Save Changes'; 
+    }
+  }
+}
+
+// ─── SHARED EVENTS ──────────────────────────────────────────────────────────
+
 function bindSettingsEvents() {
+  // Profile Updates
   document.getElementById('update-profile-btn')?.addEventListener('click', async () => {
     const name  = document.getElementById('edit-name-input')?.value?.trim();
     const email = document.getElementById('edit-email-input')?.value?.trim();
@@ -215,6 +364,7 @@ function bindSettingsEvents() {
     } catch (err) { showToast('Update failed: ' + err.message, 'error'); }
   });
 
+  // Password Changes
   document.getElementById('change-password-btn')?.addEventListener('click', async () => {
     const curr    = document.getElementById('current-password')?.value;
     const newPass = document.getElementById('new-password')?.value;
@@ -224,12 +374,63 @@ function bindSettingsEvents() {
     if (newPass.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
     try {
       await api.put('/auth/admin/change-password', { currentPassword: curr, newPassword: newPass });
-      showToast('Password changed!', 'success');
+      showToast('Password changed successfully!', 'success');
       ['current-password','new-password','confirm-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     } catch (err) { showToast('Failed: ' + err.message, 'error'); }
   });
 
+  // Logout Confirmation
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     showConfirm('Are you sure you want to logout?', Auth.logout);
   });
 }
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
+function setText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt || ''; }
+
+/**
+ * Production-grade URL normalizer
+ */
+function normalizeExternalUrl(url) {
+  if (!url || typeof url !== 'string' || url.trim() === '' || url === '#') return '';
+  let clean = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(clean)) return '';
+
+  if (!/^https?:\/\//i.test(clean)) {
+    if (/^\d+$/.test(clean.replace(/[+\-\s()]/g, ''))) {
+      clean = `https://wa.me/${clean.replace(/[+\-\s()]/g, '')}`;
+    } else {
+      clean = `https://${clean}`;
+    }
+  }
+  
+  try {
+    const u = new URL(clean);
+    return u.href;
+  } catch (e) {
+    return '';
+  }
+}
+
+// Admin Helper UI for Protocols
+['instagram-input', 'twitter-input', 'whatsapp-input', 'facebook-input', 'linkedin-input'].forEach(id => {
+  const input = document.getElementById(id);
+  if (!input) return;
+  
+  // Create helper text element
+  const helper = document.createElement('p');
+  helper.className = 'text-[11px] text-blue-500 mt-1 hidden font-medium';
+  helper.textContent = 'ℹ️ Protocol (https://) will be added automatically';
+  input.parentNode.appendChild(helper);
+
+  input.addEventListener('input', () => {
+    const val = input.value.trim();
+    if (val && !/^https?:\/\//i.test(val) && !val.startsWith('#')) {
+      helper.classList.remove('hidden');
+    } else {
+      helper.classList.add('hidden');
+    }
+  });
+});

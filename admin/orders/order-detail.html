@@ -283,7 +283,7 @@
                             <div id="shipment-active" class="hidden space-y-4">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Waybill / AWB</label>
+                                        <label class="text-xs text-gray-400 uppercase font-bold tracking-wider">Tracking Reference</label>
                                         <p id="shipment-waybill" class="font-mono font-bold text-[16px] text-[#BE2229]">...</p>
                                     </div>
                                     <div class="text-right">
@@ -316,12 +316,21 @@
                                 <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-300">
                                     <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                                 </div>
-                                <p class="text-[14px] text-gray-500 mb-4">No active shipment found for this order.</p>
+                            <div class="text-center py-6 bg-blue-50 border border-blue-100 rounded-lg px-4">
+                                <p class="text-[14px] text-blue-700 font-bold mb-2">Manual Fulfillment Active</p>
+                                <p class="text-[12px] text-blue-600 mb-4 leading-tight">Live Delhivery integration is temporarily disabled. Please fulfill this order manually and update the status below to inform the customer.</p>
+                                <!-- 
                                 <button id="shipment-create-btn" class="w-full h-11 bg-white border-2 border-[#BE2229] text-[#BE2229] font-bold rounded-lg hover:bg-red-50 transition flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                     Create Delhivery Shipment
                                 </button>
-                                <p id="shipment-create-hint" class="text-[11px] text-gray-400 mt-2">Will generate AWB and Manifest in Delhivery</p>
+                                -->
+                                <div class="w-full h-11 bg-gray-100 text-gray-400 font-bold rounded-lg flex items-center justify-center gap-2 cursor-not-allowed">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Delhivery Offline
+                                </div>
+                                <p id="shipment-create-hint" class="text-[11px] text-gray-400 mt-2">Manage tracking via Status Updates below</p>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -356,8 +365,8 @@
                                     <input id="courier-input" type="text" placeholder="e.g. BlueDart" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tracking #</label>
-                                    <input id="tracking-input" type="text" placeholder="AWB Number" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tracking Reference</label>
+                                    <input id="tracking-input" type="text" placeholder="Internal Tracking ID" class="w-full h-11 bg-gray-50 border border-gray-200 rounded-lg px-4 outline-none focus:border-[#BE2229] transition">
                                 </div>
                             </div>
                             <div>
