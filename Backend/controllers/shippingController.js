@@ -1,5 +1,5 @@
 const Order = require('../models/Order');
-const delhiveryService = require('../services/delhiveryService');
+// const delhiveryService = require('../services/delhiveryService');
 
 /**
  * @desc    Manual retry or initial shipment creation for an order
@@ -95,8 +95,8 @@ exports.trackAndSyncShipment = async (req, res) => {
     // ─── TEMPORARILY DISABLED: MANUAL MODE ───
     return res.json({
       success: true,
-      status: order.shipmentStatus,
-      message: "Manual fulfillment: tracking is based on order status updates."
+      status: order.orderStatus,
+      message: "Manual fulfillment: tracking is based on internal order status updates."
     });
     /*
     const result = await exports.syncOrderWithDelhivery(order);

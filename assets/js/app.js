@@ -157,6 +157,11 @@ function isUserLoggedIn() {
   return Auth.isLoggedIn();
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function formatCurrency(n) {
+  return '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 // ─── API Helper ───────────────────────────────────────────────────────────────
 async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   const url = API_BASE + endpoint;
@@ -2508,7 +2513,7 @@ async function initCheckoutPage() {
 
   const renderPricingUI = (pricing) => {
     console.log('[ORDER-SYNC] Rendering UI with pricing:', pricing);
-    
+
     // Desktop / Standard Elements
     const elements = {
       subtotal: document.getElementById('summary-items-total'),
@@ -2559,6 +2564,8 @@ async function initCheckoutPage() {
       }, true);
 
       if (summaryRes.success) {
+        console.log('[SUMMARY] API returned:', JSON.stringify(summaryRes));
+        
         console.log('[CHECKOUT-UI]\nsummary object received:', summaryRes);
 
         // Update State from Backend SSOT
@@ -2699,7 +2706,7 @@ async function initCheckoutPage() {
         // [ORDER-SYNC] Re-fetch summary with active pincode to ensure latest verified pricing
         const activePincode = getVal('ship-pincode');
         console.log('[ORDER-SYNC] Verifying final totals with pincode:', activePincode);
-        
+
         backendSummary = await fetchSummary(activePincode);
         if (!backendSummary) throw new Error('Could not verify order totals');
 
@@ -2714,7 +2721,7 @@ async function initCheckoutPage() {
 
         // ─── TEMPORARY: COD DISABLED ───
         await handleOnlinePaymentFlow(shippingAddress, backendSummary);
-        
+
         /* 
         if (selectedMethod === 'Online') {
           await handleOnlinePaymentFlow(shippingAddress, backendSummary);
@@ -2755,6 +2762,32 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
       else if (item.product) pid = String(item.product);
       else if (item._id) pid = String(item._id);
 
+      // GUARD: log each item being prepared so we can see exactly what goes to backend
+      console.log('[ORDER-PAYLOAD] Item being prepared:', {
+        pid,
+        name: item.name,
+        finalPrice: item.finalPrice,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        subtotal: item.subtotal
+      });
+
+      // Use unitPrice as fallback because summary response returns unitPrice not finalPrice
+      const resolvedPrice = Number(
+        item.finalPrice ||
+        item.unitPrice ||
+        item.price ||
+        item.displayPrice ||
+        0
+      );
+
+      const resolvedSubtotal = Number(
+        item.subtotal ||
+        item.total ||
+        (resolvedPrice * Number(item.quantity || 1)) ||
+        0
+      );
+
       return {
         product: pid,
         productId: pid,
@@ -2763,8 +2796,8 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
         selectedBatch: item.selectedBatch || null,
         pricingSnapshot: item.pricingSnapshot || null,
         productSnapshot: item.productSnapshot || null,
-        finalPrice: Number(item.finalPrice || item.price || item.displayPrice || 0),
-        subtotal: Number(item.subtotal || 0),
+        finalPrice: resolvedPrice,
+        subtotal: resolvedSubtotal,
         image: item.image || item.imageSnapshot || '',
         isBatchProduct: !!item.isBatchProduct,
         batchQuantity: Number(item.batchQuantity) || 1,
@@ -2814,7 +2847,7 @@ function prepareOrderPayload(shippingAddress, paymentMethod, paymentStatus, paym
     paymentMethod,
     paymentStatus,
     paymentDetails,
-    
+
     // [ORDER-SYNC] Persist immutable pricing snapshots
     subtotal: Number(pricingSnapshot.subtotal || 0),
     shippingCharge: Number(pricingSnapshot.shippingCharge || 0),
@@ -2850,9 +2883,13 @@ async function handleCODFlow(shippingAddress, backendSummary) {
     const res = await apiCall('/user/orders', 'POST', payload, true);
     if (res.success) {
       Cart.clear();
-      showToast('Order placed successfully!', 'success');
-      const redirectUrl = `order-success.html?id=${res.orderNumber}&amount=${amount}&awb=${res.tracking?.awb || ''}&tracking=${encodeURIComponent(res.tracking?.url || '')}`;
-      window.location.href = redirectUrl;
+      showToast('Order placed successfully! Redirecting...', 'success');
+      
+      const redirectUrl = `order-success.html?id=${res.orderId}&amount=${amount}&trackingId=${res.trackingNumber || res.orderNumber}`;
+      
+      setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 1500);
     } else {
       throw new Error(res.message);
     }
@@ -2867,6 +2904,13 @@ async function handleCODFlow(shippingAddress, backendSummary) {
  * PRODUCTION ONLINE FLOW (Verify-then-Create)
  */
 async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
+  // PROCESSING LOCK: prevent double-click or re-entry
+  if (window._paymentProcessing) {
+    console.warn('[PAYMENT] Already processing. Ignoring duplicate call.');
+    return;
+  }
+  window._paymentProcessing = true;
+
   try {
     console.log('[PAYMENT] Starting Online Payment Flow...');
     console.log('[PAYMENT] Backend Summary:', backendSummary);
@@ -2878,12 +2922,35 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       throw new Error('Order summary is missing');
     }
 
-    const amount = backendSummary.totalAmount || backendSummary.finalAmount; // totalAmount is now the Grand Total SSOT
-    
+    const amount = Number(
+      backendSummary.totalAmount ||
+      backendSummary.finalAmount ||
+      0
+    );
+
+    console.log('[PAYMENT] Amount resolved:', amount);
+    console.log('[PAYMENT] Full summary:', JSON.stringify(backendSummary));
+
     if (!amount || amount <= 0) {
-      console.error('[ORDER-SYNC] Invalid grand total from backend:', backendSummary);
-      throw new Error('Error calculating final total. Please refresh and try again.');
+      const debugMsg =
+        'Total amount is invalid.' +
+        ' totalAmount=' + backendSummary.totalAmount +
+        ' finalAmount=' + backendSummary.finalAmount +
+        ' subtotal=' + backendSummary.subtotal +
+        ' shippingCharge=' + backendSummary.shippingCharge;
+      console.error('[PAYMENT] AMOUNT ERROR:', debugMsg);
+      console.error('[PAYMENT] Full summary object:', JSON.stringify(backendSummary));
+      showToast(debugMsg, 'error');
+      window._paymentProcessing = false;
+      const placeBtn = document.getElementById('place-order-btn');
+      if (placeBtn) {
+        placeBtn.disabled = false;
+        placeBtn.textContent = 'Place Order';
+      }
+      return;
     }
+
+    console.log('[AMOUNT-DEBUG] Final amount resolved to:', amount);
 
     console.log('[ORDER-SYNC] Proceeding with payment for amount:', amount);
     console.log('[ORDER-SYNC] Final Pricing Breakdown:', {
@@ -2939,8 +3006,14 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       shippingAddress
     };
 
+    // PERMANENT DEBUG: verify amount before sending to gateway
+    console.log('[PAYMENT] Amount in rupees being sent:', amount);
+    console.log('[PAYMENT] Amount in paise (×100):', Math.round(amount * 100));
     console.log('[PAYMENT] STRICT PAYLOAD:', JSON.stringify(paymentPayload, null, 2));
 
+    if (isNaN(Math.round(amount * 100)) || Math.round(amount * 100) <= 0) {
+      throw new Error('[PAYMENT] Amount conversion to paise failed. Value: ' + amount);
+    }
 
     const rzpOrderRes = await apiCall(
       '/payment/create-order',
@@ -3021,43 +3094,79 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
             true
           );
 
+          // DEBUG: confirm exact field names from backend
+          console.log('[ORDER] Order Created. Full response:', JSON.stringify(finalRes));
+
           if (!finalRes.success) {
             throw new Error(
-              finalRes.message ||
-              'Payment succeeded but order creation failed'
+              finalRes.message || 'Payment succeeded but order creation failed'
             );
           }
 
-          // ---------------------------------------------------
-          // 7. Success Cleanup & Navigation
-          // ---------------------------------------------------
-          console.log('[CHECKOUT] Payment Verified');
-          console.log('[CHECKOUT] Order Created');
-          
-          Cart.clear();
+          // SAFE EXTRACTION: check all possible field names the backend might return
+          const confirmedOrderId =
+            finalRes.orderId ||
+            finalRes.order?._id ||
+            finalRes.order?.id ||
+            finalRes._id ||
+            null;
 
-          showToast('Payment successful!', 'success');
-          console.log('[CHECKOUT] Redirecting To Success Page');
+          const confirmedTrackingId =
+            finalRes.trackingNumber ||
+            finalRes.orderNumber ||
+            finalRes.order?.trackingNumber ||
+            finalRes.order?.orderNumber ||
+            '';
 
+          // GUARD: if orderId is still missing, do not silently fail
+          if (!confirmedOrderId) {
+            console.error('[ORDER] CRITICAL: orderId missing from backend response:', finalRes);
+            showToast('Order placed! Redirecting to your orders...', 'success');
+            try { Cart.clear(); } catch (e) { console.error('[CART]', e); }
+            setTimeout(() => {
+              window.location.href = 'orders.html';
+            }, 2000);
+            return;
+          }
+
+          console.log('[SUCCESS] Redirecting To Success Page');
+          console.log('[SUCCESS] orderId:', confirmedOrderId);
+          console.log('[SUCCESS] trackingId:', confirmedTrackingId);
+
+          // SHOW FEEDBACK before redirect
+          showToast('Payment Successful! Redirecting...', 'success');
+
+          // SAFE CART CLEAR: must not block redirect even if it throws
+          try {
+            Cart.clear();
+          } catch (e) {
+            console.error('[CART CLEAR ERROR] Non-blocking:', e);
+          }
+
+          // BUILD REDIRECT URL — uses ?id= because order-success.html reads params.get('id')
           const redirectUrl =
-            `order-success.html?id=${finalRes.orderNumber}` +
-            `&amount=${amount}` +
-            `&payment=success` +
-            `&awb=${finalRes.tracking?.awb || ''}` +
-            `&tracking=${encodeURIComponent(finalRes.tracking?.url || '')}`;
+            'order-success.html' +
+            '?id=' + confirmedOrderId +
+            '&amount=' + amount +
+            '&payment=success' +
+            '&trackingId=' + confirmedTrackingId;
 
-          window.location.href = redirectUrl;
+          console.log('[SUCCESS] Redirect URL:', redirectUrl);
+
+          // GUARANTEED REDIRECT
+          window._paymentProcessing = false;
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1500);
 
         } catch (err) {
           console.error('[PAYMENT VERIFICATION ERROR]', err);
-
+          window._paymentProcessing = false;
           showToast(
             err.message || 'Payment completed but order processing failed',
             'error'
           );
-
           const placeBtn = document.getElementById('place-order-btn');
-
           if (placeBtn) {
             placeBtn.disabled = false;
             placeBtn.textContent = 'Place Order';
@@ -3077,9 +3186,8 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       modal: {
         ondismiss: function () {
           console.warn('[PAYMENT] Razorpay modal dismissed');
-
+          window._paymentProcessing = false;
           const placeBtn = document.getElementById('place-order-btn');
-
           if (placeBtn) {
             placeBtn.disabled = false;
             placeBtn.textContent = 'Place Order';
@@ -3095,14 +3203,12 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
 
     rzp.on('payment.failed', function (res) {
       console.error('[PAYMENT FAILED]', res);
-
+      window._paymentProcessing = false;
       showToast(
         'Payment Failed: ' + (res.error?.description || 'Unknown error'),
         'error'
       );
-
       const placeBtn = document.getElementById('place-order-btn');
-
       if (placeBtn) {
         placeBtn.disabled = false;
         placeBtn.textContent = 'Place Order';
@@ -3112,19 +3218,16 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
     rzp.open();
 
   } catch (err) {
-
-    console.error('[ONLINE PAYMENT FLOW ERROR]', err);
-
-    const placeBtn = document.getElementById('place-order-btn');
-
-    if (placeBtn) {
-      placeBtn.disabled = false;
-      placeBtn.textContent = 'Place Order';
+      console.error('[ONLINE PAYMENT FLOW ERROR]', err);
+      window._paymentProcessing = false;
+      const placeBtn = document.getElementById('place-order-btn');
+      if (placeBtn) {
+        placeBtn.disabled = false;
+        placeBtn.textContent = 'Place Order';
+      }
+      throw err;
     }
-
-    throw err;
   }
-}
 
 async function loadRecommendedProducts() {
   const slider = document.getElementById('product-slider');

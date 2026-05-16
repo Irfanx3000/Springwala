@@ -56,7 +56,7 @@ router.get('/orders', protectUser, getMyOrders);
 router.get('/orders/:id', protectUser, getOrder);
 router.post('/orders/:id/cancel', protectUser, cancelOrder);
 router.get('/orders/:id/track', protectUser, trackOrderById);
-router.get('/orders/track/:awb', trackOrder);
+router.get('/orders/track/:identifier', trackOrder);
 
 // ── Wishlist ──────────────────────────────────────────────────────────────────
 const { getWishlist, toggleWishlist } = require('../controllers/userWishlistController');

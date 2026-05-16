@@ -147,9 +147,13 @@ function buildDesktopOrderCard(order, item) {
                     </div>
                     <div class="absolute bottom-0 left-0 w-full flex justify-between items-end">
                         <div class="flex flex-col gap-2">
-                             ${order.waybill || order.awb ? `<div class="flex items-center gap-2"><span class="text-[11px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
+                             ${order.trackingNumber ? `
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] text-gray-400 uppercase font-bold tracking-widest">Tracking</span> 
+                                    <span class="bg-blue-50 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded border border-blue-100">Tracking Active</span>
+                                </div>` : ''}
                             <div class="flex gap-[16px]">
-                                <button onclick="handleTracking('${order.awb || order.trackingNumber || ''}', '${order._id}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
+                                <button onclick="handleTracking('${order.trackingNumber || ''}')" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
                                     <span class="text-[#333333] text-[14px] font-normal font-['Roboto']">Track Order</span>
                                 </button>
                                 <button onclick="contactSupport()" class="bg-[#E6E6E6] border border-[#C5C5C5] rounded-[3px] px-[14px] py-[5px] hover:bg-[#d5d5d5] hover:border-[#999] transition">
@@ -195,9 +199,13 @@ function buildMobileOrderCard(order, item) {
                 </div>
             </div>
             <div class="mb-3">
-                ${order.waybill || order.awb ? `<div class="flex items-center gap-2 mb-2"><span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Delhivery</span> <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">${order.shipmentStatus || 'Manifested'}</span></div>` : ''}
+                ${order.trackingNumber ? `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Tracking</span> 
+                        <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">Tracking Active</span>
+                    </div>` : ''}
                 <div class="flex items-center justify-start gap-[8px] w-full overflow-x-auto hide-scrollbar flex-nowrap">
-                    <button onclick="handleTracking('${order.awb || order.trackingNumber || ''}', '${order._id}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
+                    <button onclick="handleTracking('${order.trackingNumber || ''}')" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
                         <span class="text-[#4D4848] text-[12px] font-medium font-['Roboto'] leading-[14px] whitespace-nowrap">Track Order</span>
                     </button>
                     <button onclick="contactSupport()" class="bg-[#E2E2E2] rounded-[3px] flex items-center justify-center px-[10px] py-[6px] flex-shrink-0">
@@ -304,12 +312,12 @@ function initSliderControls(totalCards) {
     updatePageInfo();
 }
 
-function handleTracking(identifier, orderId) {
-    console.log('[ORDER-SYNC] Navigating to tracking for:', identifier || orderId);
-    if (identifier) {
-        window.location.href = `track-order.html?awb=${identifier}`;
+function handleTracking(trackingId) {
+    console.log('[ORDER-SYNC] Navigating to tracking for:', trackingId);
+    if (trackingId) {
+        window.location.href = `track-order.html?trackingId=${trackingId}`;
     } else {
-        window.location.href = `track-order.html?orderId=${orderId}`;
+        showToast('Tracking is not yet available for this order.', 'info');
     }
 }
 

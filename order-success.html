@@ -147,13 +147,9 @@
                 <span class="label">Status</span>
                 <span id="display-status" class="status-badge">Pending (COD)</span>
             </div>
-            <div class="order-row" id="awb-row" style="display: none;">
-                <span class="label">Tracking ID</span>
-                <span id="display-awb" class="value">---</span>
-            </div>
             <div class="order-row" id="tracking-row" style="display: none;">
-                <span class="label">Track Link</span>
-                <a id="display-tracking-link" href="#" target="_blank" class="value text-blue-600 underline">Track Now</a>
+                <span class="label">Tracking ID</span>
+                <span id="display-tracking-id" class="value">---</span>
             </div>
         </div>
         
@@ -167,7 +163,7 @@
         const orderId = params.get('id');
         const amountParam = params.get('amount');
         const isPaid = params.get('payment') === 'success';
-        const awbParam = params.get('awb');
+        const trackingIdParam = params.get('trackingId');
         
         // Initial sync from URL for immediate feedback
         if (orderId) document.getElementById('display-order-id').textContent = orderId;
@@ -198,13 +194,13 @@
                     statusEl.style.color = '#166534';
                 }
 
-                // Shipping / Tracking (ORDER-SYNC: Support internal trackingNumber)
-                const waybill = order.waybill || order.awb || order.trackingNumber || awbParam;
-                if (waybill) {
-                    document.getElementById('awb-row').style.display = 'flex';
-                    document.getElementById('display-awb').textContent = waybill;
+                // Shipping / Tracking (ORDER-SYNC: SSOT priority)
+                const trackingRef = order.trackingNumber || trackingIdParam;
+                if (trackingRef) {
+                    document.getElementById('tracking-row').style.display = 'flex';
+                    document.getElementById('display-tracking-id').textContent = trackingRef;
                     const trackBtn = document.getElementById('track-order-btn');
-                    if (trackBtn) trackBtn.href = `track-order.html?awb=${waybill}`;
+                    if (trackBtn) trackBtn.href = `track-order.html?trackingId=${trackingRef}`;
                 }
 
                 // If items breakdown UI existed, we'd inject here

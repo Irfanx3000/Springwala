@@ -2,7 +2,7 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
-const delhiveryService = require('../services/delhiveryService');
+// const delhiveryService = require('../services/delhiveryService');
 
 const generateOrderNumber = async () => {
   const count = await Order.countDocuments();
@@ -446,68 +446,46 @@ exports.getOrderSummary = async (req, res) => {
 // ─── GET /api/user/orders/track/:identifier ─────────────────────────────────
 exports.trackOrder = async (req, res) => {
   try {
-    const { identifier } = req.params;
-    
-    // Support tracking by AWB, trackingNumber, or orderNumber
+    const identifier = (req.params.identifier || '').trim();
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: 'Tracking identifier is required.' });
+    }
+
+    // Support tracking ONLY by trackingNumber (SSOT), orderNumber, or _id
     const order = await Order.findOne({
       $or: [
-        { awb: identifier },
         { trackingNumber: identifier },
-        { orderNumber: identifier }
+        { orderNumber: identifier },
+        { _id: identifier.match(/^[0-9a-fA-F]{24}$/) ? identifier : null }
       ]
-    }).select('awb trackingNumber orderNumber shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier statusHistory');
+    })
+    .populate('items.product', 'name images')
+    .select('trackingNumber orderNumber orderStatus customerName createdAt updatedAt courier statusHistory items');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Tracking information not found for this ID.' });
     }
 
-    let scans = [];
-    let expectedDelivery = null;
-
-    /* ─── TEMPORARILY DISABLED: LIVE COURIER TRACKING ───
-    if (order.awb || order.waybill) {
-      const liveTracking = await delhiveryService.trackShipment(order.awb || order.waybill);
-      if (liveTracking.success) {
-        scans = liveTracking.scans || [];
-        expectedDelivery = liveTracking.expectedDeliveryDate;
-        
-        const mappedStatus = delhiveryService.mapStatus(liveTracking.status);
-        if (mappedStatus && mappedStatus !== order.shipmentStatus) {
-          order.shipmentStatus = mappedStatus;
-          await order.save();
-        }
-      }
-    }
-    */
-
-    // Use internal status history as scans for manual tracking
-    scans = (order.statusHistory || []).map(h => ({
+    // Use internal status history as scans for manual tracking (PURE MANUAL MODE)
+    const scans = (order.statusHistory || []).map(h => ({
       status: h.status,
       location: 'Warehouse',
       time: h.timestamp || h.createdAt,
       instructions: h.note || `Order status updated to ${h.status}`
     }));
 
-    // ─── STATUS NORMALIZATION (ORDER-SYNC) ───
-    // If shipmentStatus is Pending but orderStatus is more advanced, use orderStatus
-    let finalStatus = order.shipmentStatus;
-    const advancedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
-    if (finalStatus === 'Pending' && advancedStatuses.includes(order.orderStatus)) {
-      finalStatus = order.orderStatus;
-    }
-
     res.json({
       success: true,
       tracking: {
-        awb: order.awb || order.trackingNumber || order.orderNumber,
-        status: (order.courier === 'Manual Fulfillment' && !order.awb) ? `${finalStatus} (Manual Fulfillment Active)` : finalStatus,
+        trackingNumber: order.trackingNumber,
+        orderNumber: order.orderNumber,
+        status: order.orderStatus,
         orderStatus: order.orderStatus,
         customer: order.customerName,
         placedAt: order.createdAt,
         lastUpdated: order.updatedAt,
         scans: scans,
-        expectedDelivery: expectedDelivery,
-        trackingUrl: order.trackingUrl,
+        items: order.items,
         courier: order.courier || 'Manual Fulfillment'
       }
     });
@@ -520,7 +498,8 @@ exports.trackOrder = async (req, res) => {
 // ─── GET /api/user/orders/:id/track ──────────────────────────────────────────
 exports.trackOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, user: req.user?._id }).select('awb shipmentStatus orderStatus customerName createdAt updatedAt trackingUrl courier statusHistory');
+    const order = await Order.findOne({ _id: req.params.id, user: req.user?._id })
+      .select('trackingNumber orderNumber orderStatus customerName createdAt updatedAt courier statusHistory');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found.' });
@@ -533,23 +512,17 @@ exports.trackOrderById = async (req, res) => {
       instructions: h.note || `Order status updated to ${h.status}`
     }));
 
-    let finalStatus = order.shipmentStatus;
-    const advancedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
-    if (finalStatus === 'Pending' && advancedStatuses.includes(order.orderStatus)) {
-      finalStatus = order.orderStatus;
-    }
-
     res.json({
       success: true,
       tracking: {
-        awb: order.awb || order.trackingNumber || order.orderNumber,
-        status: (order.courier === 'Manual Fulfillment' && !order.awb) ? `${finalStatus} (Manual Fulfillment Active)` : finalStatus,
+        trackingNumber: order.trackingNumber,
+        orderNumber: order.orderNumber,
+        status: order.orderStatus,
         orderStatus: order.orderStatus,
         customer: order.customerName,
         placedAt: order.createdAt,
         lastUpdated: order.updatedAt,
         scans: scans,
-        trackingUrl: order.trackingUrl,
         courier: order.courier || 'Manual Fulfillment'
       }
     });

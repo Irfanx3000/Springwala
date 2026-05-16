@@ -69,8 +69,16 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     if (paymentStatus) order.paymentStatus = paymentStatus;
-    if (trackingNumber) order.trackingNumber = trackingNumber;
-    if (courier) order.courier = courier;
+    // ─── MANUAL TRACKING SSOT ───
+if (trackingNumber && trackingNumber.trim()) {
+  order.trackingNumber = trackingNumber.trim();
+}
+
+// Auto-generate if missing
+if (!order.trackingNumber) {
+  order.trackingNumber = `SW-TRK-${String(order.orderNumber || order._id).replace('SW', '')}`;
+}
+    order.courier = 'Manual Fulfillment';
 
     await order.save();
     res.json({ success: true, message: 'Order updated successfully', order });

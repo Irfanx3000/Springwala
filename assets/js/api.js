@@ -15,7 +15,7 @@ var BASE_URL = CONFIG.IMAGE_BASE_URL;
 async function apiFetch(endpoint, opts = {}) {
   const url = `${API_BASE}${endpoint}`;
   const headers = { ...opts.headers };
-  const token = Auth.getToken();
+  const token = (typeof Auth !== 'undefined') ? Auth.getToken() : null;
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -35,7 +35,7 @@ async function apiFetch(endpoint, opts = {}) {
   // 401 Handling: Trigger silent validation
   if (res.status === 401) {
     console.warn(`[API-WARN] 401 Unauthorized at ${endpoint}`);
-    Auth.validate(); // This will logout if truly expired
+    if (typeof Auth !== 'undefined') Auth.validate(); // This will logout if truly expired
     return null;
   }
 
@@ -67,8 +67,8 @@ const api = {
   download: async (url, filename) => {
     const fullUrl = `${API_BASE}${url}`;
     console.log(`[API-DEBUG] Downloading: ${fullUrl}`);
-    const token = Auth.getToken();
-    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
+    const token = (typeof Auth !== 'undefined') ? Auth.getToken() : null;
+    const res = await fetch(fullUrl, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
     if (!res.ok) throw new Error('Download failed');
     const blob = await res.blob();
     const a = document.createElement('a');

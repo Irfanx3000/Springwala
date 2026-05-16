@@ -49,8 +49,8 @@ async function loadOrderDetail(orderId) {
     if (payEl) payEl.innerHTML = paymentStatusBadge(order.paymentStatus);
 
     setText('detail-payment-method', order.paymentMethod);
-    setText('detail-tracking-number', order.awb || order.trackingNumber || order.orderNumber);
-    setText('detail-courier', order.courier || 'Manual Fulfillment');
+    setText('detail-tracking-number', order.trackingNumber || order.orderNumber);
+    setText('detail-courier', 'Manual Fulfillment');
 
     // Financials (ORDER-SYNC: Use totalAmount as Grand Total SSOT)
     const grandTotal = Number(order.totalAmount || order.finalAmount || 0);
@@ -105,8 +105,8 @@ async function loadOrderDetail(orderId) {
     if (paySelect) paySelect.value = order.paymentStatus;
     
     if (trackingInput) {
-      // Priority: 1. Existing AWB, 2. Internal Tracking ID, 3. Order Number fallback
-      trackingInput.value = order.awb || order.trackingNumber || order.orderNumber || '';
+      // SSOT: Priority is always internal Tracking Number
+      trackingInput.value = order.trackingNumber || order.orderNumber || '';
     }
     
     if (courierInput) {
@@ -143,106 +143,47 @@ async function handleLogisticsUI(order) {
   
   if (!activeBox || !emptyBox) return;
 
-  if (order.waybill || order.awb) {
+  const trackingId = order.trackingNumber;
+
+  if (trackingId) {
     activeBox.classList.remove('hidden');
     emptyBox.classList.add('hidden');
     
-    setText('shipment-waybill', order.waybill || order.awb);
-    setText('shipment-live-status', order.shipmentStatus || 'Manifested');
+    setText('shipment-waybill', trackingId);
+    setText('shipment-live-status', 'Manual Tracking Active');
     
-    if (order.shipmentCreatedAt) {
-      setText('shipment-created-at', formatDateTime(order.shipmentCreatedAt));
+    if (order.shipmentCreatedAt || order.createdAt) {
+      setText('shipment-created-at', formatDateTime(order.shipmentCreatedAt || order.createdAt));
     }
 
     const trackBtn = document.getElementById('shipment-track-btn');
-    if (trackBtn) trackBtn.href = order.trackingUrl || `https://www.delhivery.com/track/package/${order.waybill || order.awb}`;
+    if (trackBtn) trackBtn.href = `../../track-order.html?trackingId=${trackingId}`;
     
+    // Hide sync button in manual mode
     const syncBtn = document.getElementById('shipment-sync-btn');
-    if (syncBtn) {
-      syncBtn.onclick = () => syncLiveTracking(order.waybill || order.awb, true, syncBtn);
-    }
+    if (syncBtn) syncBtn.classList.add('hidden');
 
-    // Initial silent sync for existing shipments
-    await syncLiveTracking(order.waybill || order.awb);
+    /* ─── TEMPORARILY DISABLED: LIVE COURIER SYNC ───
+    if (order.waybill || order.awb) {
+       await syncLiveTracking(order.waybill || order.awb);
+    }
+    */
   } else {
     activeBox.classList.add('hidden');
     emptyBox.classList.remove('hidden');
     
+    /* ─── TEMPORARILY DISABLED: DELHIERY CREATION ───
     const createBtn = document.getElementById('shipment-create-btn');
     const createHint = document.getElementById('shipment-create-hint');
-    
-    // Manual Creation Policy: Online Payment ONLY + Completed ONLY
-    const isEligible = order.paymentMethod === 'Online' && order.paymentStatus === 'Completed';
-
-    if (createBtn) {
-      if (isEligible) {
-        createBtn.classList.remove('hidden');
-        if (createHint) createHint.textContent = "Will generate AWB and Manifest in Delhivery";
-        
-        createBtn.onclick = async () => {
-          if (!confirm('Are you sure you want to create a Delhivery shipment for this order?')) return;
-          createBtn.disabled = true;
-          const originalText = createBtn.innerHTML;
-          createBtn.innerHTML = '<span class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full mr-2"></span>Creating...';
-          try {
-            console.log(`[SHIPMENT CREATE REQUEST] Order: ${order.orderNumber}`);
-            const res = await api.post(`/shipping/create/${order._id}`);
-            if (res.success) {
-              showToast('Shipment created successfully!', 'success');
-              await loadOrderDetail(order._id);
-            }
-          } catch (err) {
-            showToast(err.message || 'Creation failed', 'error');
-          } finally {
-            createBtn.disabled = false;
-            createBtn.innerHTML = originalText;
-          }
-        };
-      } else {
-        createBtn.classList.add('hidden');
-        if (createHint) {
-          if (order.paymentMethod === 'COD') {
-            createHint.textContent = "Shipment creation is currently restricted to Online orders only.";
-          } else {
-            createHint.textContent = "Awaiting payment completion before shipment can be created.";
-          }
-        }
-      }
-    }
+    if (createBtn) createBtn.classList.add('hidden');
+    if (createHint) createHint.textContent = "Manual fulfillment mode is active. Internal tracking numbers are managed via the update form below.";
+    */
   }
 }
 
-async function syncLiveTracking(waybill, showToastMsg = false, btn = null) {
-  if (!waybill) return;
-  
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="animate-spin inline-block w-3 h-3 border-2 border-gray-600 border-t-transparent rounded-full mr-2"></span>Syncing...';
-  }
-
-  try {
-    const res = await api.get(`/shipping/track/${waybill}`);
-    if (res.success) {
-      setText('shipment-live-status', res.status || res.mappedStatus);
-      const lastScan = res.scans && res.scans.length > 0 ? res.scans[0] : null;
-      if (lastScan) {
-        setText('shipment-last-scan', `${lastScan.status} at ${lastScan.location} (${new Date(lastScan.time).toLocaleString()})`);
-      } else {
-        setText('shipment-last-scan', 'Shipment manifested. Waiting for courier pickup.');
-      }
-      if (showToastMsg) showToast('Tracking status synced!', 'success');
-    }
-  } catch (err) {
-    console.error('Sync failed:', err.message);
-    if (showToastMsg) showToast('Sync failed: ' + err.message, 'error');
-    setText('shipment-last-scan', `Delhivery Sync Error: ${err.message}`);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Sync Live Status';
-    }
-  }
-}
+/* ─── COMMENTED OUT: DELHIERY SYNC LOGIC ───
+async function syncLiveTracking(waybill, showToastMsg = false, btn = null) { ... }
+*/
 
 function bindUpdateForm(orderId) {
   const updateBtn = document.getElementById('update-btn');

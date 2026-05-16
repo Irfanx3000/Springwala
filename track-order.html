@@ -25,8 +25,8 @@
 
             <div class="track-card">
                 <div class="bg-red-600 p-6 text-white text-center">
-                    <h1 class="text-2xl font-bold font-['Poppins']">Track Shipment</h1>
-                    <p class="text-red-100 text-sm mt-1" id="display-awb-header">Loading tracking details...</p>
+                    <h1 class="text-2xl font-bold font-['Poppins']">Track Order</h1>
+                    <p class="text-red-100 text-sm mt-1" id="display-awb-header">Loading order details...</p>
                 </div>
 
                 <div class="p-6 md:p-10">
@@ -92,8 +92,8 @@
                                     <div id="line-shipped" class="status-line"></div>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-gray-800 text-[15px]">In Transit</h3>
-                                    <p class="text-[13px] text-gray-500">Shipment is on its way to you.</p>
+                                    <h3 class="font-bold text-gray-800 text-[15px]">Out For Delivery</h3>
+                                    <p class="text-[13px] text-gray-500">Order is on its way to your address.</p>
                                 </div>
                             </div>
                             <div class="flex gap-4">
@@ -107,11 +107,22 @@
                             </div>
                         </div>
 
+                        <!-- Order Summary -->
+                        <div id="items-section" class="mt-8 border-t border-gray-100 pt-8 hidden">
+                            <h3 class="text-[16px] font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                                Order Summary
+                            </h3>
+                            <div id="items-list" class="space-y-4">
+                                <!-- Injected Items -->
+                            </div>
+                        </div>
+
                         <!-- Scan History -->
                         <div id="scan-history-section" class="mt-8 border-t border-gray-100 pt-8 hidden">
                             <h3 class="text-[16px] font-bold text-gray-800 mb-6 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Detailed Shipment History
+                                Order Status History
                             </h3>
                             <div id="scan-list" class="space-y-6">
                                 <!-- Injected Scans -->
@@ -136,33 +147,34 @@
     <script>
         async function initTracking() {
             const params = new URLSearchParams(window.location.search);
-            const awb = params.get('awb') || params.get('trackingId'); // [TRACKING-SYNC] Support trackingId param
-            const orderId = params.get('orderId');
+            // SSOT: Only use trackingId for manual lookup
+            const trackingId = params.get('trackingId');
 
-            if (!awb && !orderId) {
+            if (!trackingId) {
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('error-state').classList.remove('hidden');
                 return;
             }
 
-            console.log('[ORDER-SYNC] Fetching latest order status...');
-            document.getElementById('display-awb-header').textContent = awb ? `Tracking Ref: ${awb}` : `Order ID: ${orderId}`;
+            console.log('[ORDER-SYNC] Fetching latest order status for:', trackingId);
 
             try {
-                let res;
-                if (awb) {
-                    res = await api.get(`/user/orders/track/${awb}`);
-                } else {
-                    res = await api.get(`/user/orders/${orderId}/track`);
-                }
+                // Unified lookup endpoint
+                const res = await api.get(`/user/orders/track/${trackingId}`);
                 
                 if (!res || !res.success) throw new Error("Tracking not found");
+                
+                // Update header with official tracking number
+                document.getElementById('display-awb-header').textContent = `Tracking Ref: ${res.tracking.trackingNumber}`;
+                
                 console.log('[ORDER-SYNC] Live status received:', res.tracking.status);
                 updateUI(res.tracking);
             } catch (err) {
                 console.error('[ORDER-SYNC] Sync failed:', err.message);
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('error-state').classList.remove('hidden');
+                // Ensure header reflects search failure
+                document.getElementById('display-awb-header').textContent = `Ref: ${trackingId}`;
             }
         }
 
@@ -172,62 +184,73 @@
 
             const statusText = document.getElementById('current-status-text');
             
-            // ─── STATUS → UI MAPPING (ORDER-SYNC) ───
+            // ─── MANUAL STATUS MAPPING (SINGLE SOURCE OF TRUTH) ───
             const statusMap = {
                 'Pending': 'Order Received',
                 'Ordered': 'Order Received',
                 'Processing': 'Preparing Your Order',
-                'Shipped': 'Shipped',
+                'Shipped': 'Out For Delivery',
                 'Delivered': 'Delivered Successfully',
                 'Cancelled': 'Order Cancelled',
-                'Returned': 'Order Returned'
+                'Returned': 'Returned'
             };
             
-            const displayStatus = statusMap[tracking.status] || tracking.status;
+            // Priority: orderStatus (Admin driven)
+            const currentStatus = tracking.orderStatus || tracking.status || 'Pending';
+            const displayStatus = statusMap[currentStatus] || currentStatus;
             statusText.textContent = displayStatus;
             
-            // Apply status-specific colors
-            if (['Cancelled', 'Returned'].includes(tracking.status)) {
+            // Status-specific colors
+            if (['Cancelled', 'Returned'].includes(currentStatus)) {
                 statusText.classList.add('text-red-600');
-            } else if (tracking.status === 'Delivered') {
+            } else if (currentStatus === 'Delivered') {
                 statusText.classList.add('text-green-600');
             } else {
                 statusText.classList.add('text-gray-800');
             }
 
-            document.getElementById('courier-name').textContent = tracking.courier || 'Manual Fulfillment';
-            document.getElementById('last-updated-text').textContent = `Updated: ${new Date(tracking.lastUpdated).toLocaleString()}`;
+            document.getElementById('courier-name').textContent = 'Manual Fulfillment';
+            document.getElementById('last-updated-text').textContent = `Updated: ${new Date(tracking.lastUpdated || tracking.placedAt).toLocaleString()}`;
             
-            if (tracking.expectedDelivery) {
-                document.getElementById('expected-delivery').textContent = `Exp. Delivery: ${new Date(tracking.expectedDelivery).toLocaleDateString()}`;
-            } else if (tracking.status === 'Pending' || tracking.status === 'Ordered' || tracking.status === 'Processing') {
+            // Hide expected delivery if it's external data, use internal logic
+            if (['Pending', 'Ordered', 'Processing'].includes(currentStatus)) {
                 document.getElementById('expected-delivery').textContent = 'Est. 3-7 Business Days';
+            } else {
+                document.getElementById('expected-delivery').textContent = '';
             }
 
-            // Update Progress Steps
-            const status = (tracking.status || '').toLowerCase();
-            const orderStatus = (tracking.orderStatus || '').toLowerCase();
-            
-            console.log('[ORDER-SYNC] Rendering status timeline for:', status);
+            // ─── Progress Steps (Manual Logic) ───
+            const s = (currentStatus || '').toLowerCase();
             
             activate('ordered');
-            
-            if (['processing', 'shipped', 'delivered', 'in transit', 'out for delivery'].includes(status) || ['processing', 'shipped', 'delivered'].includes(orderStatus)) {
-                activate('processing');
-            }
-            if (['shipped', 'delivered', 'in transit', 'out for delivery'].includes(status) || ['shipped', 'delivered'].includes(orderStatus)) {
-                activate('shipped');
-            }
-            if (status === 'delivered' || orderStatus === 'delivered') {
-                activate('delivered');
+            if (['processing', 'shipped', 'delivered'].includes(s)) activate('processing');
+            if (['shipped', 'delivered'].includes(s)) activate('shipped');
+            if (s === 'delivered') activate('delivered');
+
+            // ─── Render Order Items ───
+            const itemsList = document.getElementById('items-list');
+            const itemsSection = document.getElementById('items-section');
+            if (tracking.items && tracking.items.length > 0) {
+                itemsSection.classList.remove('hidden');
+                itemsList.innerHTML = tracking.items.map(item => `
+                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-12 h-12 bg-white rounded border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            <img src="${imageUrl(item.product?.images?.[0] || item.image)}" class="max-w-full max-h-full object-contain" alt="">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-gray-800 truncate">${item.name || item.product?.name}</p>
+                            <p class="text-xs text-gray-500">Qty: ${item.quantity} • ₹${(item.finalPrice || item.price).toLocaleString()}</p>
+                        </div>
+                    </div>
+                `).join('');
             }
 
-            // Render Scan History (ORDER-SYNC Timeline)
+            // ─── Render Status History (Timeline Source) ───
             const list = document.getElementById('scan-list');
             document.getElementById('scan-history-section').classList.remove('hidden');
 
             if (tracking.scans && tracking.scans.length > 0) {
-                // Sort scans by time (descending)
+                // Scans already mapped to statusHistory in backend
                 const sortedScans = [...tracking.scans].sort((a, b) => new Date(b.time) - new Date(a.time));
                 
                 list.innerHTML = sortedScans.map((scan, index) => `
@@ -235,21 +258,16 @@
                         <div class="w-2 h-2 rounded-full ${index === 0 ? 'bg-red-600' : 'bg-gray-400'} mt-2 shrink-0"></div>
                         <div class="flex-1">
                             <div class="flex justify-between items-start">
-                                <h4 class="text-[14px] font-bold ${index === 0 ? 'text-gray-800' : 'text-gray-600'}">${scan.status}</h4>
+                                <h4 class="text-[14px] font-bold ${index === 0 ? 'text-gray-800' : 'text-gray-600'}">${statusMap[scan.status] || scan.status}</h4>
                                 <span class="text-[11px] font-medium text-gray-400">${new Date(scan.time).toLocaleDateString()} ${new Date(scan.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                             </div>
-                            <p class="text-[13px] text-gray-500">${scan.location || 'Warehouse'}</p>
-                            ${scan.instructions ? `<p class="text-[12px] text-gray-400 mt-1 italic">${scan.instructions}</p>` : ''}
+                            <p class="text-[13px] text-gray-500">${scan.instructions || 'Order status updated'}</p>
                         </div>
                     </div>
                 `).join('');
             } else {
                 list.innerHTML = `
                     <div class="text-center py-6">
-                        <div class="bg-blue-50 text-blue-600 p-3 rounded-lg inline-flex mb-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <p class="text-sm font-medium text-gray-700">Order Placed</p>
                         <p class="text-xs text-gray-500 mt-1">Status updates will appear here as your order moves through fulfillment.</p>
                     </div>
                 `;
@@ -262,6 +280,21 @@
         }
 
         window.onload = initTracking;
+        
+        // Helper: Format currency if needed
+        function formatCurrency(n) { return '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        
+        // Helper: Resolve image URL (copied from api.js for public use)
+        function imageUrl(path) {
+            if (!path) return 'assets/images/deafult.png';
+            if (path.startsWith('http')) return path;
+            const API_BASE = (typeof CONFIG !== 'undefined') ? CONFIG.API_BASE_URL : '';
+            const BASE_URL = (typeof CONFIG !== 'undefined') ? CONFIG.IMAGE_BASE_URL : '';
+            let cleanPath = path.startsWith('/') ? path.slice(1) : path;
+            if (!cleanPath.startsWith('uploads/') && !cleanPath.startsWith('assets/')) cleanPath = 'uploads/' + cleanPath;
+            const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+            return `${cleanBase}/${cleanPath}`;
+        }
     </script>
 </body>
 </html>

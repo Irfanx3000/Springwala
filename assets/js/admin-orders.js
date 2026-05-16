@@ -66,14 +66,14 @@ async function loadOrders(page = 1) {
         <td class="px-6">
           <div class="flex flex-col gap-1">
             ${renderStatusBadge(o.orderStatus)}
-            ${(o.waybill || o.awb || o.trackingNumber) ? `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">Ref: ${o.waybill || o.awb || o.trackingNumber}</span>` : ''}
+            ${o.trackingNumber ? `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">Ref: ${o.trackingNumber}</span>` : ''}
           </div>
         </td>
         <td class="px-6">${renderPaymentBadge(o.paymentStatus)}</td>
         <td class="px-6 font-['Roboto'] text-[17px]">
           <div class="flex flex-col">
             <span>₹${o.totalAmount.toFixed(2)}</span>
-            ${(o.waybill || o.awb || o.trackingNumber) ? `<a href="../track-order.html?awb=${o.waybill || o.awb || o.trackingNumber}" target="_blank" class="text-[12px] text-[#BE2229] hover:underline font-bold" onclick="event.stopPropagation()">Track Order</a>` : ''}
+            ${o.trackingNumber ? `<a href="../track-order.html?trackingId=${o.trackingNumber}" target="_blank" class="text-[12px] text-[#BE2229] hover:underline font-bold" onclick="event.stopPropagation()">Track Order</a>` : ''}
           </div>
         </td>
       </tr>`).join('');
