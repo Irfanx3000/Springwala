@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -120,6 +120,7 @@
 
         .secondary-btn:hover { color: #1e293b; }
     </style>
+    <script src="assets/js/config.js"></script>
 </head>
 <body>
     <div class="confirmation-card">
@@ -157,65 +158,384 @@
         <a href="index.html" class="secondary-btn">Continue Shopping</a>
     </div>
 
-    <script src="assets/js/api.js"></script>
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get('id');
-        const amountParam = params.get('amount');
-        const isPaid = params.get('payment') === 'success';
-        const trackingIdParam = params.get('trackingId');
-        
-        // Initial sync from URL for immediate feedback
-        if (orderId) document.getElementById('display-order-id').textContent = orderId;
-        if (amountParam) document.getElementById('display-order-amount').textContent = '₹' + parseFloat(amountParam).toFixed(2);
+<script src="assets/js/config.js"></script>
+<script src="assets/js/pricingEngine.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+    document.body.dataset.page = 'order-success'; // Prevents page-init functions from running
 
-        async function loadOrderDetails() {
-            if (!orderId) return;
-            try {
-                // We use the public tracking/detail endpoint or user order endpoint
-                // Assuming we have an endpoint that returns order by ID for the owner
-                const res = await apiCall(`/user/orders/${orderId}`, 'GET', null, true);
-                const order = res.order;
-                if (!order) return;
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('id');
+    const amountParam = params.get('amount');
+    const isPaid = params.get('payment') === 'success';
+    const trackingIdParam = params.get('trackingId');
 
-                // [ORDER-SYNC] Use persisted totalAmount as Single Source of Truth
-                const grandTotal = Number(order.totalAmount || order.finalAmount || 0);
+    // Show URL params immediately for instant feedback (before API loads)
+    if (orderId) document.getElementById('display-order-id').textContent = orderId;
+    if (amountParam) document.getElementById('display-order-amount').textContent = '₹' + parseFloat(amountParam).toFixed(2);
+
+    // Set status from URL immediately
+    const statusEl = document.getElementById('display-status');
+    if (isPaid) {
+        statusEl.textContent = 'Paid (Online)';
+        statusEl.style.background = '#dcfce7';
+        statusEl.style.color = '#166534';
+    } else {
+        statusEl.textContent = 'Pending (COD)';
+    }
+
+    // Show tracking from URL immediately
+    if (trackingIdParam) {
+        document.getElementById('tracking-row').style.display = 'flex';
+        document.getElementById('display-tracking-id').textContent = trackingIdParam;
+        const trackBtn = document.getElementById('track-order-btn');
+        if (trackBtn) trackBtn.href = `track-order.html?trackingId=${trackingIdParam}`;
+    }
+
+    // Enhance with live data after DOM is ready
+    async function loadOrderDetails() {
+        if (!orderId) return;
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return; // Guest: rely on URL params only
+
+            const res = await fetch(`${CONFIG.API_BASE_URL}/user/orders/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!res.ok) return;
+
+            const data = await res.json();
+            const order = data.order;
+            if (!order) return;
+
+            // Update amount from DB (source of truth)
+            const grandTotal = Number(order.totalAmount || order.finalAmount || 0);
+            if (grandTotal > 0) {
                 document.getElementById('display-order-amount').textContent = '₹' + grandTotal.toFixed(2);
-                
-                console.log('[ORDER-SYNC] Success Page Verified Totals:', {
-                    subtotal: order.subtotal,
-                    shipping: order.shippingCharge,
-                    grandTotal: grandTotal
-                });
-                const statusEl = document.getElementById('display-status');
-                statusEl.textContent = `${order.orderStatus} (${order.paymentMethod})`;
-                if (order.paymentStatus === 'Completed') {
-                    statusEl.style.background = '#dcfce7';
-                    statusEl.style.color = '#166534';
-                }
-
-                // Shipping / Tracking (ORDER-SYNC: SSOT priority)
-                const trackingRef = order.trackingNumber || trackingIdParam;
-                if (trackingRef) {
-                    document.getElementById('tracking-row').style.display = 'flex';
-                    document.getElementById('display-tracking-id').textContent = trackingRef;
-                    const trackBtn = document.getElementById('track-order-btn');
-                    if (trackBtn) trackBtn.href = `track-order.html?trackingId=${trackingRef}`;
-                }
-
-                // If items breakdown UI existed, we'd inject here
-                console.log('[ORDER-SYNC] Verified Totals:', {
-                    subtotal: order.subtotal,
-                    shipping: order.shippingCharge,
-                    grandTotal: grandTotal
-                });
-
-            } catch (err) {
-                console.warn('Could not fetch live order details:', err);
             }
+
+            // Update status
+            const payMethod = order.paymentMethod || 'Online';
+            const payStatus = order.paymentStatus || '';
+            statusEl.textContent = `${payStatus} (${payMethod})`;
+            if (payStatus === 'Completed') {
+                statusEl.style.background = '#dcfce7';
+                statusEl.style.color = '#166534';
+            }
+
+            // Update tracking
+            const trackingRef = order.trackingNumber || order.orderNumber || trackingIdParam;
+            if (trackingRef) {
+                document.getElementById('tracking-row').style.display = 'flex';
+                document.getElementById('display-tracking-id').textContent = trackingRef;
+                const trackBtn = document.getElementById('track-order-btn');
+                if (trackBtn) trackBtn.href = `orders.html`;
+            }
+
+            console.log('[ORDER-SUCCESS] Verified from DB:', {
+                orderId,
+                subtotal: order.subtotal,
+                shipping: order.shippingCharge,
+                grandTotal
+            });
+
+        } catch (err) {
+            // Silent fail — URL params already shown, don't show error toast
+            console.warn('[ORDER-SUCCESS] Live fetch failed (non-critical):', err.message);
+        }
+    }
+
+    // Wait for app.js DOMContentLoaded to finish, then load order details
+    // Using setTimeout to ensure app.js initialization doesn't interfere
+    setTimeout(loadOrderDetails, 800);
+</script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Springwala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="assets/js/config.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        if (orderId) loadOrderDetails();
+        .confirmation-card {
+            max-width: 420px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 32px 24px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            animation: popIn 0.3s ease;
+            text-align: center;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .order-box {
+            padding: 16px;
+            border-radius: 12px;
+            background: #f9fafb;
+            text-align: left;
+            border: 1px solid #f1f5f9;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .order-row:last-child { margin-bottom: 0; }
+
+        .label { color: #64748b; font-weight: 500; }
+        .value { color: #1e293b; font-weight: 600; }
+        .order-id { color: #dc2626; font-weight: 700; }
+
+        .status-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: #dc2626;
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-top: 24px;
+            transition: background 0.2s;
+            display: block;
+            text-decoration: none;
+        }
+
+        .primary-btn:hover { background: #b91c1c; }
+
+        .secondary-btn {
+            width: 100%;
+            color: #64748b;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 8px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .secondary-btn:hover { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="confirmation-card">
+        <div class="success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        
+        <h1 class="title">Order Confirmed!</h1>
+        <p class="subtitle">
+            Hooray! Your order has been placed. We've sent a confirmation email with your invoice.
+        </p>
+        
+        <div class="order-box">
+            <div class="order-row">
+                <span class="label">Order ID</span>
+                <span id="display-order-id" class="order-id">Loading...</span>
+            </div>
+            <div class="order-row">
+                <span class="label">Amount Paid</span>
+                <span id="display-order-amount" class="value">₹0.00</span>
+            </div>
+            <div class="order-row">
+                <span class="label">Status</span>
+                <span id="display-status" class="status-badge">Confirmed</span>
+            </div>
+            <div class="order-row" id="tracking-row" style="display: none;">
+                <span class="label">Tracking ID</span>
+                <span id="display-tracking-id" class="value">---</span>
+            </div>
+        </div>
+        
+        <a id="track-order-btn" href="orders.html" class="primary-btn">Track My Order</a>
+        <a href="index.html" class="secondary-btn">Continue Shopping</a>
+    </div>
+
+    <script>
+        // ─── Standalone script: NO dependency on app.js, api.js, or any shared module ───
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const orderId   = params.get('id');
+            const amountParam = params.get('amount');
+            const isPaid    = params.get('payment') === 'success';
+            const trackingIdParam = params.get('trackingId');
+
+            // ── 1. Populate immediately from URL params (zero delay) ──
+            const orderIdEl  = document.getElementById('display-order-id');
+            const amountEl   = document.getElementById('display-order-amount');
+            const statusEl   = document.getElementById('display-status');
+            const trackRow   = document.getElementById('tracking-row');
+            const trackingEl = document.getElementById('display-tracking-id');
+            const trackBtn   = document.getElementById('track-order-btn');
+
+            if (orderId) {
+                orderIdEl.textContent = orderId;
+            } else {
+                orderIdEl.textContent = 'N/A';
+            }
+
+            if (amountParam && !isNaN(parseFloat(amountParam))) {
+                amountEl.textContent = '₹' + parseFloat(amountParam).toFixed(2);
+            }
+
+            if (isPaid) {
+                statusEl.textContent = 'PAID (ONLINE)';
+                statusEl.style.background = '#dcfce7';
+                statusEl.style.color = '#166534';
+            } else {
+                statusEl.textContent = 'CONFIRMED';
+            }
+
+            if (trackingIdParam && trackingIdParam !== 'undefined' && trackingIdParam !== 'null') {
+                trackRow.style.display = 'flex';
+                trackingEl.textContent = trackingIdParam;
+            }
+
+            // ── 2. Silently enrich from API (non-blocking, no toast on failure) ──
+            async function enrichFromApi() {
+                if (!orderId) return;
+
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                // Read API base from config.js (already loaded in <head>)
+                const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+                    ? CONFIG.API_BASE_URL
+                    : '';
+
+                if (!apiBase) {
+                    console.warn('[ORDER-SUCCESS] CONFIG.API_BASE_URL not found, skipping live fetch.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${apiBase}/user/orders/${orderId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    // Non-2xx: silently bail, URL params are already shown
+                    if (!res.ok) {
+                        console.warn('[ORDER-SUCCESS] API returned', res.status, '— using URL params.');
+                        return;
+                    }
+
+                    const data = await res.json();
+                    const order = data.order;
+                    if (!order) return;
+
+                    // Override amount only if DB value is valid and non-zero
+                    const dbTotal = Number(order.totalAmount || order.finalAmount || 0);
+                    if (dbTotal > 0) {
+                        amountEl.textContent = '₹' + dbTotal.toFixed(2);
+                    }
+
+                    // Override status from DB
+                    const payMethod = order.paymentMethod || 'Online';
+                    const payStatus = order.paymentStatus || 'Completed';
+                    statusEl.textContent = `${payStatus.toUpperCase()} (${payMethod.toUpperCase()})`;
+                    if (payStatus === 'Completed') {
+                        statusEl.style.background = '#dcfce7';
+                        statusEl.style.color = '#166534';
+                    } else {
+                        statusEl.style.background = '#fef3c7';
+                        statusEl.style.color = '#92400e';
+                    }
+
+                    // Tracking
+                    const trackingRef = order.trackingNumber || order.orderNumber || trackingIdParam;
+                    if (trackingRef && trackingRef !== 'undefined' && trackingRef !== 'null') {
+                        trackRow.style.display = 'flex';
+                        trackingEl.textContent = trackingRef;
+                    }
+
+                    console.log('[ORDER-SUCCESS] Enriched from DB:', {
+                        orderId,
+                        subtotal: order.subtotal,
+                        shipping: order.shippingCharge,
+                        grandTotal: dbTotal
+                    });
+
+                } catch (err) {
+                    // Completely silent — page already shows correct data from URL
+                    console.warn('[ORDER-SUCCESS] Enrich fetch failed (non-critical):', err.message);
+                }
+            }
+
+            // Small delay to let the page render first, then fetch quietly
+            setTimeout(enrichFromApi, 500);
+        })();
     </script>
 </body>
 </html>

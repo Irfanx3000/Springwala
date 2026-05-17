@@ -2472,7 +2472,6 @@ async function initCheckoutPage() {
     return;
   }
 
-  // ─── STATE CLEANUP: CLEAR STALE PAYMENT FLAGS ───
   localStorage.removeItem('selectedPaymentMethod');
   localStorage.removeItem('checkout_payment_method');
   sessionStorage.removeItem('last_payment_method');
@@ -2480,7 +2479,6 @@ async function initCheckoutPage() {
   const itemsContainer = document.getElementById('checkout-items');
   const totals = Cart.totals();
 
-  // Render items — show batch context when applicable
   if (itemsContainer) {
     itemsContainer.innerHTML = cart.map(item => {
       const batchQty = Number(item.batchQuantity) || 1;
@@ -2504,17 +2502,19 @@ async function initCheckoutPage() {
     }).join('');
   }
 
-  // ─── ONE FRONTEND PRICING STATE (SSOT) ───
+  // ─── SINGLE SOURCE OF TRUTH FOR PRICING ───
   let checkoutPricing = {
     subtotal: 0,
     shippingCharge: 0,
     grandTotal: 0
   };
 
+  // Keep backendSummary separate for items list only
+  let backendSummary = null;
+
   const renderPricingUI = (pricing) => {
     console.log('[ORDER-SYNC] Rendering UI with pricing:', pricing);
 
-    // Desktop / Standard Elements
     const elements = {
       subtotal: document.getElementById('summary-items-total'),
       shipping: document.getElementById('summary-delivery') || document.getElementById('summary-delivery-charges'),
@@ -2529,7 +2529,6 @@ async function initCheckoutPage() {
     }
     if (elements.total) elements.total.textContent = `₹${pricing.grandTotal.toFixed(2)}`;
 
-    // Mobile specific elements (from cart.html/checkout integration)
     const mobileElements = {
       subtotal: document.getElementById('mobile-summary-items-total'),
       shipping: document.getElementById('mobile-summary-delivery'),
@@ -2539,10 +2538,6 @@ async function initCheckoutPage() {
     if (mobileElements.subtotal) mobileElements.subtotal.textContent = `₹${pricing.subtotal.toFixed(2)}`;
     if (mobileElements.shipping) mobileElements.shipping.textContent = pricing.shippingCharge > 0 ? `₹${pricing.shippingCharge.toFixed(2)}` : 'Free';
     if (mobileElements.total) mobileElements.total.textContent = `₹${pricing.grandTotal.toFixed(2)}`;
-
-    console.log('[UI] Rendering subtotal:', pricing.subtotal);
-    console.log('[UI] Rendering shipping:', pricing.shippingCharge);
-    console.log('[UI] Rendering total:', pricing.grandTotal);
   };
 
   const fetchSummary = async (pincode = "") => {
@@ -2551,7 +2546,6 @@ async function initCheckoutPage() {
     const placeBtn = document.getElementById('place-order-btn');
 
     try {
-      // Show Loading State
       const deliveryEl = document.getElementById('summary-delivery') || document.getElementById('summary-delivery-charges') || document.getElementById('mobile-summary-delivery');
       if (deliveryEl) deliveryEl.textContent = 'Calculating...';
       if (noteEl) noteEl.textContent = '';
@@ -2565,22 +2559,20 @@ async function initCheckoutPage() {
 
       if (summaryRes.success) {
         console.log('[SUMMARY] API returned:', JSON.stringify(summaryRes));
-        
-        console.log('[CHECKOUT-UI]\nsummary object received:', summaryRes);
 
-        // Update State from Backend SSOT
+        // Update checkoutPricing SSOT
         checkoutPricing = {
-          subtotal: Number(summaryRes.subtotal),
-          shippingCharge: Number(summaryRes.shippingCharge),
-          grandTotal: Number(summaryRes.totalAmount)
+          subtotal: Number(summaryRes.subtotal) || 0,
+          shippingCharge: Number(summaryRes.shippingCharge) || 0,
+          grandTotal: Number(summaryRes.totalAmount) || 0
         };
 
-        console.log('[UI] Checkout state updated:', checkoutPricing);
+        // Store full summary separately for items list
+        backendSummary = summaryRes;
 
-        // Update UI
+        console.log('[UI] Checkout pricing updated:', checkoutPricing);
         renderPricingUI(checkoutPricing);
 
-        // Handle Shipping Metadata
         const info = summaryRes.shippingInfo;
         if (info) {
           if (noteEl && info.estimatedDays) noteEl.textContent = `Est. Delivery: ${info.estimatedDays}`;
@@ -2623,16 +2615,18 @@ async function initCheckoutPage() {
   };
 
   const pincodeInput = document.getElementById('ship-pincode');
-  let backendSummary = await fetchSummary(pincodeInput?.value || "");
 
-  // Listen for pincode changes to update delivery charges
+  // Initial fetch on page load
+  await fetchSummary(pincodeInput?.value || "");
+
+  // Pincode change listener — updates checkoutPricing automatically via fetchSummary
   pincodeInput?.addEventListener('input', debounce(async (e) => {
     const pin = e.target.value;
     if (pin.length === 6) {
       console.log('[CHECKOUT] Updating totals for pincode:', pin);
-      backendSummary = await fetchSummary(pin);
+      await fetchSummary(pin);
     } else if (pin.length === 0) {
-      fetchSummary(""); // Reset to default
+      await fetchSummary("");
     }
   }, 500));
 
@@ -2647,15 +2641,13 @@ async function initCheckoutPage() {
       fill('ship-city', user.shippingAddress.city || '');
       fill('ship-state', user.shippingAddress.state || '');
       fill('ship-pincode', user.shippingAddress.zip || '');
-
-      // Task 3: Auto-trigger estimate after pre-fill
       const savedPin = user.shippingAddress.zip;
-      if (savedPin && savedPin.length === 6) fetchSummary(savedPin);
+      if (savedPin && savedPin.length === 6) await fetchSummary(savedPin);
     }
   }
 
-  // Payment Method Selection Logic
-  let selectedMethod = 'Online'; // TEMPORARY: FORCE ONLINE AS DEFAULT
+  // Payment Method Selection
+  let selectedMethod = 'Online';
   const methodItems = document.querySelectorAll('.payment-method-item');
   methodItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -2698,38 +2690,47 @@ async function initCheckoutPage() {
         return;
       }
 
-      // UI: Disable Interaction
       placeBtn.disabled = true;
       placeBtn.innerHTML = '<span class="flex items-center gap-2"><div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Processing...</span>';
 
       try {
-        // [ORDER-SYNC] Re-fetch summary with active pincode to ensure latest verified pricing
-        const activePincode = getVal('ship-pincode');
-        console.log('[ORDER-SYNC] Verifying final totals with pincode:', activePincode);
+        // ── CRITICAL: Snapshot checkoutPricing RIGHT NOW before any async work ──
+        // Do NOT re-call fetchSummary here. checkoutPricing is already up to date.
+        // Re-fetching here was the root cause of the stale closure / NaN amount bug.
+        const frozenPricing = {
+          subtotal: Number(checkoutPricing.subtotal) || 0,
+          shippingCharge: Number(checkoutPricing.shippingCharge) || 0,
+          grandTotal: Number(checkoutPricing.grandTotal) || 0
+        };
 
-        backendSummary = await fetchSummary(activePincode);
-        if (!backendSummary) throw new Error('Could not verify order totals');
+        const frozenItems = Array.isArray(backendSummary?.items) ? [...backendSummary.items] : [];
 
-        console.log('[ORDER-SYNC] Verified Summary Snapshot:', {
-          subtotal: backendSummary.subtotal,
-          shipping: backendSummary.shippingCharge,
-          grandTotal: backendSummary.totalAmount
-        });
+        console.log('[CHECKOUT] Frozen pricing snapshot:', frozenPricing);
+        console.log('[CHECKOUT] Frozen items count:', frozenItems.length);
 
-        console.log('[CHECKOUT] Active Payment Method:', selectedMethod);
-        console.log('[CHECKOUT] Executing Online Flow');
-
-        // ─── TEMPORARY: COD DISABLED ───
-        await handleOnlinePaymentFlow(shippingAddress, backendSummary);
-
-        /* 
-        if (selectedMethod === 'Online') {
-          await handleOnlinePaymentFlow(shippingAddress, backendSummary);
-        } else {
-          console.log('[CHECKOUT] COD Flow Disabled');
-          await handleCODFlow(shippingAddress, backendSummary);
+        if (!frozenPricing.grandTotal || frozenPricing.grandTotal <= 0) {
+          throw new Error('Order total is invalid. Please refresh the page and try again.');
         }
-        */
+
+        if (!frozenItems.length) {
+          throw new Error('Could not verify cart items. Please refresh and try again.');
+        }
+
+        // Build a completely self-contained summary object
+        // This is what gets passed into handleOnlinePaymentFlow
+        // and subsequently into the Razorpay handler closure
+        const frozenSummary = {
+          subtotal: frozenPricing.subtotal,
+          shippingCharge: frozenPricing.shippingCharge,
+          totalAmount: frozenPricing.grandTotal,
+          finalAmount: frozenPricing.grandTotal,
+          items: frozenItems
+        };
+
+        console.log('[CHECKOUT] Executing Online Flow with frozenSummary:', frozenSummary);
+
+        await handleOnlinePaymentFlow(shippingAddress, frozenSummary);
+
       } catch (err) {
         console.error('[CHECKOUT ERROR]', err);
         showToast(err.message || 'Payment initiation failed', 'error');
@@ -2904,7 +2905,6 @@ async function handleCODFlow(shippingAddress, backendSummary) {
  * PRODUCTION ONLINE FLOW (Verify-then-Create)
  */
 async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
-  // PROCESSING LOCK: prevent double-click or re-entry
   if (window._paymentProcessing) {
     console.warn('[PAYMENT] Already processing. Ignoring duplicate call.');
     return;
@@ -2915,79 +2915,52 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
     console.log('[PAYMENT] Starting Online Payment Flow...');
     console.log('[PAYMENT] Backend Summary:', backendSummary);
 
-    // ---------------------------------------------------
-    // 1. Validate Summary & Items
-    // ---------------------------------------------------
     if (!backendSummary) {
       throw new Error('Order summary is missing');
     }
 
-    const amount = Number(
-      backendSummary.totalAmount ||
-      backendSummary.finalAmount ||
-      0
-    );
+    // ── Capture everything at function entry, before any await ──
+    const amount   = Number(backendSummary.totalAmount || backendSummary.finalAmount || 0);
+    const subtotal = Number(backendSummary.subtotal || 0);
+    const shipping = Number(backendSummary.shippingCharge || 0);
+    const items    = Array.isArray(backendSummary.items) ? [...backendSummary.items] : [];
 
-    console.log('[PAYMENT] Amount resolved:', amount);
-    console.log('[PAYMENT] Full summary:', JSON.stringify(backendSummary));
+    console.log('[PAYMENT] Captured amount:', amount);
+    console.log('[PAYMENT] Captured items count:', items.length);
 
     if (!amount || amount <= 0) {
-      const debugMsg =
-        'Total amount is invalid.' +
+      const debugMsg = 'Total amount is invalid.' +
         ' totalAmount=' + backendSummary.totalAmount +
         ' finalAmount=' + backendSummary.finalAmount +
         ' subtotal=' + backendSummary.subtotal +
         ' shippingCharge=' + backendSummary.shippingCharge;
       console.error('[PAYMENT] AMOUNT ERROR:', debugMsg);
-      console.error('[PAYMENT] Full summary object:', JSON.stringify(backendSummary));
       showToast(debugMsg, 'error');
       window._paymentProcessing = false;
       const placeBtn = document.getElementById('place-order-btn');
-      if (placeBtn) {
-        placeBtn.disabled = false;
-        placeBtn.textContent = 'Place Order';
-      }
+      if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = 'Place Order'; }
       return;
     }
 
-    console.log('[AMOUNT-DEBUG] Final amount resolved to:', amount);
-
-    console.log('[ORDER-SYNC] Proceeding with payment for amount:', amount);
-    console.log('[ORDER-SYNC] Final Pricing Breakdown:', {
-      subtotal: backendSummary.subtotal,
-      shipping: backendSummary.shippingCharge,
-      total: amount
-    });
-
-    // Use items from backend summary (Normalized SSOT)
-    const items = backendSummary.items || [];
-
-    if (!Array.isArray(items) || items.length === 0) {
-      console.error('[PAYMENT] Invalid Items from backend summary:', items);
+    if (!items.length) {
       throw new Error('Could not verify cart items. Please refresh and try again.');
     }
 
-    // ---------------------------------------------------
-    // 2. Create Razorpay Order
-    // ---------------------------------------------------
-    console.log('[PAYMENT] Creating Razorpay order...');
-
-    // STRICT NORMALIZATION: Ensure backend always gets exactly what it expects
+    // Normalize items for Razorpay order creation
     const normalizedItems = items.map(item => {
       let pid = null;
       if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
       else if (item.productId) pid = String(item.productId);
       else if (item.product) pid = String(item.product);
       else if (item._id) pid = String(item._id);
-
       if (!pid) return null;
 
       return {
         productId: pid,
         product: pid,
-        quantity: Math.max(1, Number(item.quantity || item.qty || 1)),
+        quantity: Math.max(1, Number(item.quantity || 1)),
         batchQuantity: Math.max(1, Number(item.batchQuantity) || 1),
-        finalPrice: Number(item.finalPrice || item.price || item.displayPrice || 0),
+        finalPrice: Number(item.finalPrice || item.unitPrice || item.price || 0),
         name: item.name || item.nameSnapshot || 'Product',
         image: item.image || item.imageSnapshot || '',
         selectedBatch: item.selectedBatch || null,
@@ -2996,39 +2969,29 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       };
     }).filter(Boolean);
 
-    if (normalizedItems.length === 0) {
+    if (!normalizedItems.length) {
       throw new Error('Could not normalize cart items. Cart appears malformed.');
     }
 
-    const paymentPayload = {
-      amount,
-      items: normalizedItems,
-      shippingAddress
-    };
+    const paymentPayload = { amount, items: normalizedItems, shippingAddress };
 
-    // PERMANENT DEBUG: verify amount before sending to gateway
-    console.log('[PAYMENT] Amount in rupees being sent:', amount);
-    console.log('[PAYMENT] Amount in paise (×100):', Math.round(amount * 100));
-    console.log('[PAYMENT] STRICT PAYLOAD:', JSON.stringify(paymentPayload, null, 2));
+    console.log('[PAYMENT] Amount in rupees:', amount);
+    console.log('[PAYMENT] Amount in paise:', Math.round(amount * 100));
 
     if (isNaN(Math.round(amount * 100)) || Math.round(amount * 100) <= 0) {
-      throw new Error('[PAYMENT] Amount conversion to paise failed. Value: ' + amount);
+      throw new Error('Amount conversion to paise failed. Value: ' + amount);
     }
 
-    const rzpOrderRes = await apiCall(
-      '/payment/create-order',
-      'POST',
-      paymentPayload,
-      true
-    );
+    const rzpOrderRes = await apiCall('/payment/create-order', 'POST', paymentPayload, true);
 
     if (!rzpOrderRes.success) {
       throw new Error(rzpOrderRes.message || 'Failed to create payment order');
     }
 
-    // ---------------------------------------------------
-    // 3. Open Razorpay Popup
-    // ---------------------------------------------------
+    // ── Build Razorpay options with fully self-contained handler ──
+    // All values (amount, subtotal, shipping, items, shippingAddress) are
+    // captured as local consts above — the handler closure reads from these,
+    // NOT from backendSummary, which could be mutated by the time handler fires.
     const options = {
       key: rzpOrderRes.key,
       amount: rzpOrderRes.amount,
@@ -3038,139 +3001,117 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
       order_id: rzpOrderRes.id,
 
       handler: async function (response) {
-        console.log('[PAYMENT] Razorpay payment success:', response);
+        console.log('[PAYMENT] Razorpay success callback fired');
+        console.log('[PAYMENT] Payment ID:', response.razorpay_payment_id);
+
+        // Re-capture from closed-over consts (already safe, just logging)
+        console.log('[HANDLER] Using captured amount:', amount);
+        console.log('[HANDLER] Using captured items count:', items.length);
 
         try {
+          // Step 1: Verify signature
+          const verifyRes = await apiCall('/payment/verify', 'POST', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          }, true);
 
-          // ---------------------------------------------------
-          // 4. Verify Payment Signature
-          // ---------------------------------------------------
-          const verifyRes = await apiCall(
-            '/payment/verify',
-            'POST',
-            {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            },
-            true
-          );
+          if (!verifyRes.success) throw new Error('Payment verification failed');
+          console.log('[PAYMENT] Signature verified');
 
-          if (!verifyRes.success) {
-            throw new Error('Payment verification failed');
+          // Step 2: Build order items from captured `items` const
+          const finalItems = items.map(item => {
+            let pid = null;
+            if (typeof item.product === 'object' && item.product?._id) pid = String(item.product._id);
+            else if (item.productId) pid = String(item.productId);
+            else if (item.product) pid = String(item.product);
+            else if (item._id) pid = String(item._id);
+            if (!pid) return null;
+
+            const resolvedPrice    = Number(item.finalPrice || item.unitPrice || item.price || 0);
+            const resolvedSubtotal = Number(item.subtotal || (resolvedPrice * Number(item.quantity || 1)));
+
+            return {
+              product: pid,
+              productId: pid,
+              name: item.name || item.nameSnapshot || 'Product',
+              quantity: Number(item.quantity || 1),
+              batchQuantity: Number(item.batchQuantity) || 1,
+              finalPrice: resolvedPrice,
+              subtotal: resolvedSubtotal,
+              image: item.image || item.imageSnapshot || '',
+              isBatchProduct: !!item.isBatchProduct,
+              selectedBatch: item.selectedBatch || null,
+              pricingSnapshot: item.pricingSnapshot || null,
+              productSnapshot: item.productSnapshot || null,
+              hsn: item.hsn || ''
+            };
+          }).filter(Boolean);
+
+          if (!finalItems.length) {
+            throw new Error('Cart items could not be validated. Payment ID: ' + response.razorpay_payment_id);
           }
 
-          console.log('[PAYMENT] Signature verified successfully');
-
-          // ---------------------------------------------------
-          // 5. Prepare Final Order Payload
-          // ---------------------------------------------------
-          const orderPayload = prepareOrderPayload(
-            shippingAddress,
-            'Online',
-            'Completed',
-            {
+          // Step 3: Build order payload using only captured consts
+          const orderPayload = {
+            items: finalItems,
+            shippingAddress: shippingAddress,
+            paymentMethod: 'Online',
+            paymentStatus: 'Completed',
+            paymentDetails: {
               transactionId: response.razorpay_payment_id,
               razorpayOrderId: response.razorpay_order_id,
               gateway: 'Razorpay'
             },
-            items, // Use normalized items from summary response
-            {
-              subtotal: backendSummary.subtotal,
-              shippingCharge: backendSummary.shippingCharge,
-              totalAmount: amount
-            }
-          );
+            subtotal: subtotal,
+            shippingCharge: shipping,
+            totalAmount: amount,
+            finalAmount: amount
+          };
 
-          console.log('[ORDER] Final Order Payload:', orderPayload);
+          console.log('[ORDER] Payload totals — subtotal:', subtotal, 'shipping:', shipping, 'total:', amount);
 
-          // ---------------------------------------------------
-          // 6. Create Final Order
-          // ---------------------------------------------------
-          const finalRes = await apiCall(
-            '/user/orders',
-            'POST',
-            orderPayload,
-            true
-          );
+          // Step 4: Create order
+          const finalRes = await apiCall('/user/orders', 'POST', orderPayload, true);
+          console.log('[ORDER] Response:', JSON.stringify(finalRes));
 
-          // DEBUG: confirm exact field names from backend
-          console.log('[ORDER] Order Created. Full response:', JSON.stringify(finalRes));
-
-          if (!finalRes.success) {
-            throw new Error(
-              finalRes.message || 'Payment succeeded but order creation failed'
-            );
+          if (!finalRes || !finalRes.success) {
+            throw new Error(finalRes?.message || 'Payment succeeded but order creation failed. Payment ID: ' + response.razorpay_payment_id);
           }
 
-          // SAFE EXTRACTION: check all possible field names the backend might return
+          // Step 5: Extract order ID
           const confirmedOrderId =
-            finalRes.orderId ||
-            finalRes.order?._id ||
-            finalRes.order?.id ||
-            finalRes._id ||
-            null;
+            finalRes.orderId || finalRes.order?._id || finalRes.order?.id || finalRes._id || null;
 
           const confirmedTrackingId =
-            finalRes.trackingNumber ||
-            finalRes.orderNumber ||
-            finalRes.order?.trackingNumber ||
-            finalRes.order?.orderNumber ||
-            '';
+            finalRes.trackingNumber || finalRes.orderNumber ||
+            finalRes.order?.trackingNumber || finalRes.order?.orderNumber || '';
 
-          // GUARD: if orderId is still missing, do not silently fail
-          if (!confirmedOrderId) {
-            console.error('[ORDER] CRITICAL: orderId missing from backend response:', finalRes);
-            showToast('Order placed! Redirecting to your orders...', 'success');
-            try { Cart.clear(); } catch (e) { console.error('[CART]', e); }
-            setTimeout(() => {
-              window.location.href = 'orders.html';
-            }, 2000);
-            return;
-          }
-
-          console.log('[SUCCESS] Redirecting To Success Page');
-          console.log('[SUCCESS] orderId:', confirmedOrderId);
-          console.log('[SUCCESS] trackingId:', confirmedTrackingId);
-
-          // SHOW FEEDBACK before redirect
           showToast('Payment Successful! Redirecting...', 'success');
 
-          // SAFE CART CLEAR: must not block redirect even if it throws
-          try {
-            Cart.clear();
-          } catch (e) {
-            console.error('[CART CLEAR ERROR] Non-blocking:', e);
-          }
-
-          // BUILD REDIRECT URL — uses ?id= because order-success.html reads params.get('id')
-          const redirectUrl =
-            'order-success.html' +
-            '?id=' + confirmedOrderId +
-            '&amount=' + amount +
-            '&payment=success' +
-            '&trackingId=' + confirmedTrackingId;
-
-          console.log('[SUCCESS] Redirect URL:', redirectUrl);
-
-          // GUARANTEED REDIRECT
           window._paymentProcessing = false;
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 1500);
+
+          const redirectUrl = confirmedOrderId
+            ? 'order-success.html?id=' + confirmedOrderId + '&amount=' + amount + '&payment=success&trackingId=' + confirmedTrackingId
+            : 'orders.html';
+
+          console.log('[SUCCESS] Redirecting to:', redirectUrl);
+
+          // Clear localStorage cart immediately (server cart cleared by backend)
+          // Redirect first, clear after — prevents loadCartCount from re-populating
+          // localStorage before the redirect fires
+          localStorage.removeItem('cart');
+          localStorage.removeItem('guestCart');
+
+          // Use replace instead of href so back button doesn't return to checkout
+          window.location.replace(redirectUrl);
 
         } catch (err) {
-          console.error('[PAYMENT VERIFICATION ERROR]', err);
+          console.error('[PAYMENT HANDLER ERROR]', err);
           window._paymentProcessing = false;
-          showToast(
-            err.message || 'Payment completed but order processing failed',
-            'error'
-          );
+          showToast(err.message || 'Payment completed but order processing failed', 'error');
           const placeBtn = document.getElementById('place-order-btn');
-          if (placeBtn) {
-            placeBtn.disabled = false;
-            placeBtn.textContent = 'Place Order';
-          }
+          if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = 'Place Order'; }
         }
       },
 
@@ -3179,55 +3120,38 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
         contact: shippingAddress.phone
       },
 
-      theme: {
-        color: '#BE2229'
-      },
+      theme: { color: '#BE2229' },
 
       modal: {
         ondismiss: function () {
           console.warn('[PAYMENT] Razorpay modal dismissed');
           window._paymentProcessing = false;
           const placeBtn = document.getElementById('place-order-btn');
-          if (placeBtn) {
-            placeBtn.disabled = false;
-            placeBtn.textContent = 'Place Order';
-          }
+          if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = 'Place Order'; }
         }
       }
     };
 
-    // ---------------------------------------------------
-    // 8. Open Razorpay
-    // ---------------------------------------------------
     const rzp = new Razorpay(options);
 
     rzp.on('payment.failed', function (res) {
       console.error('[PAYMENT FAILED]', res);
       window._paymentProcessing = false;
-      showToast(
-        'Payment Failed: ' + (res.error?.description || 'Unknown error'),
-        'error'
-      );
+      showToast('Payment Failed: ' + (res.error?.description || 'Unknown error'), 'error');
       const placeBtn = document.getElementById('place-order-btn');
-      if (placeBtn) {
-        placeBtn.disabled = false;
-        placeBtn.textContent = 'Place Order';
-      }
+      if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = 'Place Order'; }
     });
 
     rzp.open();
 
   } catch (err) {
-      console.error('[ONLINE PAYMENT FLOW ERROR]', err);
-      window._paymentProcessing = false;
-      const placeBtn = document.getElementById('place-order-btn');
-      if (placeBtn) {
-        placeBtn.disabled = false;
-        placeBtn.textContent = 'Place Order';
-      }
-      throw err;
-    }
+    console.error('[ONLINE PAYMENT FLOW ERROR]', err);
+    window._paymentProcessing = false;
+    const placeBtn = document.getElementById('place-order-btn');
+    if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = 'Place Order'; }
+    throw err;
   }
+}
 
 async function loadRecommendedProducts() {
   const slider = document.getElementById('product-slider');
