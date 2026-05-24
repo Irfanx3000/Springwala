@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Admin Pop-ups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #f3f4f6; }
+        
+        /* Modal Container */
+        .modal-card {
+            width: 512px;
+            height: fit-content;
+            background: #FFFFFF;
+            border: 1px solid rgba(188, 188, 188, 0.76);
+            box-shadow: 0px 0px 12.7px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+        }
+        
+        /* Robot Image - Removed border/bg to avoid double circles */
+        .robot-img {
+            width: 114px;
+            height: 114px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        /* Typography */
+        .modal-title {
+            font-family: 'Roboto';
+            font-weight: 500;
+            font-size: 26px;
+            line-height: 30px;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .modal-line {
+            width: 100%;
+            height: 1px;
+            background-color: #B5B5B5;
+            margin: 15px 0 25px 0;
+        }
+        
+        /* Buttons */
+        .btn-cancel {
+            background: #EDEDED;
+            border-radius: 7px;
+            font-family: 'Poppins';
+            font-weight: 500;
+            font-size: 15px;
+            color: #675D5D;
+            padding: 10px 20px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .btn-cancel:hover { background: #e0e0e0; }
+        
+        .btn-confirm {
+            border: 2px solid #BE2229;
+            border-radius: 7px;
+            font-family: 'Poppins';
+            font-weight: 500;
+            font-size: 15px;
+            color: #BE2229;
+            padding: 10px 20px;
+            transition: all 0.2s;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .btn-confirm:hover { background: #BE2229; color: #fff; }
+
+        .btn-close {
+            background: #EDEDED;
+            border-radius: 7px;
+            font-family: 'Poppins';
+            font-weight: 500;
+            font-size: 15px;
+            color: #675D5D;
+            padding: 10px 40px;
+            transition: all 0.2s;
+        }
+        .btn-close:hover { background: #e0e0e0; }
+        
+        /* Inputs & Uploads */
+        .input-label {
+            font-family: 'Roboto';
+            font-weight: 500;
+            font-size: 18px;
+            color: #000000;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-box {
+            background: #EDEDED;
+            border-radius: 5px;
+            width: 100%;
+            padding: 10px 15px;
+            font-family: 'Roboto';
+            font-size: 17px;
+            color: #656565;
+            border: none;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        .upload-box {
+            background: #E6F9F4;
+            border: 1px dashed #0A4A46;
+            border-radius: 5px;
+            width: 200px;
+            height: 115px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        /* Custom Checkbox */
+        .custom-checkbox {
+            width: 21px;
+            height: 21px;
+            border: 1px solid #9A9A9A;
+            border-radius: 3px;
+            cursor: pointer;
+            accent-color: #BE2229;
+        }
+    </style>
+</head>
+<body class="p-10">
+
+    <h1 class="text-3xl font-bold mb-10 text-center font-['Poppins']">All Admin Pop-ups</h1>
+
+    <div class="grid grid-cols-1 min-[1150px]:grid-cols-2 min-[1700px]:grid-cols-3 min-[2250px]:grid-cols-4 gap-10 mx-auto w-fit">
+
+        <!-- 1. Create a New Sub-category -->
+        <div id="modal-create-sub-category" class="modal-card">
+            <h2 class="modal-title mt-4">Create a New Sub-category</h2>
+            <div class="modal-line"></div>
+            
+            <div class="w-full text-left">
+                <label class="input-label">Enter Sub Category Name</label>
+                <input type="text" class="input-box" placeholder="Sub Category Name">
+                
+                <div class="flex gap-4 mb-4">
+                    <div class="w-1/2">
+                        <label class="input-label text-[17px] text-[#656565] mb-2">Sub Category Banner</label>
+                        <div class="w-full h-[115px] border border-[#B9B9B9] rounded-[5px] bg-[url('../assets/images/default.png')] bg-cover bg-center"></div>
+                    </div>
+                    <div class="w-1/2 flex items-end">
+                        <div class="upload-box w-full">
+                            <svg class="w-8 h-8 mb-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <span class="text-[15px] text-black">Click to upload</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <label class="input-label">Category</label>
+                <div class="relative w-full mb-5">
+                    <div class="w-full bg-[#EDEDED] rounded-[5px] px-[15px] py-[10px] flex justify-between items-center cursor-pointer" onclick="toggleDropdown(this)">
+                        <span class="font-['Roboto'] font-normal text-[17px] text-[#656565]">ISO Die Springs</span>
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    
+                    <!-- Open Dropdown List Preview -->
+                    <div class="absolute top-full left-0 mt-1 w-full bg-[#FFFFFF] border border-[#B9B9B9] rounded-[5px] shadow-lg z-10 overflow-hidden hidden">
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565] border-b border-[#E5E5E5]" onclick="selectOption(this)">ISO Die Springs</div>
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565] border-b border-[#E5E5E5]" onclick="selectOption(this)">JIS Die Springs</div>
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565]" onclick="selectOption(this)">Custom Springs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-4 justify-between w-full">
+                <button class="btn-confirm w-auto px-6">Confirm & Create</button>
+                <button class="btn-cancel w-auto px-6">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 2. New Category Created! -->
+        <div id="modal-new-category-created" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">New Category Created!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 3. Remove User? -->
+        <div id="modal-remove-user" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Remove User?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Remove</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 4. User Removed -->
+        <div id="modal-user-removed" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">User Removed</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 5. Create a Category -->
+        <div id="modal-create-category" class="modal-card">
+            <h2 class="modal-title mt-4">Create a Category</h2>
+            <div class="modal-line"></div>
+            
+            <div class="w-full text-left">
+                <label class="input-label">Enter Category Name</label>
+                <input type="text" class="input-box" placeholder="Category Name">
+                
+                <div class="flex gap-4 mb-4">
+                    <div class="w-1/2">
+                        <label class="input-label text-[17px] text-[#656565] mb-2">Category Banner</label>
+                        <div class="w-full h-[115px] border border-[#B9B9B9] rounded-[5px] bg-[url('../assets/images/default.png')] bg-cover bg-center"></div>
+                    </div>
+                    <div class="w-1/2 flex items-end">
+                        <div class="upload-box w-full">
+                            <svg class="w-8 h-8 mb-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <span class="text-[15px] text-black">Click to upload</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <label class="input-label">Category</label>
+                <div class="relative w-full mb-5">
+                    <div class="w-full bg-[#EDEDED] rounded-[5px] px-[15px] py-[10px] flex justify-between items-center cursor-pointer" onclick="toggleDropdown(this)">
+                        <span class="font-['Roboto'] font-normal text-[17px] text-[#656565]">ISO Die Springs</span>
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    
+                    <!-- Open Dropdown List Preview -->
+                    <div class="absolute top-full left-0 mt-1 w-full bg-[#FFFFFF] border border-[#B9B9B9] rounded-[5px] shadow-lg z-10 overflow-hidden hidden">
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565] border-b border-[#E5E5E5]" onclick="selectOption(this)">ISO Die Springs</div>
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565] border-b border-[#E5E5E5]" onclick="selectOption(this)">JIS Die Springs</div>
+                        <div class="px-[15px] py-[10px] hover:bg-[#EDEDED] cursor-pointer font-['Roboto'] text-[17px] text-[#656565]" onclick="selectOption(this)">Custom Springs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-4 justify-between w-full">
+                <button class="btn-confirm w-auto px-6">Confirm & Create</button>
+                <button class="btn-cancel w-auto px-6">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 6. New Sub-Category Created! -->
+        <div id="modal-new-sub-category-created" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">New Sub-Category Created!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 7. Block this User? -->
+        <div id="modal-block-user" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Block this User?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Block</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 8. Ameen Sarguroh has been Blocked -->
+        <div id="modal-user-blocked" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Ameen Sarguroh has been Blocked</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 9. Delete this Category? -->
+        <div id="modal-delete-category" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Delete this Category?</h2>
+            <div class="modal-line"></div>
+            
+            <div class="w-full text-left mb-6">
+                <label class="input-label">Category</label>
+                <div class="input-box flex justify-center items-center py-3">
+                    <span class="font-['Poppins'] font-semibold text-[#1A1A1A]">Beautiful Category Name</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-2 w-full justify-between">
+                <button class="btn-confirm px-4">Confirm & Delete</button>
+                <button class="btn-confirm px-4 border-[#BE2229] text-[#BE2229]">Hide this Category</button>
+                <button class="btn-cancel px-4">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 10. Category Deleted -->
+        <div id="modal-category-deleted" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Category Deleted</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 11. Hide Category? -->
+        <div id="modal-hide-category" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Hide Category?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Update</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 12. Category Hidden! -->
+        <div id="modal-category-hidden" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Category Hidden!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 13. Delete this Sub-Category? -->
+        <div id="modal-delete-sub-category" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Delete this Sub-Category?</h2>
+            <div class="modal-line"></div>
+            
+            <div class="w-full text-left mb-6">
+                <label class="input-label">Category</label>
+                <div class="input-box flex justify-center items-center py-3">
+                    <span class="font-['Poppins'] font-semibold text-[#1A1A1A]">Beautiful Sub-Category Name</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-2 w-full justify-between">
+                <button class="btn-confirm px-4">Confirm & Delete</button>
+                <button class="btn-confirm px-4 border-[#BE2229] text-[#BE2229]">Hide Sub-Category</button>
+                <button class="btn-cancel px-4">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 14. Sub-Category Deleted -->
+        <div id="modal-sub-category-deleted" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Sub-Category Deleted</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 15. Hide Sub-Category -->
+        <div id="modal-hide-sub-category" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Hide Sub-Category</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Update</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 16. Sub-Category Hidden! -->
+        <div id="modal-sub-category-hidden" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Sub-Category Hidden!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 17. Save Changes? (List with Checkboxes) -->
+        <div id="modal-save-changes-list" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Save Changes?</h2>
+            <div class="modal-line"></div>
+            
+            <div class="w-full text-left mb-6">
+                <span class="block text-[18px] font-medium text-black mb-3">List of Changes</span>
+                <div class="w-full h-[1px] bg-gray-200 mb-4"></div>
+                
+                <div class="flex flex-col gap-3 max-h-[160px] overflow-y-auto">
+                    <!-- Checkbox items -->
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="custom-checkbox" checked>
+                        <span class="font-['Roboto'] font-normal text-[18px] text-black">Deleted ISO Die Spring 36-OD</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="custom-checkbox" checked>
+                        <span class="font-['Roboto'] font-normal text-[18px] text-black">Edited ISO Die Spring 36-OD</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="custom-checkbox" checked>
+                        <span class="font-['Roboto'] font-normal text-[18px] text-black">Hidden ISO Die Spring 36-OD</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="custom-checkbox" checked>
+                        <span class="font-['Roboto'] font-normal text-[18px] text-black">Deleted ISO Die Spring 36-OD</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-2 justify-between w-full">
+                <button class="btn-confirm w-full">Confirm & Save all Changes</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 18. Save Changes? (Simple) -->
+        <div id="modal-save-changes-simple" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Save Changes?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Save Changes</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 19. Changes Saved! -->
+        <div id="modal-changes-saved" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Changes Saved!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 20. Update Stock? -->
+        <div id="modal-update-stock" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Update Stock?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Update</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 21. Stock Updated! -->
+        <div id="modal-stock-updated" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Stock Updated!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 22. Incomplete Product Details -->
+        <div id="modal-incomplete-product" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Incomplete Product Details</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-3 mt-2 w-full justify-between">
+                <button class="btn-confirm px-6">Save as Draft</button>
+                <button class="btn-confirm px-6 bg-transparent">Publish</button>
+                <button class="btn-cancel px-6">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 23. Product Published! -->
+        <div id="modal-product-published" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Product Published!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 24. Delete this Banner? -->
+        <div id="modal-delete-banner" class="modal-card">
+            <img src="../assets/images/oops.png" alt="Oops Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Delete this Banner?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-4 mt-2">
+                <button class="btn-confirm px-10">Delete</button>
+                <button class="btn-cancel px-8">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 25. Banner Deleted! -->
+        <div id="modal-banner-deleted" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Banner Deleted!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+        <!-- 26. Publish Product? -->
+        <div id="modal-publish-product" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Publish Product?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-3 mt-2 w-full justify-between">
+                <button class="btn-confirm px-6">Save as Draft</button>
+                <button class="btn-confirm px-6">Publish</button>
+                <button class="btn-cancel px-6">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 27. Publish Changes? -->
+        <div id="modal-publish-changes" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Publish Changes?</h2>
+            <div class="modal-line"></div>
+            <div class="flex gap-3 mt-2 w-full justify-between">
+                <button class="btn-confirm px-6">Save as Draft</button>
+                <button class="btn-confirm px-6">Publish</button>
+                <button class="btn-cancel px-6">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 28. Changes Published! -->
+        <div id="modal-changes-published" class="modal-card">
+            <img src="../assets/images/welcome.png" alt="Welcome Robot" class="robot-img" onerror="this.src='../assets/images/header.png'">
+            <h2 class="modal-title">Changes Published!</h2>
+            <div class="modal-line"></div>
+            <button class="btn-close">Close</button>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleDropdown(element) {
+            element.nextElementSibling.classList.toggle('hidden');
+        }
+        function selectOption(element) {
+            const text = element.innerText;
+            const dropdown = element.parentElement;
+            const trigger = dropdown.previousElementSibling;
+            trigger.querySelector('span').innerText = text;
+            dropdown.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
