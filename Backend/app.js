@@ -21,27 +21,53 @@ connectDB();
 
 // ── Core middleware ───────────────────────────────────────────────────────────
 const allowedOrigins = [
-  "http://localhost:5500",
-  "http://localhost:5503",
-  process.env.CLIENT_URL
+"http://localhost:5500",
+"http://localhost:5503",
+"http://127.0.0.1:5500",
+"http://127.0.0.1:5503",
+
+"http://springwala.in",
+"https://springwala.in",
+
+"http://www.springwala.in",
+"https://www.springwala.in"
 ];
 
+console.log("[CORS] Allowed origins:", allowedOrigins);
+
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
+origin: function(origin, callback) {
 
-    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-      return callback(null, true);
-    }
+```
+// Allow requests without origin (Postman, curl, mobile apps)
+if (!origin) {
+  return callback(null, true);
+}
 
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed"));
-    }
-  },
-  credentials: true
+// Allow localhost dynamically
+if (
+  origin.includes("localhost") ||
+  origin.includes("127.0.0.1")
+) {
+  return callback(null, true);
+}
+
+// Allow trusted domains
+if (allowedOrigins.includes(origin)) {
+  return callback(null, true);
+}
+
+// Log blocked origins WITHOUT crashing frontend
+console.error("[CORS BLOCKED]", origin);
+
+return callback(null, false);
+```
+
+},
+
+credentials: true
 }));
+
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
