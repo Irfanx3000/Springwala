@@ -12,6 +12,20 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
+        /* Smooth Animation for dropdowns */
+        .dropdown-menu {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .group:hover .dropdown-menu {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <style>
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #F4F6F6;
@@ -40,140 +54,9 @@
 
 <body class="bg-[#F4F6F6] text-[#1E1E1E] font-['Roboto']" data-page="product">
 
-    <!-- Header (Same as Index) -->
-    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center" data-banner-type="informational" data-banner-position="99">
-        <span class="text-white text-[13px]">Get discount on every selected product</span>
-    </div>
-
-    <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
-
-        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
-            <!-- Hamburger -->
-            <button id="menu-btn"
-                class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
-                <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
-            </button>
-
-            <!-- Logo -->
-            <img src="assets/images/header.png" alt="Springwala Logo"
-                class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
-
-            <!-- Cart & Wishlist -->
-            <div class="absolute right-[16px] top-[11px] flex items-center gap-3">
-                <a href="wishlist.html" class="w-[26px] h-[26px] relative flex items-center justify-center">
-                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-full h-full object-contain">
-                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-                <a href="cart.html" class="w-[29px] h-[29px] relative flex items-center justify-center">
-                    <svg class="w-full h-full text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                        </path>
-                    </svg>
-                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-            </div>
-        </div>
-
-        <div id="mobile-sub-header" class="md:hidden flex flex-col w-full origin-top">
-            <div class="px-[14px] py-[5px] bg-[#BE2229] flex items-center gap-3">
-                <div class="bg-white rounded-[6px] flex-1 flex items-center px-[11px] h-[30px]">
-                    <img src="assets/icons/mobile/search.svg" alt="Search" class="w-4 h-4 text-[#797979]">
-                    <input type="text" placeholder="Search..." class="ml-2 outline-none text-[14px] w-full">
-                </div>
-
-                <a href="login.html" class="cursor-pointer flex-shrink-0">
-                    <img src="assets/icons/mobile/account.svg" alt="Account" class="w-[26px] h-[26px]">
-                </a>
-            </div>
-
-            <!-- Shop by Categories / Deliver to Sub-header -->
-            <div
-                class="flex flex-row justify-between items-center px-[15px] py-[6px] bg-[#F6D6D6] h-[30px] w-full gap-2">
-                <!-- Shop by Categories -->
-                <div class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
-                    style="font-family: 'Roboto', sans-serif;">Shop by Categories
-                </div>
-
-                <!-- Deliver to Section -->
-                <div class="flex items-center gap-1 cursor-pointer min-w-0" id="location-btn">
-                    <span class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
-                        style="font-family: 'Roboto', sans-serif;">Deliver to</span>
-                    <img src="assets/icons/mobile/location.svg" alt="Location"
-                        class="w-[10px] sm:w-[12px] h-[14px] sm:h-[16px] flex-shrink-0"
-                        style="transform: scaleX(-1); filter: brightness(0) saturate(100%) invert(18%) sepia(90%) saturate(2687%) hue-rotate(338deg) brightness(91%) contrast(92%);">
-                    <span
-                        class="text-[#BD2830] text-[12px] sm:text-[14px] underline truncate max-w-[100px] sm:max-w-[130px]"
-                        id="location-text" style="font-family: 'Roboto', sans-serif;">Thane, Maharashtra</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
-            <img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto">
-
-            <div class="flex items-start gap-2 ml-8">
-                <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
-                <div class="flex flex-col">
-                    <span class="text-[#747474] text-[10px]">Location</span>
-                    <span class="text-[#242323] text-[12px] font-medium">Thane, Maharashtra</span>
-                </div>
-            </div>
-
-            <div class="flex-1 max-w-[519px] mx-10 flex h-[40px]">
-                <div
-                    class="border border-[#BE2229] rounded-l-[6px] px-3 flex items-center gap-2 cursor-pointer bg-white">
-                    <span class="text-[#BE2229] text-[13px]">All Categories</span>
-                    <svg class="w-3 h-3 text-[#BE2229]" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z">
-                        </path>
-                    </svg>
-                </div>
-                <div class="flex-1 border border-[#D7D9D9] border-l-0 rounded-r-[6px] flex items-center px-3 bg-white">
-                    <input type="text" class="flex-1 outline-none text-[13px]" placeholder="Search Products...">
-                    <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979]">
-                </div>
-            </div>
-
-            <div class="flex items-center gap-7">
-                <a href="login.html" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-                    <img src="assets/icons/desktop/profile.svg" alt="Account" class="w-6 h-6 text-[#525252]">
-                    <span class="text-[#525252] text-[15px]">Your Account</span>
-                </a>
-                <a href="cart.html" class="cursor-pointer hover:opacity-80 transition relative">
-                    <img src="assets/icons/desktop/cart.svg" alt="Cart" class="w-6 h-6 text-[#525252]">
-                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-                <a href="wishlist.html" class="cursor-pointer hover:opacity-80 transition relative">
-                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 text-[#525252]">
-                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <div class="w-full bg-white">
-        <div class="hidden md:flex max-w-[1440px] mx-auto items-center h-[56px] px-[80px]">
-            <a href="categories.html"
-                class="border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-50 transition">
-                <img src="assets/icons/mobile/categories-red.svg" alt="Categories" class="w-4 h-4 text-[#BE2229]">
-                <span class="text-[#BE2229] text-[12px] font-medium uppercase">Browse All Categories</span>
-            </a>
-
-			<ul class="flex items-center gap-8 ml-10 text-[15px] text-[#525252]">
-			    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="index.html">Home</a></li>
-			    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="allproducts.html">All Products</a></li>
-			    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="orders.html">Orders</a></li>
-			    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="#">Knowledge Centre</a></li>
-			    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="#">Contact Us</a></li>
-			</ul>
-
-            <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
-                <img id="customer-support-slot" src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
-            </div>
-        </div>
-    </div>
+    <!-- Dynamic Header Scaffolding -->
+    <div id="sw-header"></div>
+    <script src="assets/js/dynamic-header.js"></script>
 
     <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-50 hidden-menu md:hidden">
         <div class="p-6">
@@ -206,12 +89,14 @@
                     <span class="w-2 h-2 bg-transparent rounded-full"></span>
                     <a href="login.html">Your Account</a>
                 </li>
+                <li class="flex items-center gap-3">
+                    <span class="w-2 h-2 bg-transparent rounded-full"></span>
+                    <a href="contact-us.html">Contact Us</a>
+                </li>
             </ul>
         </div>
     </div>
-
-
-
+    
     <!-- Main Content -->
     <main class="max-w-[1440px] mx-auto md:px-[80px] pb-[180px] md:pb-20">
 
@@ -480,14 +365,40 @@
                             <div class="w-full h-[2px] bg-[#D9D9D9] mb-4"></div>
 
                             <!-- Specs List -->
-                            <div id="product-specs-desktop" class="text-[13px] font-['Roboto'] text-[#525252] leading-[21px]">
-                                Outer Diameter (OD) - 10 mm<br>
-                                Inner diameter(ID) - 5 mm<br>
-                                Free Length (L₀) - 44 mm<br>
-                                Wire Section (Thickness) - 1.5 mm (Rectangular)<br>
-                                Colour CodeRed (R) - Heavy Duty<br>
-                                Spring Constant (k) - 1.5 kgf/mm<br>
-                                Maximum Deflection (Δmax) - 15.1 mm
+                            <h3 class="font-poppins text-[18px] text-left mb-3 text-black">Features</h3>
+                            <div id="product-specs-desktop" class="w-full text-[13px] font-['Roboto'] text-[#525252]">
+                                <table class="w-full text-left border border-gray-400 shadow-sm rounded-md overflow-hidden" style="border-spacing: 0; border-collapse: separate;">
+                                    <tbody>
+                                        <tr class="bg-gray-50">
+                                            <th class="py-2 px-3 font-medium text-gray-700 w-1/2 border-b border-r border-gray-200">Outer Diameter (OD)</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">10 mm</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Inner diameter(ID)</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">5 mm</td>
+                                        </tr>
+                                        <tr class="bg-gray-50">
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Free Length (L₀)</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">44 mm</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Wire Section (Thickness)</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">1.5 mm (Rectangular)</td>
+                                        </tr>
+                                        <tr class="bg-gray-50">
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Colour Code</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">Red (R) - Heavy Duty</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Spring Constant (k)</th>
+                                            <td class="py-2 px-3 border-b border-gray-200">1.5 kgf/mm</td>
+                                        </tr>
+                                        <tr class="bg-gray-50">
+                                            <th class="py-2 px-3 font-medium text-gray-700 border-r border-gray-200">Maximum Deflection (Δmax)</th>
+                                            <td class="py-2 px-3">15.1 mm</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -528,6 +439,67 @@
                                 selected for applications involving moderate to heavy loads, short to medium stroke
                                 lengths, and repeated compression cycles.</p>
                         </div>
+
+                        <div id="product-details-desktop" class="hidden p-[28px] text-[#1E1E1E] text-[16px] font-semibold font-['Roboto'] leading-[19px]"><p class="mb-4">Product Details</p><p class="mb-4 font-normal"><strong>Material:</strong> High Carbon Steel<br><strong>Color:</strong> Red (Heavy Load)<br><strong>Outer Diameter:</strong> 10 mm<br><strong>Inner Diameter:</strong> 5 mm<br><strong>Free Length:</strong> 25 mm<br><strong>Load Capacity:</strong> 450 N<br><strong>Operating Temperature:</strong> -20°C to 120°C</p><p class="font-normal">These specifications ensure optimal performance and longevity under heavy industrial use. Always verify dimensions before installation.</p></div>
+                        <div id="product-reviews-desktop-content" class="hidden p-[28px] text-[#1E1E1E] text-[16px] font-semibold font-['Roboto'] leading-[19px]">
+    <div class="flex justify-between items-center mb-6">
+        <p class="text-xl">Customer Reviews</p>
+        <button id="write-review-btn-desktop" class="bg-[#F9C71D] text-black px-4 py-2 rounded font-bold hover:bg-yellow-500 transition">Write a Review</button>
+    </div>
+    
+    
+    <div class="flex items-center gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
+        <div class="text-4xl font-bold">4.5</div>
+        <div>
+            <div class="flex gap-1 mb-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+            <p class="text-sm text-gray-500 font-normal">Based on 124 customer reviews</p>
+        </div>
+    </div>
+
+    
+    <!-- Review Form (Hidden by default) -->
+    <div id="review-form-desktop" class="hidden bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
+        <p class="mb-4 text-lg">Write your review</p>
+        <div class="mb-4">
+            <label class="block text-sm font-normal text-gray-700 mb-1">Rating</label>
+            <div class="flex gap-1 text-2xl text-gray-300 cursor-pointer" id="star-rating-desktop">
+                <span class="hover:text-yellow-500" data-val="1">★</span>
+                <span class="hover:text-yellow-500" data-val="2">★</span>
+                <span class="hover:text-yellow-500" data-val="3">★</span>
+                <span class="hover:text-yellow-500" data-val="4">★</span>
+                <span class="hover:text-yellow-500" data-val="5">★</span>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-normal text-gray-700 mb-1">Your Review</label>
+            <textarea id="review-text-desktop" rows="3" class="w-full border border-gray-300 rounded p-2 font-normal text-sm" placeholder="What did you like or dislike?"></textarea>
+        </div>
+        <div class="flex gap-3">
+            <button id="submit-review-desktop" class="bg-black text-white px-5 py-2 rounded font-bold hover:bg-gray-800 transition">Post Review</button>
+            <button id="cancel-review-desktop" class="bg-white text-black border border-gray-300 px-5 py-2 rounded font-bold hover:bg-gray-100 transition">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Review List -->
+    <div id="reviews-list-desktop">
+        <div class="mb-6 border-b pb-4">
+            <div class="flex items-center mb-2">
+                <div class="flex gap-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+                <span class="ml-2 font-normal text-sm text-gray-500">by Rahul Sharma on Jan 12, 2026</span>
+            </div>
+            <p class="font-normal">Excellent quality springs. Used them for my press tool and they work flawlessly. Fast shipping too!</p>
+        </div>
+        <div class="mb-6 border-b pb-4">
+            <div class="flex items-center mb-2">
+                <div class="flex gap-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+                <span class="ml-2 font-normal text-sm text-gray-500">by Amit Verma on Dec 05, 2025</span>
+            </div>
+            <p class="font-normal">Good product, exactly as described. One star less because the packaging could have been better.</p>
+        </div>
+    </div>
+</div>
+                        <div id="product-faqs-desktop" class="hidden p-[28px] text-[#1E1E1E] text-[16px] font-semibold font-['Roboto'] leading-[19px]"><p class="mb-4">Frequently Asked Questions (FAQs)</p><div class="mb-4"><p class="font-bold text-sm mb-1">Q: What is the maximum compression length for this spring?</p><p class="font-normal text-sm">A: The maximum recommended deflection is 15.1 mm. Exceeding this may cause permanent deformation.</p></div><div class="mb-4"><p class="font-bold text-sm mb-1">Q: Can this be used in high-temperature environments?</p><p class="font-normal text-sm">A: It is rated up to 120°C. For higher temperatures, consider our heat-resistant series.</p></div><div><p class="font-bold text-sm mb-1">Q: Is bulk discount available?</p><p class="font-normal text-sm">A: Yes, we offer discounts for orders above 50 pieces. Please contact our sales team.</p></div></div>
+
                     </div>
 
                 </div>
@@ -656,14 +628,40 @@
             <div class="bg-white rounded-[10px] p-4 mb-4">
                 <h3 class="font-poppins text-[18px] text-center mb-2">Features</h3>
                 <hr class="border-gray-200 mb-4">
-                <p id="product-specs-mobile" class="text-[#525252] text-[15px] leading-relaxed">
-                    Outer Diameter (OD) - 10 mm<br>
-                    Inner diameter(ID) - 5 mm<br>
-                    Free Length (L₀) - 44 mm<br>
-                    Wire Section (Thickness) - 1.5 mm<br>
-                    Colour Code: Red (R) – Heavy Duty<br>
-                    Spring Constant (k) - 1.5 kgf/mm
-                </p>
+                <div id="product-specs-mobile" class="w-full text-[13px] font-['Roboto'] text-[#525252]">
+                    <table class="w-full text-left border border-gray-400 shadow-sm rounded-md overflow-hidden" style="border-spacing: 0; border-collapse: separate;">
+                        <tbody>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium text-gray-700 w-1/2 border-b border-r border-gray-200">Outer Diameter (OD)</th>
+                                <td class="py-2 px-3 border-b border-gray-200">10 mm</td>
+                            </tr>
+                            <tr>
+                                <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Inner diameter(ID)</th>
+                                <td class="py-2 px-3 border-b border-gray-200">5 mm</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Free Length (L₀)</th>
+                                <td class="py-2 px-3 border-b border-gray-200">44 mm</td>
+                            </tr>
+                            <tr>
+                                <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Wire Section (Thickness)</th>
+                                <td class="py-2 px-3 border-b border-gray-200">1.5 mm (Rectangular)</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Colour Code</th>
+                                <td class="py-2 px-3 border-b border-gray-200">Red (R) - Heavy Duty</td>
+                            </tr>
+                            <tr>
+                                <th class="py-2 px-3 font-medium text-gray-700 border-b border-r border-gray-200">Spring Constant (k)</th>
+                                <td class="py-2 px-3 border-b border-gray-200">1.5 kgf/mm</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <th class="py-2 px-3 font-medium text-gray-700 border-r border-gray-200">Maximum Deflection (Δmax)</th>
+                                <td class="py-2 px-3">15.1 mm</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Mobile Promo Banner -->
@@ -780,6 +778,63 @@
                     involving moderate to heavy loads, short to medium stroke lengths, and repeated compression cycles.
                 </p>
             </div>
+
+            <div id="product-details-mobile" class="hidden p-[16px] text-[#1E1E1E] text-[14px] font-normal font-['Roboto'] leading-[20px]"><p class="font-bold mb-2">Product Details</p><p class="mb-2"><strong>Material:</strong> High Carbon Steel<br><strong>Color:</strong> Red (Heavy Load)<br><strong>Outer Diameter:</strong> 10 mm<br><strong>Inner Diameter:</strong> 5 mm<br><strong>Free Length:</strong> 25 mm<br><strong>Load Capacity:</strong> 450 N</p><p>These specifications ensure optimal performance under heavy use.</p></div>
+            <div id="product-reviews-mobile" class="hidden p-[16px] text-[#1E1E1E] text-[14px] font-normal font-['Roboto'] leading-[20px]">
+    <div class="flex justify-between items-center mb-4">
+        <p class="font-bold text-lg">Customer Reviews</p>
+        <button id="write-review-btn-mobile" class="bg-[#F9C71D] text-black px-3 py-1.5 rounded text-xs font-bold shadow-sm">Write Review</button>
+    </div>
+    
+    
+    <div class="flex items-center gap-3 mb-5 bg-gray-50 p-3 rounded">
+        <div class="text-2xl font-bold">4.5</div>
+        <div>
+            <div class="flex gap-1 mb-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+            <p class="text-xs text-gray-500 font-normal">Based on 124 reviews</p>
+        </div>
+    </div>
+
+
+    <!-- Review Form Mobile -->
+    <div id="review-form-mobile" class="hidden bg-gray-50 p-4 rounded mb-6 border border-gray-200">
+        <p class="font-bold mb-3">Write your review</p>
+        <div class="mb-3">
+            <label class="block text-xs text-gray-600 mb-1">Rating</label>
+            <div class="flex gap-1 text-xl text-gray-300" id="star-rating-mobile">
+                <span class="active:text-yellow-500" data-val="1">★</span>
+                <span class="active:text-yellow-500" data-val="2">★</span>
+                <span class="active:text-yellow-500" data-val="3">★</span>
+                <span class="active:text-yellow-500" data-val="4">★</span>
+                <span class="active:text-yellow-500" data-val="5">★</span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="block text-xs text-gray-600 mb-1">Your Review</label>
+            <textarea id="review-text-mobile" rows="3" class="w-full border border-gray-300 rounded p-2 text-sm" placeholder="What did you like?"></textarea>
+        </div>
+        <div class="flex gap-2">
+            <button id="submit-review-mobile" class="bg-black text-white px-4 py-1.5 rounded text-xs font-bold">Post</button>
+            <button id="cancel-review-mobile" class="bg-white text-black border border-gray-300 px-4 py-1.5 rounded text-xs font-bold">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Review List Mobile -->
+    <div id="reviews-list-mobile">
+        <div class="mb-4 border-b pb-3">
+            <div class="flex gap-1 mb-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+            <span class="text-xs text-gray-500">Rahul S.</span>
+            <p class="mt-1 text-sm">Excellent quality springs. Work flawlessly!</p>
+        </div>
+        <div class="mb-4 border-b pb-3">
+            <div class="flex gap-1 mb-1"><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg><svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+            <span class="text-xs text-gray-500">Amit V.</span>
+            <p class="mt-1 text-sm">Good product, exactly as described.</p>
+        </div>
+    </div>
+</div>
+            <div id="product-faqs-mobile" class="hidden p-[16px] text-[#1E1E1E] text-[14px] font-normal font-['Roboto'] leading-[20px]"><p class="font-bold mb-2">FAQs</p><div class="mb-3"><p class="font-bold text-xs mb-1">Q: Max compression length?</p><p class="text-xs">A: Max deflection is 15.1 mm.</p></div><div class="mb-3"><p class="font-bold text-xs mb-1">Q: High-temp use?</p><p class="text-xs">A: Rated up to 120°C.</p></div><div><p class="font-bold text-xs mb-1">Q: Bulk discounts?</p><p class="text-xs">A: Yes, for 50+ pieces. Contact sales.</p></div></div>
+
 
             <!-- Mobile Promo Banner Placeholders -->
             <div
@@ -1464,7 +1519,7 @@
                 <div class="flex flex-col gap-4">
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
-                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="contact-us.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
                 </div>
 
@@ -1546,7 +1601,7 @@
                     <div class="flex flex-col gap-4 text-left">
                         <a href="index.html">Home</a>
                         <a href="#">About Us</a>
-                        <a href="#">Contact Us</a>
+                        <a href="contact-us.html">Contact Us</a>
                         <a href="#">Delivery & Shipping</a>
                     </div>
 
@@ -1595,8 +1650,7 @@
     </footer>
 
     <!-- Mobile Sticky Action Bar -->
-    <div
-        class="md:hidden fixed bottom-[65px] left-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-[100] flex flex-col gap-3 border-t border-gray-100">
+    <div id="mobile-sticky-action-bar" class="md:hidden fixed bottom-[65px] left-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-[100] flex flex-col gap-3 border-t border-gray-100 transition-transform duration-300">
         <!-- Row 1: Price and Quantity -->
         <div class="flex justify-between items-center">
             <!-- Price -->
@@ -1899,6 +1953,292 @@
     </script>
     <script src="assets/js/pricingEngine.js"></script>
     <script src="assets/js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Mobile Sticky Bottom Bar Scroll Logic
+    const stickyBar = document.getElementById('mobile-sticky-action-bar');
+    if (stickyBar) {
+        let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        let isScrolling;
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 50) {
+                // Scrolling down
+                stickyBar.style.transform = 'translateY(120%)';
+            } else {
+                // Scrolling up
+                stickyBar.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+
+            // Clear timeout throughout the scroll
+            window.clearTimeout(isScrolling);
+
+            // Set a timeout to run after scrolling ends
+            isScrolling = setTimeout(function() {
+                stickyBar.style.transform = 'translateY(0)';
+            }, 5000);
+        }, { passive: true });
+    }
+
+    // 2. Tab Logic (Desktop & Mobile) - Event Delegation
+    document.addEventListener('click', function(e) {
+        // Mobile Tabs
+        const mobileTab = e.target.closest('div.bg-\\[\\#8E8E8E\\] > div.cursor-pointer, .bg-\\[\\#8E8E8E\\] > div.cursor-pointer, div[class*="bg-[#8E8E8E]"] > div.cursor-pointer');
+        if (mobileTab && !mobileTab.classList.contains('absolute')) {
+            const text = (mobileTab.innerText || mobileTab.textContent || '').trim().toLowerCase();
+            let targetId = 'product-description-mobile';
+            if (text.indexOf('detail') !== -1) targetId = 'product-details-mobile';
+            if (text.indexOf('review') !== -1) targetId = 'product-reviews-mobile';
+            if (text.indexOf('faq') !== -1) targetId = 'product-faqs-mobile';
+            
+            ['product-description-mobile', 'product-details-mobile', 'product-reviews-mobile', 'product-faqs-mobile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+            });
+            
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) { targetEl.classList.remove('hidden'); targetEl.style.display = 'block'; }
+            
+            const container = mobileTab.parentElement;
+            if (container) {
+                Array.from(container.children).forEach(child => {
+                    if (child.tagName === 'DIV' && !child.classList.contains('absolute')) {
+                        child.classList.remove('border-b-[3px]', 'border-[#4C4949]');
+                        child.classList.add('opacity-70');
+                        const span = child.querySelector('span');
+                        if (span) { span.classList.remove('font-bold'); span.classList.add('font-normal'); }
+                    }
+                });
+            }
+            
+            mobileTab.classList.add('border-b-[3px]', 'border-[#4C4949]');
+            mobileTab.classList.remove('opacity-70');
+            const span = mobileTab.querySelector('span');
+            if (span) { span.classList.add('font-bold'); span.classList.remove('font-normal'); }
+        }
+
+        // Desktop Tabs
+        const desktopTabSpan = e.target.tagName === 'SPAN' ? e.target : (e.target.closest('span') || null);
+        if (desktopTabSpan) {
+            const container = desktopTabSpan.parentElement;
+            if (container && container.className && container.className.indexOf('bg-[#8E8E8E]') !== -1) {
+                const text = (desktopTabSpan.innerText || desktopTabSpan.textContent || '').trim().toLowerCase();
+                
+                if (text.indexOf('description') === -1 && text.indexOf('detail') === -1 && text.indexOf('review') === -1 && text.indexOf('faq') === -1) return;
+                
+                let targetId = 'product-description-desktop';
+                if (text.indexOf('detail') !== -1) targetId = 'product-details-desktop';
+                if (text.indexOf('review') !== -1) targetId = 'product-reviews-desktop-content';
+                if (text.indexOf('faq') !== -1) targetId = 'product-faqs-desktop';
+                
+                ['product-description-desktop', 'product-details-desktop', 'product-reviews-desktop-content', 'product-faqs-desktop'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+                });
+                
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) { targetEl.classList.remove('hidden'); targetEl.style.display = 'block'; }
+                
+                const activeIndicator = container.querySelector('.absolute');
+                
+                Array.from(container.children).forEach(child => {
+                    if (child.tagName === 'SPAN') {
+                        child.classList.remove('text-[#FFFFFF]', 'font-bold');
+                        child.classList.add('text-[#C0BEBE]', 'font-normal');
+                    }
+                });
+                
+                desktopTabSpan.classList.add('text-[#FFFFFF]', 'font-bold');
+                desktopTabSpan.classList.remove('text-[#C0BEBE]', 'font-normal');
+                if (activeIndicator) {
+                    activeIndicator.style.left = desktopTabSpan.offsetLeft + 'px';
+                    activeIndicator.style.width = desktopTabSpan.offsetWidth + 'px';
+                }
+            }
+        }
+    });
+
+    // 3. Review UI Logic (Desktop)
+    const writeBtnDesktop = document.getElementById('write-review-btn-desktop');
+    const formDesktop = document.getElementById('review-form-desktop');
+    const cancelBtnDesktop = document.getElementById('cancel-review-desktop');
+    const submitBtnDesktop = document.getElementById('submit-review-desktop');
+    const starRatingDesktop = document.getElementById('star-rating-desktop');
+    const reviewsListDesktop = document.getElementById('reviews-list-desktop');
+    let currentRatingDesktop = 5;
+
+    if (writeBtnDesktop && formDesktop) {
+        writeBtnDesktop.addEventListener('click', () => {
+            formDesktop.classList.remove('hidden');
+            writeBtnDesktop.style.display = 'none';
+        });
+        cancelBtnDesktop.addEventListener('click', () => {
+            formDesktop.classList.add('hidden');
+            writeBtnDesktop.style.display = 'inline-block';
+        });
+        
+        if (starRatingDesktop) {
+            const stars = starRatingDesktop.querySelectorAll('span');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    currentRatingDesktop = parseInt(this.getAttribute('data-val'));
+                    stars.forEach(s => {
+                        if (parseInt(s.getAttribute('data-val')) <= currentRatingDesktop) {
+                            s.classList.remove('text-gray-300');
+                            s.classList.add('text-yellow-500');
+                        } else {
+                            s.classList.add('text-gray-300');
+                            s.classList.remove('text-yellow-500');
+                        }
+                    });
+                });
+            });
+            // Initialize 5 stars
+            stars.forEach(s => {
+                s.classList.remove('text-gray-300');
+                s.classList.add('text-yellow-500');
+            });
+        }
+
+        submitBtnDesktop.addEventListener('click', () => {
+            const text = document.getElementById('review-text-desktop').value;
+            if (!text.trim()) return window.showSuccessPopup('Please enter a review');
+            
+            const svgStar = '<svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+            const svgStarEmpty = '<svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+            const starsHtml = '<div class="flex gap-1">' + Array(currentRatingDesktop).fill(svgStar).join('') + Array(5 - currentRatingDesktop).fill(svgStarEmpty).join('') + '</div>';
+            const newReview = document.createElement('div');
+            newReview.className = 'mb-6 border-b pb-4';
+            newReview.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <span class="text-yellow-500 text-lg">${starsHtml}</span>
+                    <span class="ml-2 font-normal text-sm text-gray-500">by You just now</span>
+                </div>
+                <p class="font-normal">${text}</p>
+            `;
+            reviewsListDesktop.prepend(newReview);
+            
+            document.getElementById('review-text-desktop').value = '';
+            formDesktop.classList.add('hidden');
+            writeBtnDesktop.style.display = 'inline-block';
+            window.showSuccessPopup('Review posted successfully!');
+        });
+    }
+
+    // 4. Review UI Logic (Mobile)
+    const writeBtnMobile = document.getElementById('write-review-btn-mobile');
+    const formMobile = document.getElementById('review-form-mobile');
+    const cancelBtnMobile = document.getElementById('cancel-review-mobile');
+    const submitBtnMobile = document.getElementById('submit-review-mobile');
+    const starRatingMobile = document.getElementById('star-rating-mobile');
+    const reviewsListMobile = document.getElementById('reviews-list-mobile');
+    let currentRatingMobile = 5;
+
+    if (writeBtnMobile && formMobile) {
+        writeBtnMobile.addEventListener('click', () => {
+            formMobile.classList.remove('hidden');
+            writeBtnMobile.style.display = 'none';
+        });
+        cancelBtnMobile.addEventListener('click', () => {
+            formMobile.classList.add('hidden');
+            writeBtnMobile.style.display = 'inline-block';
+        });
+        
+        if (starRatingMobile) {
+            const starsM = starRatingMobile.querySelectorAll('span');
+            starsM.forEach(star => {
+                star.addEventListener('click', function() {
+                    currentRatingMobile = parseInt(this.getAttribute('data-val'));
+                    starsM.forEach(s => {
+                        if (parseInt(s.getAttribute('data-val')) <= currentRatingMobile) {
+                            s.classList.remove('text-gray-300');
+                            s.classList.add('text-yellow-500');
+                        } else {
+                            s.classList.add('text-gray-300');
+                            s.classList.remove('text-yellow-500');
+                        }
+                    });
+                });
+            });
+            starsM.forEach(s => {
+                s.classList.remove('text-gray-300');
+                s.classList.add('text-yellow-500');
+            });
+        }
+
+        submitBtnMobile.addEventListener('click', () => {
+            const text = document.getElementById('review-text-mobile').value;
+            if (!text.trim()) return window.showSuccessPopup('Please enter a review');
+            
+            const svgStarM = '<svg class="w-4 h-4 text-yellow-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+            const svgStarEmptyM = '<svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>';
+            const starsHtml = '<div class="flex gap-1">' + Array(currentRatingMobile).fill(svgStarM).join('') + Array(5 - currentRatingMobile).fill(svgStarEmptyM).join('') + '</div>';
+            const newReview = document.createElement('div');
+            newReview.className = 'mb-4 border-b pb-3';
+            newReview.innerHTML = `
+                <span class="text-yellow-500 text-sm">${starsHtml}</span>
+                <span class="ml-2 text-xs text-gray-500">You</span>
+                <p class="mt-1 text-sm">${text}</p>
+            `;
+            reviewsListMobile.prepend(newReview);
+            
+            document.getElementById('review-text-mobile').value = '';
+            formMobile.classList.add('hidden');
+            writeBtnMobile.style.display = 'inline-block';
+            window.showSuccessPopup('Review posted successfully!');
+        });
+    }
+    });
+</script>
+
+<!-- Custom Success Popup -->
+<div id="custom-success-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden transition-opacity duration-300">
+    <div class="bg-white rounded-[10px] p-[24px] flex flex-col items-center justify-center w-[300px] shadow-lg transform transition-transform duration-300 scale-95">
+        <div class="w-[50px] h-[50px] rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <p class="text-[18px] font-bold font-['Roboto'] text-[#1E1E1E] mb-2">Success</p>
+        <p class="text-[14px] font-normal font-['Roboto'] text-[#666666] text-center mb-6" id="custom-popup-message">Action completed successfully.</p>
+        <button id="close-custom-popup" class="w-full bg-[#F9C71D] text-black font-bold font-['Roboto'] py-[10px] rounded-[5px] hover:bg-yellow-500 transition">OK</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const popup = document.getElementById('custom-success-popup');
+    const closeBtn = document.getElementById('close-custom-popup');
+    if (popup && closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            popup.classList.add('hidden');
+        });
+    }
+    
+    // Global function to show popup easily
+    window.showSuccessPopup = function(msg) {
+        const p = document.getElementById('custom-success-popup');
+        const m = document.getElementById('custom-popup-message');
+        if (p && m) {
+            m.innerText = msg;
+            p.classList.remove('hidden');
+            const inner = p.querySelector('div.bg-white');
+            if (inner) {
+                inner.classList.remove('scale-95');
+                inner.classList.add('scale-100');
+            }
+        }
+    };
+    // 5. Desktop visibility for Related Products & Knowledge Section
+    // Move them outside of the mobile-only wrapper (md:hidden) so they show everywhere
+    const mainContent = document.querySelector('main');
+    const sectionsToMove = document.querySelectorAll('.featured-offers-section, .knowledge-section');
+    if (mainContent) {
+        sectionsToMove.forEach(sec => {
+            mainContent.appendChild(sec);
+        });
+    }
+});
+</script>
 </body>
 </html>
-

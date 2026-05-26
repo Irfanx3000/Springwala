@@ -232,17 +232,24 @@
             const itemsSection = document.getElementById('items-section');
             if (tracking.items && tracking.items.length > 0) {
                 itemsSection.classList.remove('hidden');
-                itemsList.innerHTML = tracking.items.map(item => `
-                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                        <div class="w-12 h-12 bg-white rounded border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                            <img src="${imageUrl(item.product?.images?.[0] || item.image)}" class="max-w-full max-h-full object-contain" alt="">
+                itemsList.innerHTML = tracking.items.map(item => {
+                    const slug = item.product?.slug;
+                    const id = item.product?._id || item.product || item.productId;
+                    const link = slug ? `product.html?slug=${slug}` : (id ? `product.html?id=${id}` : '#');
+                    return `
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                            <a href="${link}" class="w-12 h-12 bg-white rounded border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-80 transition-opacity">
+                                <img src="${imageUrl(item.product?.images?.[0] || item.image)}" class="max-w-full max-h-full object-contain" alt="">
+                            </a>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-gray-800 truncate">
+                                    <a href="${link}" class="hover:text-red-600 hover:underline transition-colors">${item.name || item.product?.name}</a>
+                                </p>
+                                <p class="text-xs text-gray-500">Qty: ${item.quantity} • ₹${(item.finalPrice || item.price).toLocaleString()}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold text-gray-800 truncate">${item.name || item.product?.name}</p>
-                            <p class="text-xs text-gray-500">Qty: ${item.quantity} • ₹${(item.finalPrice || item.price).toLocaleString()}</p>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             // ─── Render Status History (Timeline Source) ───

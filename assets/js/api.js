@@ -273,11 +273,24 @@ function initGlobalSearch() {
       resultsDiv.classList.remove('hidden');
       overlay.style.display = 'block';
 
-      const data = await api.get('/search', { q: query });
+      const data = await api.get('/search/admin', { q: query });
       if (!data || !data.success) throw new Error('Search failed');
 
-      const { products, orders, customers } = data.results;
+      const { products, orders, customers, categories } = data.results;
       let html = '';
+
+      if (categories && categories.length) {
+        html += `<div class="search-section-title">Categories</div>`;
+        html += categories.map(cat => `
+          <div class="search-item" onclick="window.location.href='${resolveAdminPath('categories.html?search=' + encodeURIComponent(cat.name))}'">
+            <img src="${imageUrl(cat.banner)}" alt="">
+            <div class="info">
+              <span class="name">${cat.name}</span>
+              <span class="meta">Category</span>
+            </div>
+          </div>
+        `).join('');
+      }
 
       if (products.length) {
         html += `<div class="search-section-title">Products</div>`;

@@ -1010,7 +1010,7 @@ exports.trackOrder = async (req, res) => {
         { _id: identifier.match(/^[0-9a-fA-F]{24}$/) ? identifier : null }
       ]
     })
-    .populate('items.product', 'name images')
+    .populate('items.product', 'name images slug')
     .select('trackingNumber orderNumber orderStatus customerName createdAt updatedAt courier statusHistory items');
 
     if (!order) {

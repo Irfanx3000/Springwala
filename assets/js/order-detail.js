@@ -81,18 +81,27 @@ async function loadOrderDetail(orderId) {
     // Items
     const itemsTbody = document.getElementById('detail-items-tbody');
     if (itemsTbody) {
-      itemsTbody.innerHTML = order.items.map(item => `
-        <tr class="border-b border-gray-100">
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-3">
-              ${item.product?.images?.[0] ? `<img src="${imageUrl(item.product.images[0])}" class="w-10 h-10 rounded object-cover" alt="${item.name}">` : '<div class="w-10 h-10 bg-gray-100 rounded"></div>'}
-              <span class="font-['Roboto'] text-[15px]">${item.name}${item.variant ? ` <span class="text-gray-400">(${item.variant.name}: ${item.variant.value})</span>` : ''}</span>
-            </div>
-          </td>
-          <td class="px-4 py-3 text-center">${formatCurrency(item.discountedPrice || item.price)}</td>
-          <td class="px-4 py-3 text-center">${item.quantity}</td>
-          <td class="px-4 py-3 text-right">${formatCurrency((item.discountedPrice || item.price) * item.quantity)}</td>
-        </tr>`).join('');
+      itemsTbody.innerHTML = order.items.map(item => {
+        const productId = item.product?._id || item.product || item.productId;
+        const editLink = productId ? `../products/add-product.html?id=${productId}` : '#';
+        return `
+          <tr class="border-b border-gray-100">
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                <a href="${editLink}" class="block hover:opacity-80 transition-opacity shrink-0">
+                  ${item.product?.images?.[0] ? `<img src="${imageUrl(item.product.images[0])}" class="w-10 h-10 rounded object-cover" alt="${item.name}">` : '<div class="w-10 h-10 bg-gray-100 rounded"></div>'}
+                </a>
+                <span class="font-['Roboto'] text-[15px]">
+                  <a href="${editLink}" class="hover:text-red-600 hover:underline transition-colors font-medium">${item.name}</a>
+                  ${item.variant ? ` <span class="text-gray-400">(${item.variant.name}: ${item.variant.value})</span>` : ''}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center">${formatCurrency(item.discountedPrice || item.price)}</td>
+            <td class="px-4 py-3 text-center">${item.quantity}</td>
+            <td class="px-4 py-3 text-right">${formatCurrency((item.discountedPrice || item.price) * item.quantity)}</td>
+          </tr>`;
+      }).join('');
     }
 
     // Pre-fill update form (ORDER-SYNC: Autofill Tracking Reference)

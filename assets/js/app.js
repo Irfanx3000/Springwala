@@ -306,7 +306,7 @@ const Cart = {
   },
 
   // Add item
-  async add(productId, name, image, finalPrice, quantity = 1, batchQuantity = 1) {
+  async add(productId, name, image, finalPrice, quantity = 1, batchQuantity = 1, slug = '') {
     const unitPrice = Number(finalPrice);
     if (!Auth.isLoggedIn()) {
       const items = Cart.getGuestCart();
@@ -323,6 +323,7 @@ const Cart = {
           finalPrice: unitPrice,
           nameSnapshot: name,
           imageSnapshot: image,
+          productSlug: slug || '',
         });
       }
       Cart.saveGuestCart(items);
@@ -587,7 +588,8 @@ async function loadCartCount() {
           batchQuantity: Number(item.batchQuantity) || 1,
           selectedBatch: item.selectedBatch || null,
           pricingSnapshot: item.pricingSnapshot || null,
-          productSnapshot: item.productSnapshot || null
+          productSnapshot: item.productSnapshot || null,
+          productSlug: item.product?.slug || item.productSlug || ''
         };
       });
 
@@ -924,7 +926,7 @@ function buildProductCard(p, className = '', showRemove = false) {
     const discount = Number(pricing?.discount || 0);
 
     const img = productImg(p);
-    const link = `product.html?id=${p._id}`;
+    const link = p.slug ? `product.html?slug=${p.slug}` : `product.html?id=${p._id}`;
     const isOutOfStock = Number(p.stock || 0) <= 0;
     const isInWishlist = Wishlist.items.includes(String(p._id));
     const catSlug = p.category?.name ? p.category.name.toLowerCase().replace(/\s+/g, '-') : '';
@@ -956,7 +958,7 @@ function buildProductCard(p, className = '', showRemove = false) {
         <button class="fo-cart-btn !bg-gray-400 cursor-not-allowed" disabled>
           Out of Stock
         </button>` : `
-        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${productName}','${img}',${finalPrice},${isBatch ? pricing.unitsPerPack : 1},this)">
+        <button class="fo-cart-btn" onclick="addToCartFromCard('${p._id}','${productName}','${img}',${finalPrice},${isBatch ? pricing.unitsPerPack : 1},'${p.slug || ''}',this)">
           Add to Cart <img src="assets/icons/mobile/addtocart.svg" alt="Cart" class="w-4 h-4 ml-2">
         </button>`}
         ${showRemove ? `
@@ -972,8 +974,8 @@ function buildProductCard(p, className = '', showRemove = false) {
   }
 }
 
-function addToCartFromCard(productId, name, image, finalPrice, batchQuantity = 1, btn) {
-  Cart.add(productId, name, image, finalPrice, 1, batchQuantity);
+function addToCartFromCard(productId, name, image, finalPrice, batchQuantity = 1, slug = '', btn) {
+  Cart.add(productId, name, image, finalPrice, 1, batchQuantity, slug);
 
   if (btn) {
     const orig = btn.innerHTML;
@@ -1049,78 +1051,527 @@ function updateHeaderUser(user) {
   if (profileEmail) profileEmail.textContent = user.email || user.phoneNumber || '';
 }
 
-// ─── Location (Centralized) ───────────────────────────────────────────────────
-function initLocation() {
-  const stored = localStorage.getItem('userLocation');
-  if (stored) {
-    try {
-      const location = JSON.parse(stored);
-      updateNavbarLocation(location);
-    } catch (e) {
-      // Fallback for old string format
-      document.querySelectorAll('.location-display, #location-text, .desktop-location-text').forEach(el => el.textContent = stored);
-    }
-  }
-}
+// ─── Location (Centralized Location Intelligence System) ───────────────────────
+const LocationManager = {
+  STALE_TIME_MS: 30 * 60 * 1000, // 30 minutes
+  SIGNIFICANT_MOVE_KM: 5, // 5 km
+  SLIDER_LIMIT: 100000,
 
-function updateNavbarLocation(location) {
-  if (!location) return;
-  const text = `${location.state}, ${location.country}`;
-  document.querySelectorAll('.location-display, #location-text, .desktop-location-text, .nav-location').forEach(el => {
-    el.textContent = text;
-  });
-}
+  init: function() {
+    console.log('[LOCATION-SYNC] Centralized Location Intelligence System initializing...');
+    this.injectPrompts();
+    this.loadSavedLocation();
+    this.checkLocationLifecycle();
+    this.setupListeners();
+  },
 
-/**
- * Triggered ONLY on Profile Page
- */
-/**
- * Triggered ONLY on Profile Page
- */
-async function requestLocationPermission() {
-  if (!navigator.geolocation) {
-    console.warn("Geolocation is not supported by this browser.");
-    return;
-  }
+  injectPrompts: function() {
+    if (document.getElementById('location-soft-prompt')) return;
 
-  navigator.geolocation.getCurrentPosition(
-    handleLocationSuccess,
-    handleLocationError
-  );
-}
+    // Soft Pre-Permission UI Modal
+    const softPromptHtml = `
+      <div id="location-soft-prompt" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col items-center text-center">
+          <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2 font-['Poppins']">Enable Location Access</h3>
+          <p class="text-sm text-gray-600 mb-6 font-['Roboto'] leading-relaxed">
+            Allow location access to view accurate delivery dates, check item availability in your nearest warehouse, and get precise shipping rates.
+          </p>
+          <div class="flex flex-col gap-2 w-full">
+            <button id="loc-btn-allow" class="w-full bg-[#BE2229] hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform active:scale-95 text-sm">
+              Allow Location Access
+            </button>
+            <button id="loc-btn-manual" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-colors text-sm">
+              Enter Pincode Manually
+            </button>
+            <button id="loc-btn-cancel" class="w-full text-gray-400 hover:text-gray-500 font-semibold py-2 text-xs transition-colors">
+              Not Now
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', softPromptHtml);
 
-async function handleLocationSuccess(position) {
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
+    // Manual Pincode Input Modal
+    const manualPincodeHtml = `
+      <div id="pincode-manual-prompt" class="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+          <h3 class="text-lg font-bold text-gray-900 mb-2 font-['Poppins']">Enter Delivery Pincode</h3>
+          <p class="text-sm text-gray-600 mb-4 font-['Roboto']">
+            Please enter your 6-digit Indian PIN code to check shipping serviceability and delivery speeds.
+          </p>
+          <input type="tel" id="loc-pincode-input" maxlength="6" placeholder="e.g. 400001" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-widest focus:outline-none focus:border-[#BE2229] mb-4">
+          <div class="flex gap-3">
+            <button id="loc-pincode-cancel" class="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl transition-colors text-sm">
+              Cancel
+            </button>
+            <button id="loc-pincode-submit" class="flex-1 bg-[#BE2229] hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition-transform active:scale-95 text-sm">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', manualPincodeHtml);
 
-  try {
-    const res = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
-    );
-
-    const data = await res.json();
-    console.log("Geo Data:", data);
-
-    const location = {
-      country: data.countryName || "",
-      state: data.principalSubdivision || ""
+    // Bind Button Events
+    document.getElementById('loc-btn-allow').onclick = () => {
+      this.toggleSoftPrompt(false);
+      this.requestSystemLocation();
+    };
+    document.getElementById('loc-btn-manual').onclick = () => {
+      this.toggleSoftPrompt(false);
+      this.toggleManualPincodePrompt(true);
+    };
+    document.getElementById('loc-btn-cancel').onclick = () => {
+      this.toggleSoftPrompt(false);
+      this.savePermissionState('denied');
+      this.triggerIPFallback();
     };
 
-    // Update navbar and storage
-    localStorage.setItem('userLocation', JSON.stringify(location));
-    updateNavbarLocation(location);
+    document.getElementById('loc-pincode-cancel').onclick = () => {
+      this.toggleManualPincodePrompt(false);
+    };
+    document.getElementById('loc-pincode-submit').onclick = async () => {
+      const pin = document.getElementById('loc-pincode-input').value.trim();
+      if (/^\d{6}$/.test(pin)) {
+        this.toggleManualPincodePrompt(false);
+        await this.handlePincodeSubmit(pin);
+      } else {
+        showToast('Please enter a valid 6-digit PIN code.', 'error');
+      }
+    };
+  },
 
-    // If we are on profile page, also fill the fields
-    if (typeof fillProfileLocationFields === 'function') {
-      fillProfileLocationFields(location);
+  toggleSoftPrompt: function(show) {
+    const el = document.getElementById('location-soft-prompt');
+    if (!el) return;
+    const content = el.firstElementChild;
+    if (show) {
+      el.classList.remove('hidden');
+      el.offsetHeight; // force layout
+      el.classList.add('opacity-100');
+      content.classList.remove('scale-95');
+      content.classList.add('scale-100');
+    } else {
+      el.classList.remove('opacity-100');
+      content.classList.remove('scale-100');
+      content.classList.add('scale-95');
+      setTimeout(() => el.classList.add('hidden'), 300);
     }
-  } catch (err) {
-    console.error("Location fetch failed:", err);
-  }
-}
+  },
 
-function handleLocationError(error) {
-  console.warn("Location permission denied or failed:", error.message);
+  toggleManualPincodePrompt: function(show) {
+    const el = document.getElementById('pincode-manual-prompt');
+    if (!el) return;
+    const content = el.firstElementChild;
+    if (show) {
+      el.classList.remove('hidden');
+      el.offsetHeight; // force layout
+      el.classList.add('opacity-100');
+      content.classList.remove('scale-95');
+      content.classList.add('scale-100');
+      const input = document.getElementById('loc-pincode-input');
+      if (input) { input.value = ''; input.focus(); }
+    } else {
+      el.classList.remove('opacity-100');
+      content.classList.remove('scale-100');
+      content.classList.add('scale-95');
+      setTimeout(() => el.classList.add('hidden'), 300);
+    }
+  },
+
+  loadSavedLocation: function() {
+    const stored = localStorage.getItem('userLocation');
+    if (stored) {
+      try {
+        const location = JSON.parse(stored);
+        this.updateNavbarLocation(location);
+      } catch (e) {
+        document.querySelectorAll('.location-display, #location-text, .desktop-location-text, .nav-location, .navbar-location-text').forEach(el => el.textContent = stored);
+      }
+    }
+  },
+
+  updateNavbarLocation: function(location) {
+    if (!location) return;
+    
+    let city = (location.city || '').trim();
+    let state = (location.state || '').trim();
+    
+    // Fallback: If city is missing, fallback to nearest valid locality
+    if (!city) {
+      city = (location.district || location.locality || '').trim();
+    }
+    
+    // Clean string literals "undefined" or "null"
+    if (city.toLowerCase() === 'undefined' || city.toLowerCase() === 'null') city = '';
+    if (state.toLowerCase() === 'undefined' || state.toLowerCase() === 'null') state = '';
+    
+    let text = '';
+    if (city && state) {
+      text = `${city}, ${state}`;
+    } else if (city) {
+      text = city;
+    } else if (state) {
+      text = state;
+    } else {
+      text = location.pincode || location.formattedAddress || 'Select Location';
+    }
+    
+    document.querySelectorAll('.location-display, #location-text, .desktop-location-text, .nav-location, .navbar-location-text').forEach(el => {
+      el.textContent = text;
+      el.setAttribute('title', text);
+    });
+  },
+
+  getPermissionState: function() {
+    return localStorage.getItem('locationPermissionState') || 'prompt';
+  },
+
+  savePermissionState: function(state) {
+    localStorage.setItem('locationPermissionState', state);
+  },
+
+  requestSystemLocation: function() {
+    if (!navigator.geolocation) {
+      console.warn("Geolocation is not supported by this browser.");
+      this.triggerIPFallback();
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => this.handleSuccess(pos),
+      (err) => this.handleError(err),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  },
+
+  handleSuccess: async function(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    this.savePermissionState('granted');
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: {
+          'Accept-Language': 'en',
+          'User-Agent': 'SpringwalaEcommerce/1.0'
+        }
+      });
+      const data = await res.json();
+      
+      const addr = data.address || {};
+      const country = addr.country || '';
+      
+      // State extraction priority: state -> region
+      const state = addr.state || 
+                    addr.region || 
+                    addr.administrative_area_level_1 || 
+                    '';
+      
+      // City extraction priority: city -> town -> village -> municipality
+      let city = addr.city || 
+                 addr.town || 
+                 addr.village || 
+                 addr.municipality || 
+                 '';
+                 
+      // If city is missing, fallback to nearest valid locality
+      if (!city) {
+        city = addr.suburb || 
+               addr.neighbourhood || 
+               addr.locality || 
+               addr.county || 
+               addr.district || 
+               addr.state_district || 
+               '';
+      }
+                   
+      const district = addr.county || addr.district || addr.state_district || '';
+      const pincode = addr.postcode || '';
+      const formattedAddress = data.display_name || '';
+
+      const freshLocation = {
+        latitude: lat,
+        longitude: lng,
+        country,
+        state,
+        city,
+        district,
+        pincode,
+        formattedAddress,
+        lastUpdated: Date.now(),
+        permissionState: 'granted'
+      };
+
+      const cached = this.getLocation();
+      if (!cached || this.isLocationDifferent(cached, freshLocation)) {
+        console.log('[LOCATION-SYNC] Geolocation changed. Saving and updating UI:', freshLocation);
+        this.saveLocation(freshLocation);
+      } else {
+        console.log('[LOCATION-SYNC] Geolocation has not changed. Preserving cache.');
+        localStorage.setItem('userLocation', JSON.stringify({ ...cached, lastUpdated: Date.now() }));
+      }
+    } catch (err) {
+      console.error("Reverse geocoding failed, fallback to previous cached location:", err);
+      const cached = this.getLocation();
+      if (cached && (cached.city || cached.state || cached.pincode)) {
+        cached.latitude = lat;
+        cached.longitude = lng;
+        cached.lastUpdated = Date.now();
+        cached.permissionState = 'granted';
+        this.saveLocation(cached);
+      } else {
+        this.saveLocation({
+          latitude: lat,
+          longitude: lng,
+          country: '',
+          state: '',
+          city: '',
+          district: '',
+          pincode: '',
+          formattedAddress: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          lastUpdated: Date.now(),
+          permissionState: 'granted'
+        });
+      }
+    }
+  },
+
+  handleError: function(err) {
+    console.warn("System location denied or failed:", err.message);
+    if (err.code === err.PERMISSION_DENIED) {
+      this.savePermissionState('denied');
+      this.triggerIPFallback();
+    } else {
+      // Temporary GPS error (timeout, position unavailable)
+      // Attempt to load from cache first
+      const cached = this.getLocation();
+      if (cached && (cached.city || cached.state || cached.pincode)) {
+        console.log('[LOCATION-SYNC] Temporary geolocation error. Keeping cached location.');
+        this.updateNavbarLocation(cached);
+      } else {
+        this.triggerIPFallback();
+      }
+    }
+  },
+
+  handlePincodeSubmit: async function(pincode) {
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await res.json();
+      
+      let city = '', state = '', country = 'India';
+      if (data && data[0] && data[0].Status === 'Success') {
+        const postOffice = data[0].PostOffice[0];
+        city = postOffice.District || postOffice.Block || postOffice.Name;
+        state = postOffice.State;
+      }
+
+      const location = {
+        latitude: null,
+        longitude: null,
+        country: country,
+        state: state,
+        city: city,
+        district: city,
+        pincode: pincode,
+        formattedAddress: `${city || ''}, ${state || ''}, ${country}`.trim().replace(/^,\s*/, ''),
+        lastUpdated: Date.now(),
+        permissionState: 'manual'
+      };
+
+      this.saveLocation(location);
+      this.savePermissionState('manual');
+      showToast(`Location set to ${city || pincode}`, 'success');
+    } catch (err) {
+      console.error("Pincode lookup failed, saving basic entry:", err);
+      this.saveLocation({
+        latitude: null,
+        longitude: null,
+        country: 'India',
+        state: '',
+        city: '',
+        district: '',
+        pincode: pincode,
+        formattedAddress: `PIN: ${pincode}, India`,
+        lastUpdated: Date.now(),
+        permissionState: 'manual'
+      });
+    }
+  },
+
+  triggerIPFallback: async function() {
+    console.log('[LOCATION-SYNC] Triggering IP Geolocation fallback...');
+    const stored = this.getLocation();
+    if (stored && stored.pincode) {
+      console.log('[LOCATION-SYNC] Preserving existing manual pincode location');
+      return;
+    }
+    
+    try {
+      const res = await fetch('https://freeipapi.com/api/json');
+      const data = await res.json();
+      
+      const location = {
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        country: data.countryName || '',
+        state: data.regionName || '',
+        city: data.cityName || '',
+        district: '',
+        pincode: data.zipCode || '',
+        formattedAddress: `${data.cityName || ''}, ${data.regionName || ''}, ${data.countryName || ''}`.trim().replace(/^,\s*/, ''),
+        lastUpdated: Date.now(),
+        permissionState: 'ip'
+      };
+
+      const cached = this.getLocation();
+      if (!cached || this.isLocationDifferent(cached, location)) {
+        this.saveLocation(location);
+      }
+    } catch (err) {
+      console.warn("IP Geolocation fallback failed:", err.message);
+    }
+  },
+
+  isLocationDifferent: function(loc1, loc2) {
+    if (!loc1 || !loc2) return true;
+    return (loc1.city || '').trim().toLowerCase() !== (loc2.city || '').trim().toLowerCase() ||
+           (loc1.state || '').trim().toLowerCase() !== (loc2.state || '').trim().toLowerCase() ||
+           (loc1.country || '').trim().toLowerCase() !== (loc2.country || '').trim().toLowerCase() ||
+           (loc1.pincode || '').trim().toLowerCase() !== (loc2.pincode || '').trim().toLowerCase() ||
+           Math.abs((loc1.latitude || 0) - (loc2.latitude || 0)) > 0.001 ||
+           Math.abs((loc1.longitude || 0) - (loc2.longitude || 0)) > 0.001;
+  },
+
+  getLocation: function() {
+    const stored = localStorage.getItem('userLocation');
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
+  },
+
+  saveLocation: function(loc) {
+    localStorage.setItem('userLocation', JSON.stringify(loc));
+    this.updateNavbarLocation(loc);
+    
+    if (typeof fillProfileLocationFields === 'function') {
+      fillProfileLocationFields(loc);
+    }
+
+    this.dispatchLocationChange(loc);
+  },
+
+  dispatchLocationChange: function(loc) {
+    const event = new CustomEvent('locationChanged', { detail: loc });
+    window.dispatchEvent(event);
+  },
+
+  checkLocationLifecycle: async function() {
+    let permission = this.getPermissionState();
+    
+    if (navigator.permissions && navigator.permissions.query) {
+      try {
+        const result = await navigator.permissions.query({ name: 'geolocation' });
+        permission = result.state;
+        this.savePermissionState(permission);
+        
+        result.onchange = () => {
+          this.savePermissionState(result.state);
+          if (result.state === 'granted') {
+            this.requestSystemLocation();
+          } else if (result.state === 'denied') {
+            this.triggerIPFallback();
+          }
+        };
+      } catch (e) {
+        console.warn('[LOCATION-SYNC] navigator.permissions.query failed:', e);
+      }
+    }
+
+    if (permission === 'granted') {
+      console.log('[LOCATION-SYNC] Geolocation permission is granted. Fetching fresh location...');
+      this.requestSystemLocation();
+    } else if (permission === 'prompt') {
+      console.log('[LOCATION-SYNC] Geolocation permission prompt required.');
+      setTimeout(() => this.toggleSoftPrompt(true), 2000);
+    } else {
+      console.log('[LOCATION-SYNC] Geolocation permission is denied/manual. Using fallback.');
+      if (permission === 'denied') {
+        this.triggerIPFallback();
+      }
+    }
+  },
+
+  checkFreshness: function(loc) {
+    // Always request system location on focus/visibility change if permission is granted
+    if (this.getPermissionState() === 'granted') {
+      this.requestSystemLocation();
+    }
+  },
+
+  getDistance: function(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  },
+
+  setupListeners: function() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const loc = this.getLocation();
+        if (loc) this.checkFreshness(loc);
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      const loc = this.getLocation();
+      if (loc) this.checkFreshness(loc);
+    });
+
+    // Global click handler to trigger location entry modal when any location indicator is clicked
+    document.addEventListener('click', (e) => {
+      const locTarget = e.target.closest('#location-btn, .navbar-location-text, .desktop-location-text, .location-display, .nav-location');
+      if (locTarget) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSoftPrompt(true);
+      }
+    });
+
+    // Recalculate summary / totals dynamically when locationChanged is received
+    window.addEventListener('locationChanged', () => {
+      if (typeof initCheckoutPage === 'function' && document.body.dataset.page === 'checkout') {
+        console.log('[LOCATION-SYNC] Location changed, reloading checkout summary...');
+        initCheckoutPage();
+      }
+      if (typeof renderCart === 'function' && document.body.dataset.page === 'cart') {
+        console.log('[LOCATION-SYNC] Location changed, rendering cart...');
+        renderCart();
+      }
+    });
+  }
+};
+
+function initLocation() {
+  LocationManager.init();
 }
 
 // ─── Mobile Menu ──────────────────────────────────────────────────────────────
@@ -1574,23 +2025,42 @@ async function loadCategoriesSection() {
 // ─── Page: allproducts.html ───────────────────────────────────────────────────
 async function initAllProductsPage() {
   const params = new URLSearchParams(window.location.search);
+  const SLIDER_LIMIT = 100000;
 
   // 1. STATE MANAGEMENT
   const state = {
     products: [],
-    filteredProducts: [],
     allCategories: [],
-    currentPage: 1,
+    currentPage: Number(params.get('page')) || 1,
     itemsPerPage: 20,
+    totalProducts: 0,
     filters: {
       search: params.get('search') || '',
       category: params.get('category') || '',
       subcategory: params.get('subcategory') || '',
-      priceMin: 0,
-      priceMax: 100000,
-      inStockOnly: false
+      priceMin: Number(params.get('priceMin')) || 0,
+      priceMax: Number(params.get('priceMax')) || SLIDER_LIMIT,
+      inStockOnly: params.get('inStockOnly') === 'true',
+      sortBy: params.get('sortBy') || 'newest'
     }
   };
+
+  // 13 Sort Options
+  const sortOptions = [
+    { key: 'featured', label: 'Featured' },
+    { key: 'best_sellers', label: 'Best Sellers' },
+    { key: 'newly_added', label: 'Newly Added' },
+    { key: 'price_asc', label: 'Price: Low to High' },
+    { key: 'price_desc', label: 'Price: High to Low' },
+    { key: 'popular', label: 'Most Popular' },
+    { key: 'top_rated', label: 'Top Rated' },
+    { key: 'limited_stock', label: 'Limited Stock' },
+    { key: 'discounted', label: 'Discounted Products' },
+    { key: 'trending', label: 'Trending Products' },
+    { key: 'recommended', label: 'Recommended' },
+    { key: 'alphabetical_asc', label: 'Alphabetical A-Z' },
+    { key: 'alphabetical_desc', label: 'Alphabetical Z-A' }
+  ];
 
   // 2. UI ELEMENTS
   const grid = document.getElementById('product-grid');
@@ -1609,26 +2079,26 @@ async function initAllProductsPage() {
   const labelMin = document.getElementById('label-min');
   const labelMax = document.getElementById('label-max');
 
-  const SLIDER_LIMIT = 100000;
-
   // 3. CORE LOGIC
   async function init() {
     try {
-      console.log("[AllProducts] Initializing...");
+      console.log("[AllProducts] Initializing dynamic sorting & filtering...");
       if (grid) grid.innerHTML = '<div class="col-span-2 lg:col-span-5 flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#BE2229]"></div></div>';
 
-      const [catData, prodData] = await Promise.all([
-        apiCall('/user/categories').catch(() => ({ categories: [] })),
-        apiCall('/user/products?limit=1000').catch(() => ({ products: [] }))
-      ]);
-
+      const catData = await apiCall('/user/categories').catch(() => ({ categories: [] }));
       state.allCategories = catData.categories || [];
-      state.products = prodData.products || [];
 
-      console.log(`[AllProducts] Loaded ${state.products.length} products`);
+      // Initialize UI controls from state
+      const availabilityCheckbox = document.querySelector('.filter-availability');
+      if (availabilityCheckbox) {
+        availabilityCheckbox.checked = state.filters.inStockOnly;
+      }
 
       renderCategories();
-      applyFilters();
+      initSortUI();
+      updatePriceUI();
+      await fetchAndRender();
+      updateBreadcrumb();
       setupEventListeners();
     } catch (err) {
       console.error("[AllProducts] Init Error:", err);
@@ -1636,52 +2106,75 @@ async function initAllProductsPage() {
     }
   }
 
+  async function fetchAndRender() {
+    if (grid) {
+      grid.innerHTML = '<div class="col-span-2 lg:col-span-5 flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#BE2229]"></div></div>';
+    }
+
+    try {
+      const q = new URLSearchParams();
+      q.set('page', state.currentPage);
+      q.set('limit', state.itemsPerPage);
+
+      if (state.filters.category) q.set('category', state.filters.category);
+      if (state.filters.subcategory) q.set('subcategory', state.filters.subcategory);
+      if (state.filters.search) q.set('search', state.filters.search);
+      
+      // Price filters
+      if (state.filters.priceMin > 0) q.set('priceMin', state.filters.priceMin);
+      if (state.filters.priceMax < SLIDER_LIMIT) q.set('priceMax', state.filters.priceMax);
+      if (state.filters.inStockOnly) q.set('inStockOnly', 'true');
+      
+      // Sort strategy
+      if (state.filters.sortBy) q.set('sortBy', state.filters.sortBy);
+
+      console.log(`[AllProducts] Fetching page ${state.currentPage} with query:`, q.toString());
+      const res = await apiCall(`/user/products?${q.toString()}`);
+      
+      state.products = res.products || [];
+      state.totalProducts = res.total || 0;
+
+      renderProducts();
+      updatePaginationUI();
+    } catch (err) {
+      console.error("[AllProducts] Fetch Error:", err);
+      if (grid) grid.innerHTML = '<div class="col-span-2 lg:col-span-5 text-center py-12 text-red-500">Failed to load products. Please try again.</div>';
+    }
+  }
+
+  function updateURL() {
+    const q = new URLSearchParams();
+    if (state.filters.search) q.set('search', state.filters.search);
+    if (state.filters.category) q.set('category', state.filters.category);
+    if (state.filters.subcategory) q.set('subcategory', state.filters.subcategory);
+    if (state.filters.sortBy) q.set('sortBy', state.filters.sortBy);
+    if (state.currentPage > 1) q.set('page', state.currentPage);
+    if (state.filters.priceMin > 0) q.set('priceMin', state.filters.priceMin);
+    if (state.filters.priceMax < SLIDER_LIMIT) q.set('priceMax', state.filters.priceMax);
+    if (state.filters.inStockOnly) q.set('inStockOnly', 'true');
+
+    const newUrl = `${window.location.pathname}?${q.toString()}`;
+    window.history.replaceState({ path: newUrl }, '', newUrl);
+  }
 
   function applyFilters() {
-    try {
-      state.filteredProducts = state.products.filter(p => {
-        const pricing = Pricing.calculate(p);
-        const price = Number(pricing.finalPrice || 0);
-        const priceMatch = price >= state.filters.priceMin && price <= state.filters.priceMax;
-
-        const catId = p.category?._id || p.category;
-        const categoryMatch = !state.filters.category || catId === state.filters.category;
-
-        const subId = p.subcategory?._id || p.subcategory;
-        const subcategoryMatch = !state.filters.subcategory || subId === state.filters.subcategory;
-
-        const term = state.filters.search.toLowerCase();
-        const searchMatch = !term || (p.name || '').toLowerCase().includes(term) || (p.brand || '').toLowerCase().includes(term);
-
-        const availabilityMatch = !state.filters.inStockOnly || Number(p.stock || 0) > 0;
-
-        return priceMatch && categoryMatch && subcategoryMatch && searchMatch && availabilityMatch;
-      });
-
-      state.currentPage = 1;
-      renderProducts();
-      updateBreadcrumb();
-    } catch (err) {
-      console.error("[AllProducts] Filter Error:", err);
-    }
+    state.currentPage = 1;
+    updateURL();
+    fetchAndRender();
+    updateBreadcrumb();
   }
 
   function renderProducts() {
     if (!grid) return;
-    if (state.filteredProducts.length === 0) {
+    if (state.products.length === 0) {
       grid.innerHTML = '<div class="col-span-2 lg:col-span-5 text-center py-12 text-gray-500">No products found matching filters.</div>';
-      updatePaginationUI();
       return;
     }
-
-    const start = (state.currentPage - 1) * state.itemsPerPage;
-    const paginated = state.filteredProducts.slice(start, start + state.itemsPerPage);
-    grid.innerHTML = paginated.map(p => buildProductCard(p, 'product-card')).join('');
-    updatePaginationUI();
+    grid.innerHTML = state.products.map(p => buildProductCard(p, 'product-card')).join('');
   }
 
   function updatePaginationUI() {
-    const total = state.filteredProducts.length;
+    const total = state.totalProducts;
     const totalPages = Math.ceil(total / state.itemsPerPage);
     const start = total === 0 ? 0 : (state.currentPage - 1) * state.itemsPerPage + 1;
     const end = Math.min(state.currentPage * state.itemsPerPage, total);
@@ -1749,6 +2242,169 @@ async function initAllProductsPage() {
     bcContainer.innerHTML = html;
   }
 
+  function initSortUI() {
+    const sortDropdownBtn = document.getElementById('sort-dropdown-btn');
+    const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
+    const sortActiveLabel = document.getElementById('active-sort-label');
+    const sortOptionsList = document.getElementById('sort-options-list');
+    const sortChevron = document.getElementById('sort-dropdown-chevron');
+
+    const mobileOverlay = document.getElementById('sort-mobile-overlay');
+    const mobileSheet = document.getElementById('sort-mobile-sheet');
+    const mobileClose = document.getElementById('sort-mobile-close');
+    const mobileOptionsList = document.getElementById('sort-mobile-options-list');
+    const mobileHandle = document.getElementById('sort-mobile-handle');
+
+    const activeOpt = sortOptions.find(o => o.key === state.filters.sortBy) || sortOptions[2]; // Default Newly Added
+    if (sortActiveLabel) sortActiveLabel.textContent = activeOpt.label;
+
+    if (sortOptionsList) {
+      sortOptionsList.innerHTML = sortOptions.map(opt => `
+        <button type="button" class="sort-option-btn ${opt.key === state.filters.sortBy ? 'active' : ''}" data-sort="${opt.key}" role="menuitem">
+          <span>${opt.label}</span>
+          ${opt.key === state.filters.sortBy ? '<svg class="w-4 h-4 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+        </button>
+      `).join('');
+    }
+
+    if (mobileOptionsList) {
+      mobileOptionsList.innerHTML = sortOptions.map(opt => `
+        <button type="button" class="sort-mobile-option-btn ${opt.key === state.filters.sortBy ? 'active' : ''}" data-sort="${opt.key}">
+          <span>${opt.label}</span>
+          ${opt.key === state.filters.sortBy ? '<svg class="w-5 h-5 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : ''}
+        </button>
+      `).join('');
+    }
+
+    function toggleDropdown(show) {
+      if (!sortDropdownMenu) return;
+      if (show) {
+        sortDropdownMenu.classList.remove('hidden');
+        sortDropdownBtn.setAttribute('aria-expanded', 'true');
+        if (sortChevron) sortChevron.classList.add('rotate-180');
+      } else {
+        sortDropdownMenu.classList.add('hidden');
+        sortDropdownBtn.setAttribute('aria-expanded', 'false');
+        if (sortChevron) sortChevron.classList.remove('rotate-180');
+      }
+    }
+
+    sortDropdownBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (window.innerWidth < 1024) {
+        toggleMobileSheet(true);
+      } else {
+        const isHidden = sortDropdownMenu?.classList.contains('hidden');
+        toggleDropdown(isHidden);
+      }
+    };
+
+    document.addEventListener('click', () => toggleDropdown(false));
+
+    sortDropdownMenu.onclick = (e) => e.stopPropagation();
+
+    if (sortOptionsList) {
+      sortOptionsList.onclick = (e) => {
+        const btn = e.target.closest('.sort-option-btn');
+        if (!btn) return;
+        changeSort(btn.dataset.sort);
+        toggleDropdown(false);
+      };
+    }
+
+    function toggleMobileSheet(show) {
+      if (!mobileOverlay || !mobileSheet) return;
+      if (show) {
+        mobileOverlay.classList.remove('hidden');
+        mobileSheet.offsetHeight; // force reflow
+        mobileSheet.classList.remove('translate-y-full');
+        mobileSheet.classList.add('translate-y-0');
+        document.body.style.overflow = 'hidden';
+      } else {
+        mobileSheet.classList.remove('translate-y-0');
+        mobileSheet.classList.add('translate-y-full');
+        setTimeout(() => {
+          mobileOverlay.classList.add('hidden');
+          document.body.style.overflow = '';
+        }, 300);
+      }
+    }
+
+    mobileClose.onclick = () => toggleMobileSheet(false);
+    mobileOverlay.onclick = (e) => {
+      if (e.target === mobileOverlay) toggleMobileSheet(false);
+    };
+
+    if (mobileOptionsList) {
+      mobileOptionsList.onclick = (e) => {
+        const btn = e.target.closest('.sort-mobile-option-btn');
+        if (!btn) return;
+        changeSort(btn.dataset.sort);
+        toggleMobileSheet(false);
+      };
+    }
+
+    // Touch gesture swipe-down to dismiss
+    let touchStartY = 0;
+    let touchMoveY = 0;
+    mobileHandle?.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchMoveY = touchStartY;
+    });
+    mobileHandle?.addEventListener('touchmove', (e) => {
+      touchMoveY = e.touches[0].clientY;
+      const diff = touchMoveY - touchStartY;
+      if (diff > 0) {
+        mobileSheet.style.transform = `translateY(${diff}px)`;
+      }
+    });
+    mobileHandle?.addEventListener('touchend', () => {
+      const diff = touchMoveY - touchStartY;
+      mobileSheet.style.transform = '';
+      if (diff > 100) {
+        toggleMobileSheet(false);
+      }
+    });
+
+    // Keyboard navigation (accessibility)
+    sortDropdownBtn.onkeydown = (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDropdown(true);
+        const first = sortOptionsList?.querySelector('.sort-option-btn');
+        first?.focus();
+      }
+    };
+
+    sortOptionsList.onkeydown = (e) => {
+      const active = document.activeElement;
+      if (!active || !active.classList.contains('sort-option-btn')) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = active.nextElementSibling;
+        if (next) next.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = active.previousElementSibling;
+        if (prev) prev.focus();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        toggleDropdown(false);
+        sortDropdownBtn?.focus();
+      }
+    };
+  }
+
+  function changeSort(key) {
+    if (state.filters.sortBy === key) return;
+    state.filters.sortBy = key;
+    state.currentPage = 1;
+    updateURL();
+    initSortUI();
+    fetchAndRender();
+  }
+
   function setupEventListeners() {
     document.addEventListener('change', e => {
       if (e.target.classList.contains('filter-category-cb')) {
@@ -1789,9 +2445,10 @@ async function initAllProductsPage() {
     window.addEventListener('touchend', () => { isDraggingMin = false; isDraggingMax = false; });
 
     window.performReset = () => {
-      state.filters = { search: '', category: '', subcategory: '', priceMin: 0, priceMax: SLIDER_LIMIT, inStockOnly: false };
+      state.filters = { search: '', category: '', subcategory: '', priceMin: 0, priceMax: SLIDER_LIMIT, inStockOnly: false, sortBy: 'newest' };
       updatePriceUI();
       renderCategories();
+      initSortUI();
       applyFilters();
     };
 
@@ -1826,7 +2483,8 @@ async function initAllProductsPage() {
       btn.addEventListener('click', () => {
         if (state.currentPage > 1) {
           state.currentPage--;
-          renderProducts();
+          updateURL();
+          fetchAndRender();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -1834,10 +2492,11 @@ async function initAllProductsPage() {
 
     document.querySelectorAll('.next-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const totalPages = Math.ceil(state.filteredProducts.length / state.itemsPerPage);
+        const totalPages = Math.ceil(state.totalProducts / state.itemsPerPage);
         if (state.currentPage < totalPages) {
           state.currentPage++;
-          renderProducts();
+          updateURL();
+          fetchAndRender();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
@@ -1913,7 +2572,7 @@ async function initWishlistPage() {
 }
 async function initProductPage() {
   const params = new URLSearchParams(window.location.search);
-  const productId = params.get('id');
+  const productId = params.get('slug') || params.get('id');
   if (!productId) {
     window.location.href = 'index.html';
     return;
@@ -1976,11 +2635,37 @@ async function initProductPage() {
     const descMobile = document.getElementById('product-description-mobile');
     if (descMobile) descMobile.innerHTML = descContent;
 
-    const specsHTML = (p.specifications || []).map(s => `${s.key}: ${s.value}`).join('<br>');
+    // Dynamic structured table generator for specifications
+    const renderSpecsTable = (specs) => {
+      if (!specs || specs.length === 0) {
+        return '<p class="text-gray-500 font-normal p-4">Standard specifications apply.</p>';
+      }
+      let trs = '';
+      specs.forEach((s, idx) => {
+        const isEven = idx % 2 === 0;
+        const bgClass = isEven ? 'bg-gray-50' : 'bg-white';
+        const borderBClass = idx === specs.length - 1 ? '' : 'border-b';
+        trs += `
+          <tr class="${bgClass}">
+            <th class="py-2 px-3 font-medium text-gray-700 w-1/2 ${borderBClass} border-r border-gray-200">${s.key}</th>
+            <td class="py-2 px-3 ${borderBClass} border-gray-200">${s.value}</td>
+          </tr>
+        `;
+      });
+      return `
+        <table class="w-full text-left border border-gray-400 shadow-sm rounded-md overflow-hidden" style="border-spacing: 0; border-collapse: separate;">
+          <tbody>
+            ${trs}
+          </tbody>
+        </table>
+      `;
+    };
+
+    const specsHTML = renderSpecsTable(p.specifications || []);
     const specsDesktop = document.getElementById('product-specs-desktop');
-    if (specsDesktop) specsDesktop.innerHTML = specsHTML || 'Standard specifications apply.';
+    if (specsDesktop) specsDesktop.innerHTML = specsHTML;
     const specsMobile = document.getElementById('product-specs-mobile');
-    if (specsMobile) specsMobile.innerHTML = specsHTML || 'Standard specifications apply.';
+    if (specsMobile) specsMobile.innerHTML = specsHTML;
 
     let hsnValue = p.hsnCode || '';
     if (!hsnValue && p.specifications) {
@@ -2183,7 +2868,7 @@ async function initProductPage() {
       }
       const pricing = Pricing.calculate(p, qty, selectedBatch);
 
-      Cart.add(p._id, p.name, mainImg, pricing.finalPrice, qty, selectedBatch.quantity);
+      Cart.add(p._id, p.name, mainImg, pricing.finalPrice, qty, selectedBatch.quantity, p.slug || '');
 
       if (redirect) window.location.href = 'cart.html';
       else showToast('Added to cart!', 'success');
@@ -2280,13 +2965,17 @@ async function renderCart() {
         const image = item.image;
         const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
         const fullImg = getImageUrl(image);
+        const slug = item.productSlug || '';
+        const url = slug ? `product.html?slug=${slug}` : `product.html?id=${item.productId}`;
 
         return `
         <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0">
           <div class="flex items-center gap-4">
-            <img src="${fullImg}" class="w-[80px] h-[80px] object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            <a href="${url}" class="w-[80px] h-[80px] flex-shrink-0 flex items-center justify-center hover:opacity-85 transition">
+              <img src="${fullImg}" class="w-full h-full object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            </a>
             <div>
-              <h4 class="font-bold text-[16px] text-black">${name}</h4>
+              <h4 class="font-bold text-[16px] text-black hover:text-[#BE2229] transition"><a href="${url}">${name}</a></h4>
               <div class="flex items-center gap-2 mt-2">
                 <button class="w-[24px] h-[24px] border border-gray-300 flex items-center justify-center rounded" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1})">-</button>
                 <span class="text-[14px]">${item.quantity}</span>
@@ -2309,13 +2998,17 @@ async function renderCart() {
         const image = item.image;
         const finalPrice = Number(item.finalPrice || item.price || item.pricePerUnit || 0) || 0;
         const fullImg = getImageUrl(image);
+        const slug = item.productSlug || '';
+        const url = slug ? `product.html?slug=${slug}` : `product.html?id=${item.productId}`;
 
         return `
         <div class="bg-white p-4 rounded-lg border border-gray-100 mb-2">
           <div class="flex gap-4">
-            <img src="${fullImg}" class="w-[64px] h-[64px] object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            <a href="${url}" class="w-[64px] h-[64px] flex-shrink-0 flex items-center justify-center hover:opacity-85 transition">
+              <img src="${fullImg}" class="w-full h-full object-contain rounded" alt="${name}" onerror="this.onerror=null; this.src='assets/images/deafult.png';">
+            </a>
             <div class="flex-1">
-              <h4 class="font-bold text-[14px] text-black">${name}</h4>
+              <h4 class="font-bold text-[14px] text-black hover:text-[#BE2229] transition"><a href="${url}">${name}</a></h4>
               <div class="flex items-center justify-between mt-3">
                 <div class="flex items-center border border-gray-200 rounded overflow-hidden">
                   <button class="w-[20px] h-[22px] bg-gray-100 flex items-center justify-center text-[14px]" onclick="Cart.updateQty('${item.itemId || item.productId}', ${item.quantity - 1})">-</button>
@@ -2487,13 +3180,16 @@ async function initCheckoutPage() {
       const qtyLabel = isBatch
         ? `Qty: ${item.quantity} pack${item.quantity !== 1 ? 's' : ''} × ${batchQty} = ${item.quantity * batchQty} units`
         : `Qty: ${item.quantity}`;
+      const slug = item.productSlug || '';
+      const url = slug ? `product.html?slug=${slug}` : `product.html?id=${item.productId}`;
+
       return `
       <div class="flex items-center gap-4 py-2 border-b border-gray-50 last:border-0">
-        <div class="w-[60px] h-[60px] bg-gray-50 rounded flex-shrink-0">
+        <a href="${url}" class="w-[60px] h-[60px] bg-gray-50 rounded flex-shrink-0 flex items-center justify-center hover:opacity-85 transition">
           <img src="${productImg({ images: [item.image] })}" class="w-full h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-        </div>
+        </a>
         <div class="flex-1 min-w-0">
-          <h4 class="text-[14px] font-medium text-[#242323] truncate">${item.name}</h4>
+          <h4 class="text-[14px] font-medium text-[#242323] hover:text-[#BE2229] transition truncate"><a href="${url}">${item.name}</a></h4>
           <p class="text-[12px] text-[#A8A3A3]">${qtyLabel}</p>
         </div>
         <div class="text-[14px] font-bold text-[#BE2229]">₹${subtotal.toFixed(2)}</div>
@@ -3200,12 +3896,13 @@ async function addOrderToCart(orderId) {
       data.order.items.forEach(item => {
         // Cart.add signature: (productId, name, image, finalPrice, quantity, batchQuantity)
         Cart.add(
-          item.product,
+          item.product?._id || item.product,
           item.name,
           item.image,
           Number(item.finalPrice || item.unitPrice || 0),
           item.quantity,
-          Number(item.batchQuantity) || 1
+          Number(item.batchQuantity) || 1,
+          item.product?.slug || ''
         );
       });
       showToast('Items added to cart!', 'success');
@@ -3223,14 +3920,69 @@ async function initProfilePage() {
     return;
   }
 
-  // Trigger location request ONLY on profile page if not asked before
-  requestLocationPermission();
+  const locationFieldIds = [
+    'profile-country', 'profile-state',
+    'company-country', 'company-state',
+    'billing-country', 'billing-state', 'billing-city', 'billing-zip',
+    'shipping-country', 'shipping-state', 'shipping-city', 'shipping-zip'
+  ];
 
+  // Helper to mark field as manually edited when user inputs or changes data
+  const registerEditTracking = () => {
+    locationFieldIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          el.dataset.userEdited = 'true';
+        });
+        el.addEventListener('change', () => {
+          el.dataset.userEdited = 'true';
+        });
+      }
+    });
+  };
+
+  // Run listeners registration immediately
+  registerEditTracking();
+
+  // Reactive listener for global location changes
+  const onLocationChanged = (e) => {
+    console.log('[PROFILE-LOCATION] Geolocation updated globally, autofilling profile form fields...', e.detail);
+    fillProfileLocationFields(e.detail);
+  };
+  window.addEventListener('locationChanged', onLocationChanged);
+
+  // Pre-fill location fields if they exist or prompt for permission
+  const currentLoc = LocationManager.getLocation();
+  if (currentLoc) {
+    fillProfileLocationFields(currentLoc);
+  } else if (LocationManager.getPermissionState() === 'prompt') {
+    LocationManager.toggleSoftPrompt(true);
+  }
+
+  // SetVal with intelligent userEdited check for loaded profile values
   const setVal = (id, val) => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (el.tagName === 'INPUT') el.value = val || '';
-    else el.textContent = val || '';
+    if (el.tagName === 'INPUT') {
+      const isLocField = locationFieldIds.includes(id);
+      const isDefaultVal = !val || val === 'Your Country' || val === 'Your State' || val === 'Your City' || val === 'Enter Country' || val === 'Enter State' || val === 'Enter City';
+      
+      if (isLocField) {
+        if (isDefaultVal) {
+          // If database has default/empty value, preserve any GPS-prefilled value
+          if (!el.value) el.value = '';
+        } else {
+          // Database has active custom value - set it and lock it from GPS overwrite
+          el.value = val;
+          el.dataset.userEdited = 'true';
+        }
+      } else {
+        el.value = val || '';
+      }
+    } else {
+      el.textContent = val || '';
+    }
   };
 
   const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
@@ -3362,8 +4114,14 @@ async function initProfilePage() {
       const state = getVal('profile-state');
 
       // Update local storage if manually changed
-      localStorage.setItem('userLocation', JSON.stringify({ country, state }));
-      updateNavbarLocation({ country, state });
+      const currentLoc = LocationManager.getLocation() || {};
+      const updatedLoc = {
+        ...currentLoc,
+        country,
+        state,
+        timestamp: Date.now()
+      };
+      LocationManager.saveLocation(updatedLoc);
 
       saveProfile({
         firstName: getVal('profile-first-name'),
@@ -3580,16 +4338,29 @@ window.loadProfileImage = loadProfileImage;
 function fillProfileLocationFields(location) {
   if (!location) return;
 
-  const countryEl = document.getElementById('profile-country');
-  const stateEl = document.getElementById('profile-state');
+  const mappings = [
+    { id: 'profile-country', value: location.country },
+    { id: 'profile-state', value: location.state },
+    { id: 'company-country', value: location.country },
+    { id: 'company-state', value: location.state },
+    { id: 'billing-country', value: location.country },
+    { id: 'billing-state', value: location.state },
+    { id: 'billing-city', value: location.city },
+    { id: 'billing-zip', value: location.pincode || location.zip },
+    { id: 'shipping-country', value: location.country },
+    { id: 'shipping-state', value: location.state },
+    { id: 'shipping-city', value: location.city },
+    { id: 'shipping-zip', value: location.pincode || location.zip }
+  ];
 
-  // Only fill if empty to avoid overriding user input
-  if (countryEl && (!countryEl.value || countryEl.value === 'Your Country')) {
-    countryEl.value = location.country || "";
-  }
-  if (stateEl && (!stateEl.value || stateEl.value === 'Your State')) {
-    stateEl.value = location.state || "";
-  }
+  mappings.forEach(map => {
+    const el = document.getElementById(map.id);
+    if (el) {
+      el.value = map.value || '';
+      // Dispatch input event to notify any sync logic (e.g. same-as-billing or states datalist populator)
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
 }
 window.fillProfileLocationFields = fillProfileLocationFields;
 

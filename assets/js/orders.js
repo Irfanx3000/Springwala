@@ -120,17 +120,19 @@ function buildDesktopOrderCard(order, item) {
     const dateStr = formatDate(order.orderStatus?.toLowerCase() === 'delivered' ? order.deliveryDate : (order.estimatedDeliveryDate || order.createdAt));
     const statusLabel = order.orderStatus?.toLowerCase() === 'delivered' ? 'Delivered on' : 'Estimated Delivery by';
     const statusColor = order.orderStatus?.toLowerCase() === 'delivered' ? '#096709' : '#1B99B5';
+    const slug = product.slug || '';
+    const url = slug ? `product.html?slug=${slug}` : (product._id ? `product.html?id=${product._id}` : '#');
 
     return `
         <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[20px] mb-[20px]">
             <div class="flex gap-[20px]">
-                <div class="w-[141px] h-[141px] flex-shrink-0 flex items-center justify-center">
+                <a href="${url}" class="w-[141px] h-[141px] flex-shrink-0 flex items-center justify-center hover:opacity-85 transition">
                     <img src="${image}" alt="${title}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-                </div>
+                </a>
                 <div class="flex-1 relative min-w-0 h-[141px]">
                     <div class="flex justify-between w-full h-[100px]">
                         <div class="flex flex-col items-start pr-[20px] flex-1">
-                            <h3 class="text-[#000000] text-[20px] font-medium font-['Poppins'] leading-[28px] max-w-full line-clamp-2">${title}</h3>
+                            <h3 class="text-[#000000] text-[20px] font-medium font-['Poppins'] leading-[28px] max-w-full line-clamp-2 hover:text-[#BE2229] transition"><a href="${url}">${title}</a></h3>
                             <div class="inline-flex items-center px-[6px] py-[2px] rounded-[2px] mt-[8px]" style="background-color: ${statusColor}">
                                 <span class="text-white text-[13px] font-medium font-['Poppins'] leading-[20px]">${statusLabel} ${dateStr}</span>
                             </div>
@@ -181,16 +183,18 @@ function buildMobileOrderCard(order, item) {
     const dateStr = formatDate(order.orderStatus?.toLowerCase() === 'delivered' ? order.deliveryDate : (order.estimatedDeliveryDate || order.createdAt));
     const statusLabel = order.orderStatus?.toLowerCase() === 'delivered' ? 'Delivered on' : 'Estimated Delivery by';
     const statusColor = order.orderStatus?.toLowerCase() === 'delivered' ? '#096709' : '#1B99B5';
+    const slug = product.slug || '';
+    const url = slug ? `product.html?slug=${slug}` : (product._id ? `product.html?id=${product._id}` : '#');
 
     return `
         <div class="w-full bg-white border border-[#E4E4E4] rounded-[10px] p-[16px]">
             <div class="flex items-start gap-[12px] mb-[12px]">
-                <div class="w-[64px] h-[64px] flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <a href="${url}" class="w-[64px] h-[64px] flex-shrink-0 flex items-center justify-center overflow-hidden hover:opacity-85 transition">
                     <img src="${image}" alt="${title}" class="max-w-full max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
-                </div>
+                </a>
                 <div class="flex flex-col flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
-                        <h3 class="text-[#000000] text-[15px] font-medium font-['Poppins'] leading-[22px] line-clamp-2">${title}</h3>
+                        <h3 class="text-[#000000] text-[15px] font-medium font-['Poppins'] leading-[22px] line-clamp-2 hover:text-[#BE2229] transition"><a href="${url}">${title}</a></h3>
                         <button class="text-[#605454] flex-shrink-0 mt-[2px]" onclick="shareOrder('${order._id}')"><img src="assets/icons/mobile/share.svg" alt="Share" class="w-[16px] h-[16px]"></button>
                     </div>
                     <div class="inline-flex items-center px-[6px] py-[2px] rounded-[2px] w-fit mt-[4px]" style="background-color: ${statusColor}">

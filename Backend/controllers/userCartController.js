@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 
 // ─── Helper: fetch or create cart for user ────────────────────────────────────
 async function getOrCreateCart(userId) {
-  let cart = await Cart.findOne({ user: userId }).populate('items.product', 'name images basePrice finalPrice stock isActive');
+  let cart = await Cart.findOne({ user: userId }).populate('items.product', 'name images basePrice finalPrice stock isActive slug');
   if (!cart) cart = await Cart.create({ user: userId, items: [] });
   return cart;
 }
@@ -85,7 +85,7 @@ exports.addToCart = async (req, res) => {
     }
 
     await cart.save();
-    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive slug');
 
     res.json({ success: true, message: 'Item added to cart.', cart });
   } catch (err) {
@@ -121,7 +121,7 @@ exports.updateCartItem = async (req, res) => {
 
     item.quantity = qty;
     await cart.save();
-    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive slug');
 
     res.json({ success: true, message: 'Cart updated.', cart });
   } catch (err) {
@@ -195,7 +195,7 @@ exports.mergeCart = async (req, res) => {
     }
 
     await cart.save();
-    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive');
+    await cart.populate('items.product', 'name images basePrice finalPrice stock isActive slug');
 
     res.json({ success: true, message: 'Cart merged successfully.', cart });
   } catch (err) {

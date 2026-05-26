@@ -55,6 +55,7 @@ const ProductSchema = new mongoose.Schema({
   totalSold:        { type: Number, default: 0 },
   rating:           { type: Number, default: 0 },
   totalReviews:     { type: Number, default: 0 },
+  viewCount:        { type: Number, default: 0 },
 }, { timestamps: true });
 
 // Auto-generate slug and compute Final Price
@@ -83,5 +84,16 @@ ProductSchema.pre('save', function (next) {
 
   next();
 });
+
+// Indexes for high performance sorting and filtering
+ProductSchema.index({ isActive: 1, isFeatured: -1, createdAt: -1 });
+ProductSchema.index({ isActive: 1, totalSold: -1 });
+ProductSchema.index({ isActive: 1, finalPrice: 1 });
+ProductSchema.index({ isActive: 1, finalPrice: -1 });
+ProductSchema.index({ isActive: 1, viewCount: -1 });
+ProductSchema.index({ isActive: 1, rating: -1, totalReviews: -1 });
+ProductSchema.index({ isActive: 1, stock: 1 });
+ProductSchema.index({ isActive: 1, discountPercent: -1 });
+ProductSchema.index({ isActive: 1, category: 1, subcategory: 1 });
 
 module.exports = mongoose.model('Product', ProductSchema);

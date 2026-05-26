@@ -6,7 +6,13 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
-  await loadCategories();
+  const params = new URLSearchParams(window.location.search);
+  const searchParam = params.get('search') || '';
+  if (searchParam) {
+    const searchEl = document.getElementById('category-search');
+    if (searchEl) searchEl.value = searchParam;
+  }
+  await loadCategories(searchParam);
   bindCategoryEvents();
 });
 

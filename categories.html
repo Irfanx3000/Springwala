@@ -16,138 +16,22 @@
 </head>
 
 <body class="bg-[#F4F6F6] font-['Roboto'] flex flex-col min-h-screen m-0 p-0 text-gray-800" data-page="categories">
-
-    <div class="bg-[#BE2229] h-[24px] flex items-center justify-center" data-banner-type="informational" data-banner-position="99">
-        <span class="text-white text-[13px]">Get discount on every selected product</span>
-    </div>
-
-    <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
-
-        <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
-            <!-- Hamburger -->
-            <button id="menu-btn"
-                class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
-                <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
-            </button>
-
-            <!-- Logo -->
-            <img src="assets/images/header.png" alt="Springwala Logo"
-                class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px]">
-
-            <!-- Cart & Wishlist -->
-            <div class="absolute right-[16px] top-[11px] flex items-center gap-3">
-                <a href="wishlist.html" class="w-[26px] h-[26px] relative flex items-center justify-center">
-                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-full h-full object-contain">
-                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-                <a href="cart.html" class="w-[29px] h-[29px] relative flex items-center justify-center">
-                    <svg class="w-full h-full text-[#525252]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                        </path>
-                    </svg>
-                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-            </div>
-        </div>
-
-        <div id="mobile-sub-header" class="md:hidden flex flex-col w-full origin-top">
-            <div class="px-[14px] py-[5px] bg-[#BE2229] flex items-center gap-3">
-                <div class="bg-white rounded-[6px] flex-1 flex items-center px-[11px] h-[30px]">
-                    <img src="assets/icons/mobile/search.svg" alt="Search" class="w-4 h-4 text-[#797979]">
-                    <input type="text" placeholder="Search..." class="ml-2 outline-none text-[14px] w-full">
-                </div>
-
-                <a href="login.html" class="cursor-pointer flex-shrink-0">
-                    <img src="assets/icons/mobile/account.svg" alt="Account" class="w-[26px] h-[26px]">
-                </a>
-            </div>
-
-            <!-- Shop by Categories / Deliver to Sub-header -->
-            <div
-                class="flex flex-row justify-between items-center px-[15px] py-[6px] bg-[#F6D6D6] h-[30px] w-full gap-2">
-                <!-- Shop by Categories -->
-                <div class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
-                    style="font-family: 'Roboto', sans-serif;">Shop by Categories
-                </div>
-
-                <!-- Deliver to Section -->
-                <div class="flex items-center gap-1 cursor-pointer min-w-0" id="location-btn">
-                    <span class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
-                        style="font-family: 'Roboto', sans-serif;">Deliver to</span>
-                    <img src="assets/icons/mobile/location.svg" alt="Location"
-                        class="w-[10px] sm:w-[12px] h-[14px] sm:h-[16px] flex-shrink-0"
-                        style="transform: scaleX(-1); filter: brightness(0) saturate(100%) invert(18%) sepia(90%) saturate(2687%) hue-rotate(338deg) brightness(91%) contrast(92%);">
-                    <span
-                        class="text-[#BD2830] text-[12px] sm:text-[14px] underline truncate max-w-[100px] sm:max-w-[130px]"
-                        id="location-text" style="font-family: 'Roboto', sans-serif;">Thane, Maharashtra</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
-            <img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto">
-
-            <div class="flex items-start gap-2 ml-8">
-                <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
-                <div class="flex flex-col">
-                    <span class="text-[#747474] text-[10px]">Location</span>
-                    <span class="text-[#242323] text-[12px] font-medium">Thane, Maharashtra</span>
-                </div>
-            </div>
-
-            <div class="flex-1 max-w-[519px] mx-10 flex h-[40px]">
-                <div
-                    class="border border-[#BE2229] rounded-l-[6px] px-3 flex items-center gap-2 cursor-pointer bg-white">
-                    <span class="text-[#BE2229] text-[13px]">All Categories</span>
-                    <svg class="w-3 h-3 text-[#BE2229]" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z">
-                        </path>
-                    </svg>
-                </div>
-                <div class="flex-1 border border-[#D7D9D9] border-l-0 rounded-r-[6px] flex items-center px-3 bg-white">
-                    <input type="text" class="flex-1 outline-none text-[13px]" placeholder="Search Products...">
-                    <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979]">
-                </div>
-            </div>
-
-            <div class="flex items-center gap-7">
-                <a href="login.html" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-                    <img src="assets/icons/desktop/profile.svg" alt="Account" class="w-6 h-6 text-[#525252]">
-                    <span class="text-[#525252] text-[15px]">Your Account</span>
-                </a>
-                <a href="cart.html" class="cursor-pointer hover:opacity-80 transition relative">
-                    <img src="assets/icons/desktop/cart.svg" alt="Cart" class="w-6 h-6 text-[#525252]">
-                    <span class="cart-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-                <a href="wishlist.html" class="cursor-pointer hover:opacity-80 transition relative">
-                    <img src="assets/icons/desktop/saved-items.svg" alt="Wishlist" class="w-6 h-6 text-[#525252]">
-                    <span class="wishlist-badge absolute -top-1 -right-1 bg-[#BE2229] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <div class="hidden md:flex max-w-[1440px] mx-auto items-center h-[56px] px-[80px]">
-        <a href="categories.html"
-            class="border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-50 transition">
-            <img src="assets/icons/mobile/categories-red.svg" alt="Categories" class="w-4 h-4 text-[#BE2229]">
-            <span class="text-[#BE2229] text-[12px] font-medium uppercase">Browse All Categories</span>
-        </a>
-
-		<ul class="flex items-center gap-8 ml-10 text-[15px] text-[#525252]">
-		    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="index.html">Home</a></li>
-		    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="allproducts.html">All Products</a></li>
-		    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="orders.html">Orders</a></li>
-		    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="#">Knowledge Centre</a></li>
-		    <li class="cursor-pointer hover:text-[#BE2229] transition"><a href="#">Contact Us</a></li>
-		</ul>
-
-        <div class="ml-auto h-[42px] cursor-pointer rounded-l-lg hover:opacity-90 transition">
-            <img id="customer-support-slot" src="assets/banners/customer-support.png" alt="Customer Support" class="h-full w-auto">
-        </div>
-    </div>
+    <style>
+        /* Smooth Animation for dropdowns */
+        .dropdown-menu {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .group:hover .dropdown-menu {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <div id="sw-header" class="hidden md:block"></div>
+    <script src="assets/js/dynamic-header.js"></script>
 
     <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-50 hidden-menu md:hidden">
         <div class="p-6">
@@ -380,7 +264,7 @@
                 <div class="flex flex-col gap-4">
                     <a href="index.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
-                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="contact-us.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
                 </div>
 
@@ -462,7 +346,7 @@
                     <div class="flex flex-col gap-4 text-left">
                         <a href="index.html">Home</a>
                         <a href="#">About Us</a>
-                        <a href="#">Contact Us</a>
+                        <a href="contact-us.html">Contact Us</a>
                         <a href="#">Delivery & Shipping</a>
                     </div>
 

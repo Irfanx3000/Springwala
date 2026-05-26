@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 
@@ -11,6 +12,7 @@ exports.getProducts = async (req, res) => {
       search, category, isFeatured, tags,
       page = 1, limit = 20,
       sortBy = 'createdAt', order = 'desc',
+      priceMin, priceMax, inStockOnly
     } = req.query;
 
     const query = { isActive: true };
@@ -29,8 +31,73 @@ exports.getProducts = async (req, res) => {
     if (isFeatured !== undefined) query.isFeatured = isFeatured === 'true';
     if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] };
 
+    // Server-side price filtering (finalPrice)
+    if (priceMin !== undefined || priceMax !== undefined) {
+      query.finalPrice = {};
+      if (priceMin !== undefined && priceMin !== '') {
+        query.finalPrice.$gte = Number(priceMin);
+      }
+      if (priceMax !== undefined && priceMax !== '') {
+        query.finalPrice.$lte = Number(priceMax);
+      }
+    }
+
+    // Server-side stock filtering
+    if (inStockOnly === 'true') {
+      query.stock = { $gt: 0 };
+    }
+
+    // 13 Sort Strategies Mapping
+    let sortOpt = {};
+    switch (sortBy) {
+      case 'featured':
+        sortOpt = { isFeatured: -1, createdAt: -1 };
+        break;
+      case 'best_sellers':
+        sortOpt = { totalSold: -1, createdAt: -1 };
+        break;
+      case 'newly_added':
+      case 'newest':
+        sortOpt = { createdAt: -1 };
+        break;
+      case 'price_asc':
+        sortOpt = { finalPrice: 1, createdAt: -1 };
+        break;
+      case 'price_desc':
+        sortOpt = { finalPrice: -1, createdAt: -1 };
+        break;
+      case 'popular':
+        sortOpt = { viewCount: -1, createdAt: -1 };
+        break;
+      case 'top_rated':
+        sortOpt = { rating: -1, totalReviews: -1, createdAt: -1 };
+        break;
+      case 'limited_stock':
+        sortOpt = { stock: 1, createdAt: -1 };
+        break;
+      case 'discounted':
+        sortOpt = { discountPercent: -1, createdAt: -1 };
+        break;
+      case 'trending':
+        sortOpt = { viewCount: -1, totalSold: -1, createdAt: -1 };
+        break;
+      case 'recommended':
+        sortOpt = { rating: -1, isFeatured: -1, createdAt: -1 };
+        break;
+      case 'alphabetical_asc':
+      case 'name_asc':
+        sortOpt = { name: 1 };
+        break;
+      case 'alphabetical_desc':
+      case 'name_desc':
+        sortOpt = { name: -1 };
+        break;
+      default:
+        sortOpt = { [sortBy]: order === 'asc' ? 1 : -1 };
+        break;
+    }
+
     const skip = (Number(page) - 1) * Number(limit);
-    const sortOpt = { [sortBy]: order === 'asc' ? 1 : -1 };
 
     const [products, total] = await Promise.all([
       Product.find(query)
@@ -127,10 +194,12 @@ exports.getLatestProducts = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findOne({
-      _id: req.params.id,
-      isActive: true
-    })
+    const isId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isId
+      ? { _id: req.params.id, isActive: true }
+      : { slug: req.params.id, isActive: true };
+
+    const product = await Product.findOne(query)
       .populate('category', 'name slug')
       .populate('subcategory', 'name slug')
       .select('-__v');
@@ -151,7 +220,9 @@ exports.getProduct = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getRelatedProducts = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).select('category');
+    const isId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isId ? { _id: req.params.id } : { slug: req.params.id };
+    const product = await Product.findOne(query).select('category');
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -180,6 +251,15 @@ exports.getRelatedProducts = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getCategories = async (req, res) => {
   try {
+    // Get unique category and subcategory IDs from active products
+    const [activeCategoryIds, activeSubcategoryIds] = await Promise.all([
+      Product.distinct('category', { isActive: true }),
+      Product.distinct('subcategory', { isActive: true })
+    ]);
+
+    const activeCatSet = new Set(activeCategoryIds.map(id => id.toString()));
+    const activeSubcatSet = new Set(activeSubcategoryIds.filter(id => id).map(id => id.toString()));
+
     const categories = await Category.find({
       isActive: true,
       parentCategory: null
@@ -188,7 +268,23 @@ exports.getCategories = async (req, res) => {
       .select('name slug banner subcategories')
       .sort({ sortOrder: 1, name: 1 });
 
-    res.json({ success: true, categories });
+    const filteredCategories = categories.map(cat => {
+      const plainCat = cat.toObject ? cat.toObject({ virtuals: true }) : cat;
+      
+      if (plainCat.subcategories && Array.isArray(plainCat.subcategories)) {
+        plainCat.subcategories = plainCat.subcategories.filter(sub => activeSubcatSet.has(sub._id.toString()));
+      } else {
+        plainCat.subcategories = [];
+      }
+
+      return plainCat;
+    }).filter(cat => {
+      const hasDirectProducts = activeCatSet.has(cat._id.toString());
+      const hasActiveSubcategories = cat.subcategories && cat.subcategories.length > 0;
+      return hasDirectProducts || hasActiveSubcategories;
+    });
+
+    res.json({ success: true, categories: filteredCategories });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
