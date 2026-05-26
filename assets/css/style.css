@@ -1378,4 +1378,16 @@ img {
     max-width: 100%;
     height: auto;
 }
+/* Dropdown menu animation for desktop nav */
+.dropdown-menu {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.group:hover .dropdown-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
 
