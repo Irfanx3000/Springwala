@@ -961,15 +961,16 @@ exports.getOrderSummary = async (req, res) => {
   try {
     const { items: bodyItems, pincode } = req.body;
 
-    console.log('[SUMMARY REQUEST] Items count:', bodyItems?.length, 'Pincode:', pincode);
+    const normalizedPincode = (pincode || '').toString().trim();
+    console.log('[SUMMARY REQUEST] Items count:', bodyItems?.length, 'Pincode:', normalizedPincode);
 
     if (!bodyItems || !bodyItems.length) {
       return res.json({ success: true, totalAmount: 0, deliveryCharges: 0, finalAmount: 0 });
     }
 
-    const pricing = await calculatePricing(bodyItems, pincode);
+    const pricing = await calculatePricing(bodyItems, normalizedPincode);
 
-    console.log('[SUMMARY SUCCESS] Total:', pricing.finalAmount, 'Items:', pricing.items?.length);
+    console.log('[SUMMARY SUCCESS] Total:', pricing.finalAmount, 'Shipping:', pricing.shippingCharge, 'Pincode:', normalizedPincode, 'Items:', pricing.items?.length);
 
     res.json({
       success: true,

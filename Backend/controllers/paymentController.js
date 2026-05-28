@@ -1,14 +1,20 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const path = require('path');
 const Order = require('../models/Order');
+
+// Ensure dotenv is loaded even if this module is imported directly
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // ─── INITIALIZATION ──────────────────────────────────────────────────────────
 const KEY_ID = (process.env.RAZORPAY_KEY_ID || '').trim();
 const KEY_SECRET = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+const KEY_MODE = KEY_ID.startsWith('rzp_live_') ? 'LIVE' : KEY_ID.startsWith('rzp_test_') ? 'TEST' : 'UNKNOWN';
 
 if (!KEY_ID || !KEY_SECRET) {
-  console.error('[RAZORPAY] CRITICAL ERROR: API Keys are missing in .env');
+  console.error('[RAZORPAY] CRITICAL ERROR: API Keys are missing in .env or process.env');
 }
+console.log(`[RAZORPAY] Initializing Razorpay client in ${KEY_MODE} mode. key_id=${KEY_ID ? `${KEY_ID.slice(0, 8)}***` : 'MISSING'}`);
 
 const razorpay = new Razorpay({
   key_id: KEY_ID,
@@ -94,10 +100,20 @@ exports.createRazorpayOrder = async (req, res) => {
       key: KEY_ID,
     });
   } catch (error) {
-    console.error('[RAZORPAY] Create Order Error:', error.message);
+    const errorDetails = {
+      name: error?.name,
+      message: error?.message,
+      statusCode: error?.statusCode,
+      description: error?.description,
+      source: error?.source,
+      field: error?.field,
+      error: error?.error,
+      stack: error?.stack,
+    };
+    console.error('[RAZORPAY] Create Order Error:', errorDetails);
     res.status(400).json({ 
       success: false, 
-      message: error.message || 'Payment initiation failed' 
+      message: error?.message || 'Payment initiation failed' 
     });
   }
 };

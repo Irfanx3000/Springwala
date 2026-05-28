@@ -1557,8 +1557,16 @@ const LocationManager = {
     });
 
     // Recalculate summary / totals dynamically when locationChanged is received
-    window.addEventListener('locationChanged', () => {
+    window.addEventListener('locationChanged', (e) => {
+      const pin = e?.detail?.pincode || e?.detail?.zip;
       if (typeof initCheckoutPage === 'function' && document.body.dataset.page === 'checkout') {
+        if (pin) {
+          const pincodeInput = document.getElementById('ship-pincode');
+          if (pincodeInput) {
+            pincodeInput.value = pin;
+            console.log('[LOCATION-SYNC] Checkout pincode updated from locationChanged:', pin);
+          }
+        }
         console.log('[LOCATION-SYNC] Location changed, reloading checkout summary...');
         initCheckoutPage();
       }
@@ -3154,6 +3162,9 @@ async function renderCart() {
       }
     });
   }
+
+  // Load related products dynamically based on cart items
+  loadCartRelatedProducts();
 }
 
 
@@ -3257,6 +3268,8 @@ async function initCheckoutPage() {
   };
 
   const fetchSummary = async (pincode = "") => {
+    pincode = (pincode || "").trim();
+    console.log('[SUMMARY] fetchSummary called with pincode:', pincode);
     const msgEl = document.getElementById('shipping-message');
     const noteEl = document.getElementById('shipping-estimate-note');
     const placeBtn = document.getElementById('place-order-btn');
@@ -3905,6 +3918,80 @@ async function loadRecommendedProducts() {
   }
 }
 
+async function loadCartRelatedProducts() {
+  const containerMobile = document.getElementById('related-items-mobile');
+  const containerDesktop = document.getElementById('related-items-desktop');
+
+  if (!containerMobile && !containerDesktop) return;
+
+  try {
+    const items = Cart.get();
+    const cartProductIds = new Set(items.map(item => String(item.productId)));
+
+    let products = [];
+    if (items.length > 0) {
+      try {
+        const firstItem = items[0];
+        const data = await apiCall(`/user/products/${firstItem.productId}`);
+        const p = data.product;
+        if (p && p.category && p.category._id) {
+          const catData = await apiCall(`/user/products?category=${p.category._id}&limit=20`);
+          products = catData.products || [];
+        }
+      } catch (err) {
+        console.warn('[loadCartRelatedProducts] Failed to fetch category products:', err);
+      }
+    }
+
+    // Filter out products already in cart
+    let filteredProducts = products.filter(p => !cartProductIds.has(String(p._id)));
+
+    // Fallback if empty or category search yielded no items
+    if (filteredProducts.length === 0) {
+      try {
+        const fallbackData = await apiCall('/user/products/top-sold?limit=20');
+        const fallbackProducts = fallbackData.products || [];
+        filteredProducts = fallbackProducts.filter(p => !cartProductIds.has(String(p._id)));
+        
+        if (filteredProducts.length === 0) {
+          const featData = await apiCall('/user/products/featured?limit=20');
+          const featProducts = featData.products || [];
+          filteredProducts = featProducts.filter(p => !cartProductIds.has(String(p._id)));
+        }
+      } catch (err) {
+        console.warn('[loadCartRelatedProducts] Failed to fetch fallback products:', err);
+      }
+    }
+
+    // Slice to maximum of 4 items
+    const finalProducts = filteredProducts.slice(0, 4);
+
+    // Render Mobile
+    if (containerMobile) {
+      if (finalProducts.length === 0) {
+        containerMobile.innerHTML = '<div class="col-span-2 text-center py-4 text-gray-500 text-sm">No related products found.</div>';
+      } else {
+        containerMobile.innerHTML = finalProducts.map(p => buildProductCard(p, 'product-card')).join('');
+      }
+    }
+
+    // Render Desktop
+    if (containerDesktop) {
+      if (finalProducts.length === 0) {
+        containerDesktop.innerHTML = '<div class="text-center py-8 text-gray-500 text-[16px]">No related products found.</div>';
+      } else {
+        containerDesktop.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            ${finalProducts.map(p => buildProductCard(p, 'product-card')).join('')}
+          </div>
+        `;
+      }
+    }
+  } catch (err) {
+    console.warn('[loadCartRelatedProducts] Failed to load related products:', err);
+  }
+}
+
 // [ORDER-SYNC] Duplicate initOrdersPage removed from app.js. 
 // Using centralized implementation in assets/js/orders.js instead.
 
@@ -4367,6 +4454,10 @@ function fillProfileLocationFields(location) {
     { id: 'billing-state', value: location.state },
     { id: 'billing-city', value: location.city },
     { id: 'billing-zip', value: location.pincode || location.zip },
+    { id: 'ship-country', value: location.country },
+    { id: 'ship-state', value: location.state },
+    { id: 'ship-city', value: location.city },
+    { id: 'ship-pincode', value: location.pincode || location.zip },
     { id: 'shipping-country', value: location.country },
     { id: 'shipping-state', value: location.state },
     { id: 'shipping-city', value: location.city },
