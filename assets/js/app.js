@@ -1981,7 +1981,7 @@ async function loadCategoriesSection() {
       const slice = cats.slice(start, start + perPage);
       grid.innerHTML = slice.map(c => {
         const img = c.banner ? (c.banner.startsWith('http') ? c.banner : `${API_BASE.replace('/api', '')}/uploads/${c.banner}`) : 'assets/images/deafult.png';
-        return `<div class="ec-card" style="cursor:pointer" onclick="window.location.href='allproducts.html?category=${c._id}'">
+        return `<div class="ec-card" style="cursor:pointer" onclick="window.location.href='allproducts.html?category=${c.slug}'">
           <div class="ec-img-box"><img src="${img}" alt="${c.name}" onerror="this.src='assets/images/deafult.png'"></div>
           <p class="ec-name">${c.name}</p>
         </div>`;
@@ -2200,7 +2200,8 @@ async function initAllProductsPage() {
       state.allCategories.forEach(c => {
         const div = document.createElement('div');
         div.className = 'mt-2';
-        div.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="${c._id}" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${state.filters.category === c._id ? 'checked' : ''}><span class="text-[13px] font-medium">${c.name}</span></label>`;
+        const isSel = state.filters.category === c._id || state.filters.category === c.slug;
+        div.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="${c.slug}" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${isSel ? 'checked' : ''}><span class="text-[13px] font-medium">${c.name}</span></label>`;
         catSidebar.appendChild(div);
       });
     }
@@ -2214,9 +2215,9 @@ async function initAllProductsPage() {
 
       catCarousel.innerHTML = allChip + state.allCategories.map(c => {
         const img = c.banner ? (c.banner.startsWith('http') ? c.banner : `${IMAGE_BASE}/uploads/${c.banner}`) : 'assets/images/deafult.png';
-        const isSel = state.filters.category === c._id;
+        const isSel = state.filters.category === c._id || state.filters.category === c.slug;
         return `
-          <div class="cat-chip snap-start flex-shrink-0 w-[90px] h-[80px] lg:w-[230px] lg:h-[145px] bg-white rounded-[6px] lg:rounded-[8px] flex flex-col cursor-pointer border ${isSel ? 'border-[#BE2229] shadow-md' : 'border-[rgba(234,234,234,0.63)]'}" data-cat-id="${c._id}">
+          <div class="cat-chip snap-start flex-shrink-0 w-[90px] h-[80px] lg:w-[230px] lg:h-[145px] bg-white rounded-[6px] lg:rounded-[8px] flex flex-col cursor-pointer border ${isSel ? 'border-[#BE2229] shadow-md' : 'border-[rgba(234,234,234,0.63)]'}" data-cat-id="${c.slug}">
             <div class="flex-1 flex items-center justify-center p-2 min-h-0"><img src="${img}" class="max-h-full object-contain" onerror="this.src='assets/images/deafult.png'"></div>
             <div class="pb-2 text-center"><span class="text-[9px] lg:text-[18px] font-medium">${c.name}</span></div>
           </div>`;
@@ -2235,11 +2236,30 @@ async function initAllProductsPage() {
   function updateBreadcrumb() {
     if (!bcContainer) return;
     let html = `<a href="index.html">Home</a> &gt; <a href="allproducts.html">All Products</a>`;
+    let headingText = "All Products";
+
     if (state.filters.category) {
-      const cat = state.allCategories.find(c => c._id === state.filters.category);
-      if (cat) html += ` &gt; <span class="font-medium">${cat.name}</span>`;
+      const cat = state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category);
+      if (cat) {
+        html += ` &gt; <span class="font-medium">${cat.name}</span>`;
+        headingText = `Showing Products for ${cat.name}`;
+      }
+    } else if (state.filters.subcategory) {
+      // Traverse subcategories to find dynamic match
+      const subcat = state.allCategories.flatMap(c => c.subcategories || []).find(s => s._id === state.filters.subcategory || s.slug === state.filters.subcategory);
+      if (subcat) {
+        html += ` &gt; <span class="font-medium">${subcat.name}</span>`;
+        headingText = `Showing Products for ${subcat.name}`;
+      }
     }
+
     bcContainer.innerHTML = html;
+
+    // Dynamically update h1 page title heading on allproducts.html
+    const h1 = document.querySelector('main h1');
+    if (h1) {
+      h1.textContent = headingText;
+    }
   }
 
   function initSortUI() {
@@ -2602,11 +2622,11 @@ async function initProductPage() {
       let html = `<a href="allproducts.html" class="hover:text-[#BE2229]">All Categories</a>`;
 
       if (product.category) {
-        html += ` &gt; <a href="allproducts.html?category=${product.category._id}" class="hover:text-[#BE2229]">${product.category.name}</a>`;
+        html += ` &gt; <a href="allproducts.html?category=${product.category.slug}" class="hover:text-[#BE2229]">${product.category.name}</a>`;
       }
 
       if (product.subcategory) {
-        html += ` &gt; <a href="allproducts.html?subcategory=${product.subcategory._id}" class="hover:text-[#BE2229]">${product.subcategory.name}</a>`;
+        html += ` &gt; <a href="allproducts.html?subcategory=${product.subcategory.slug}" class="hover:text-[#BE2229]">${product.subcategory.name}</a>`;
       }
 
       html += ` &gt; <span class="text-black font-medium">${product.name}</span>`;
@@ -4376,7 +4396,7 @@ async function initCategoriesPage() {
     grid.innerHTML = cats.map(c => {
       const img = c.banner ? (c.banner.startsWith('http') ? c.banner : `${IMAGE_BASE}/uploads/${c.banner}`) : 'assets/images/deafult.png';
       return `
-        <a href="allproducts.html?category=${c._id}" class="bg-white border border-[rgba(234,234,234,0.63)] rounded-[8px] shadow-[0px_2px_4px_rgba(0,0,0,0.25)] flex flex-col items-center justify-end h-[119px] relative hover:shadow-md transition">
+        <a href="allproducts.html?category=${c.slug}" class="bg-white border border-[rgba(234,234,234,0.63)] rounded-[8px] shadow-[0px_2px_4px_rgba(0,0,0,0.25)] flex flex-col items-center justify-end h-[119px] relative hover:shadow-md transition">
           <div class="w-full h-[78px] flex items-center justify-center absolute top-2">
             <img src="${img}" alt="${c.name}" class="max-w-[147px] max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
           </div>
@@ -4520,7 +4540,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Smart Responsive Banner Switch is now handled globally above
 
   // Highlight active nav items (desktop & mobile)
-  const currentPage = document.body.dataset.page;
+  const currentPage = document.body.dataset.page || window.location.pathname.split('/').pop().replace('.html', '') || 'index';
   if (currentPage) {
     // Desktop Nav
     document.querySelectorAll(`ul.flex li a[href*="${currentPage}"]`).forEach(a => {
@@ -4529,12 +4549,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Mobile Bottom Navigation ──────────────────────────────────────────────
     const bottomNav = document.querySelector('.mobile-navbar');
     if (bottomNav) {
-      const pageId = document.body.dataset.page || 'index';
+      const pageId = currentPage;
       bottomNav.querySelectorAll('.nav-item').forEach(item => {
         const itemPage = item.dataset.page;
 
         // Active State Logic
-        if (itemPage === pageId || (pageId === 'index' && itemPage === 'home')) {
+        if (itemPage === pageId || (pageId === 'index' && itemPage === 'home') || (pageId === 'orders' && itemPage === 'profile')) {
           item.classList.add('active');
         } else {
           item.classList.remove('active');
@@ -4570,7 +4590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (bodyPage === 'allproducts') initAllProductsPage();
   if (bodyPage === 'product') initProductPage();
   if (bodyPage === 'cart') initCartPage();
-  if (bodyPage === 'orders') initOrdersPage();
+  if (bodyPage === 'orders' && typeof initOrdersPage === 'function') initOrdersPage();
   if (bodyPage === 'profile') initProfilePage();
   if (bodyPage === 'categories') initCategoriesPage();
   if (bodyPage === 'checkout') initCheckoutPage();

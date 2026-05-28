@@ -26,8 +26,32 @@ exports.getProducts = async (req, res) => {
       ];
     }
 
-    if (category) query.category = category;
-    if (req.query.subcategory) query.subcategory = req.query.subcategory;
+    if (category) {
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        query.category = category;
+      } else {
+        const catDoc = await Category.findOne({ slug: category, isActive: true });
+        if (catDoc) {
+          query.category = catDoc._id;
+        } else {
+          query.category = new mongoose.Types.ObjectId();
+        }
+      }
+    }
+
+    if (req.query.subcategory) {
+      const subcat = req.query.subcategory;
+      if (mongoose.Types.ObjectId.isValid(subcat)) {
+        query.subcategory = subcat;
+      } else {
+        const subcatDoc = await Category.findOne({ slug: subcat, isActive: true });
+        if (subcatDoc) {
+          query.subcategory = subcatDoc._id;
+        } else {
+          query.subcategory = new mongoose.Types.ObjectId();
+        }
+      }
+    }
     if (isFeatured !== undefined) query.isFeatured = isFeatured === 'true';
     if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] };
 

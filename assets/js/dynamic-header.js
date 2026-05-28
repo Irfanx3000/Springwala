@@ -1,6 +1,7 @@
 /**
  * dynamic-header.js - Dynamic Storefront Header System
  * Loads, caches, and renders categories dropdown, mega menu, and navigation.
+ * Supports both Desktop and Mobile layouts based on index.html responsive architecture.
  */
 
 (function () {
@@ -62,13 +63,63 @@
             <span class="text-white text-[13px]">Get Flat 100% Discount on Selected Products</span>
         </div>
 
-        <!-- Desktop Header Area -->
-        <header class="bg-white sticky top-0 z-50">
-            <!-- Top Nav Block (Search, Logo, Location) -->
-            <div class="max-w-[1440px] mx-auto flex items-center justify-between px-[80px] h-[73px]">
+        <header class="bg-[#F4F6F6] md:bg-white border-b border-[#E8E8E8] sticky top-0 z-50">
+            <!-- Mobile Header Area -->
+            <div class="flex md:hidden relative w-full h-[51px] bg-white border-b border-[#E8E8E8] z-50">
+                <!-- Hamburger -->
+                <button id="menu-btn"
+                    class="absolute left-[17px] top-[11px] w-[29px] h-[29px] flex items-center justify-center">
+                    <img src="assets/icons/mobile/hamburger.svg" alt="Menu" class="w-full h-full object-contain">
+                </button>
+
+                <!-- Logo -->
+                <img src="assets/images/header.png" alt="Springwala Logo"
+                    class="absolute left-1/2 -translate-x-1/2 top-[9px] w-[141px] h-[33px] cursor-pointer"
+                    onclick="window.location.href='index.html'">
+
+
+            </div>
+
+            <!-- Mobile Sub-Header -->
+            <div id="mobile-sub-header" class="md:hidden flex flex-col w-full origin-top">
+                <div class="px-[14px] py-[5px] bg-[#BE2229] flex items-center gap-3">
+                    <div class="bg-white rounded-[6px] flex-1 flex items-center px-[11px] h-[30px] relative" id="mobile-search-container">
+                        <img src="assets/icons/mobile/search.svg" alt="Search" class="w-4 h-4 text-[#797979]">
+                        <input type="text" id="mobile-search-input" placeholder="Search..." class="ml-2 outline-none text-[14px] w-full" autocomplete="off">
+                    </div>
+
+                    <a href="login.html" id="mobile-profile-link" class="cursor-pointer flex-shrink-0">
+                        <img src="assets/icons/mobile/account.svg" alt="Account" class="w-[26px] h-[26px]">
+                    </a>
+                </div>
+
+                <!-- Shop by Categories / Deliver to Sub-header -->
+                <div
+                    class="flex flex-row justify-between items-center px-[15px] py-[6px] bg-[#F6D6D6] h-[30px] w-full gap-2">
+                    <!-- Shop by Categories -->
+                    <div class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap cursor-pointer font-medium"
+                        style="font-family: 'Roboto', sans-serif;" onclick="window.location.href='categories.html'">Shop by Categories
+                    </div>
+
+                    <!-- Deliver to Section -->
+                    <div class="flex items-center gap-1 cursor-pointer min-w-0" id="location-btn">
+                        <span class="text-[#BD2830] text-[12px] sm:text-[14px] whitespace-nowrap"
+                            style="font-family: 'Roboto', sans-serif;">Deliver to</span>
+                        <img src="assets/icons/mobile/location.svg" alt="Location"
+                            class="w-[10px] sm:w-[12px] h-[14px] sm:h-[16px] flex-shrink-0"
+                            style="transform: scaleX(-1); filter: brightness(0) saturate(100%) invert(18%) sepia(90%) saturate(2687%) hue-rotate(338deg) brightness(91%) contrast(92%);">
+                        <span
+                            class="text-[#BD2830] text-[12px] sm:text-[14px] underline truncate max-w-[100px] sm:max-w-[130px] navbar-location-text"
+                            id="location-text" style="font-family: 'Roboto', sans-serif;">${defaultLocationText}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Header Area -->
+            <div class="hidden md:flex max-w-[1440px] mx-auto items-center justify-between px-[80px] h-[73px]">
                 <img src="assets/images/header.png" alt="Springwala Logo" class="h-[40px] w-auto cursor-pointer" onclick="window.location.href='index.html'">
 
-                <div class="flex items-start gap-2 ml-8 cursor-pointer">
+                <div class="flex items-start gap-2 ml-8 cursor-pointer" id="desktop-location-btn">
                     <img src="assets/icons/desktop/location.svg" alt="Location" class="w-4 h-4 mt-1 text-[#747474]">
                     <div class="flex flex-col min-w-0">
                         <span class="text-[#747474] text-[10px]">Location</span>
@@ -103,10 +154,6 @@
                         <input type="text" id="desktop-search-input" class="flex-1 outline-none text-[13px] h-full" placeholder="Search Products..." autocomplete="off">
                         <img src="assets/icons/desktop/search.svg" alt="Search" class="w-5 h-5 text-[#797979] cursor-pointer" id="desktop-search-btn">
                     </div>
-
-                    <!-- Autocomplete Suggestions Dropdown -->
-                    <div id="search-suggestions-dropdown" class="hidden absolute left-0 right-0 top-[100%] mt-[6px] bg-white shadow-[0px_4px_20px_rgba(0,0,0,0.15)] rounded-[6px] z-50 overflow-y-auto no-scrollbar max-h-[450px] border border-gray-100">
-                    </div>
                 </div>
 
                 <!-- Profile & Cart -->
@@ -126,12 +173,12 @@
             </div>
             
             <!-- Bottom Nav Block (Browse Categories & Links) -->
-            <div class="border-t border-[#E8E8E8] relative z-40 bg-white shadow-sm">
+            <div class="border-t border-[#E8E8E8] relative z-40 bg-white shadow-sm hidden md:block">
                 <div class="max-w-[1440px] mx-auto flex items-center h-[56px] px-[80px]">
                     
                     <!-- DROPDOWN 1: Browse All Categories -->
                     <div class="relative group h-full flex items-center" id="mega-menu-trigger">
-                        <a href="categories.html" class="bg-[#BE2229] border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-800 transition">
+                        <a href="javascript:void(0)" class="bg-[#BE2229] border border-[#BE2229] rounded-[5px] px-4 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-red-800 transition">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                             <span class="text-white text-[12px] font-medium uppercase">Browse All Categories</span>
                         </a>
@@ -156,7 +203,58 @@
                 </div>
             </div>
         </header>
+
+        <!-- Centralized Mobile Menu Drawer -->
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-[280px] bg-white shadow-2xl z-50 hidden-menu md:hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-8">
+                    <img src="assets/images/header.png" alt="Logo" class="h-8">
+                    <button id="close-menu" class="text-gray-500 text-2xl">&times;</button>
+                </div>
+                <ul class="space-y-6 text-[#525252] font-['Poppins'] text-lg">
+                    <li class="flex items-center gap-3" id="mobile-menu-index">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li class="flex items-center gap-3" id="mobile-menu-categories">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="categories.html">Categories</a>
+                    </li>
+                    <li class="flex items-center gap-3" id="mobile-menu-allproducts">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="allproducts.html">All Products</a>
+                    </li>
+                    <li class="flex items-center gap-3" id="mobile-menu-orders">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="orders.html">Your Orders</a>
+                    </li>
+                    <li class="flex items-center gap-3" id="mobile-menu-wishlist">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="wishlist.html">Your Wishlist</a>
+                    </li>
+                    <li class="flex items-center gap-3" id="mobile-menu-profile">
+                        <span class="w-2 h-2 bg-transparent rounded-full indicator"></span>
+                        <a href="profile.html">Your Account</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Autocomplete Suggestions Dropdown -->
+        <div id="search-suggestions-dropdown" class="hidden absolute left-0 right-0 top-[100%] mt-[6px] bg-white shadow-[0px_4px_20px_rgba(0,0,0,0.15)] rounded-[6px] z-50 overflow-y-auto no-scrollbar max-h-[450px] border border-gray-100">
+        </div>
     `;
+
+    function showErrorState() {
+        const searchList = document.getElementById('search-cat-list');
+        const megaMenu = document.getElementById('mega-menu-content');
+        if (searchList) {
+            searchList.innerHTML = `<span class="text-red-500 text-[13px] pl-1">Failed to load categories</span>`;
+        }
+        if (megaMenu) {
+            megaMenu.innerHTML = `<div class="w-full text-center text-red-500 py-4">Failed to load categories</div>`;
+        }
+    }
 
     // 2. Fetch and hydrate the categories from API
     async function loadCategories() {
@@ -225,6 +323,37 @@
                 }).join('');
             }
         }
+
+        // Persist/Sync category selection from URL
+        const params = new URLSearchParams(window.location.search);
+        const urlCat = params.get('category') || '';
+        const label = document.getElementById('selected-category-text');
+        if (label) {
+            if (urlCat) {
+                const matchedCat = categories.find(cat => cat.slug === urlCat);
+                if (matchedCat) {
+                    label.textContent = matchedCat.name;
+                    label.setAttribute('data-slug', matchedCat.slug);
+                } else {
+                    // Try looking up in subcategories
+                    let matchedSub = null;
+                    for (const cat of categories) {
+                        const sub = (cat.subcategories || []).find(s => s.slug === urlCat);
+                        if (sub) {
+                            matchedSub = sub;
+                            break;
+                        }
+                    }
+                    if (matchedSub) {
+                        label.textContent = matchedSub.name;
+                        label.setAttribute('data-slug', matchedSub.slug);
+                    }
+                }
+            } else {
+                label.textContent = 'All Categories';
+                label.setAttribute('data-slug', '');
+            }
+        }
     }
 
     // 3. Autocomplete Custom Styles Injection
@@ -259,13 +388,13 @@
         }
     }
 
-    function handleSearchSubmit() {
-        const searchInput = document.getElementById('desktop-search-input');
+    function handleSearchSubmit(isMobile = false) {
+        const searchInput = document.getElementById(isMobile ? 'mobile-search-input' : 'desktop-search-input');
         const selectedCat = document.getElementById('selected-category-text');
         if (!searchInput) return;
 
         const query = searchInput.value.trim();
-        const catSlug = selectedCat ? selectedCat.getAttribute('data-slug') : '';
+        const catSlug = isMobile ? '' : (selectedCat ? selectedCat.getAttribute('data-slug') : '');
 
         if (query) {
             saveRecentSearch(query);
@@ -290,22 +419,39 @@
                 label.textContent = name;
                 label.setAttribute('data-slug', slug);
             }
+            // Navigate to allproducts.html with selected category slug
+            if (slug) {
+                window.location.href = `allproducts.html?category=${encodeURIComponent(slug)}`;
+            } else {
+                window.location.href = 'allproducts.html';
+            }
         }
 
         // Search button clicked
         if (e.target.id === 'desktop-search-btn') {
             e.preventDefault();
-            handleSearchSubmit();
+            handleSearchSubmit(false);
         }
     });
 
     // 5. Predictive Live Search Suggestions Logic
-    const dropdown = document.getElementById('search-suggestions-dropdown');
+    let dropdown = document.getElementById('search-suggestions-dropdown');
     let searchDebounceTimer;
     let abortController = null;
     const cache = {}; // suggestions cache
     let activeIndex = -1;
     let itemsList = [];
+
+    function getActiveDropdown() {
+        if (!dropdown) dropdown = document.getElementById('search-suggestions-dropdown');
+        if (!dropdown) return null;
+        const isMobile = window.innerWidth < 768; // md breakpoint is 768px
+        const parent = document.getElementById(isMobile ? 'mobile-search-container' : 'search-bar-container');
+        if (parent && dropdown.parentElement !== parent) {
+            parent.appendChild(dropdown);
+        }
+        return dropdown;
+    }
 
     function escapeHtml(str) {
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -323,6 +469,9 @@
     }
 
     async function fetchSearchSuggestions(query) {
+        const dd = getActiveDropdown();
+        if (!dd) return;
+
         if (!query) {
             renderRecentAndTrending();
             return;
@@ -338,7 +487,7 @@
         abortController = new AbortController();
 
         try {
-            dropdown.innerHTML = `
+            dd.innerHTML = `
                 <div class="p-4 flex flex-col gap-3">
                     <div class="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
                     <div class="h-8 bg-gray-100 rounded animate-pulse w-full"></div>
@@ -346,7 +495,7 @@
                     <div class="h-8 bg-gray-100 rounded animate-pulse w-full"></div>
                 </div>
             `;
-            dropdown.classList.remove('hidden');
+            dd.classList.remove('hidden');
 
             const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : 'http://localhost:5000/api';
             const res = await fetch(`${apiBase}/search?q=${encodeURIComponent(query)}`, { signal: abortController.signal });
@@ -368,10 +517,14 @@
     }
 
     function renderErrorUI() {
-        dropdown.innerHTML = `<div class="py-6 text-center text-red-500 text-[13px]">Error loading suggestions. Please try again.</div>`;
+        const dd = getActiveDropdown();
+        if (dd) dd.innerHTML = `<div class="py-6 text-center text-red-500 text-[13px]">Error loading suggestions. Please try again.</div>`;
     }
 
     function renderSearchSuggestions(data, query) {
+        const dd = getActiveDropdown();
+        if (!dd) return;
+
         const { products, categories, suggestions } = data;
         itemsList = [];
         activeIndex = -1;
@@ -441,11 +594,14 @@
             html = `<div class="py-8 text-center text-gray-500 text-[13px]">No matches found for "${escapeHtml(query)}"</div>`;
         }
 
-        dropdown.innerHTML = html;
-        dropdown.classList.remove('hidden');
+        dd.innerHTML = html;
+        dd.classList.remove('hidden');
     }
 
     function renderRecentAndTrending() {
+        const dd = getActiveDropdown();
+        if (!dd) return;
+
         let recent = [];
         try {
             recent = JSON.parse(localStorage.getItem('sw_recent_searches') || '[]');
@@ -486,36 +642,37 @@
             `;
         });
 
-        dropdown.innerHTML = html;
-        dropdown.classList.remove('hidden');
+        dd.innerHTML = html;
+        dd.classList.remove('hidden');
     }
 
-    // Input handlers
-    const inputHandler = (e) => {
+    // Input handlers helper
+    const searchDebounce = (e) => {
         const query = e.target.value.trim();
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => fetchSearchSuggestions(query), 300);
     };
 
-    const searchInputEl = document.getElementById('desktop-search-input');
-    if (searchInputEl) {
-        searchInputEl.addEventListener('input', inputHandler);
-        
-        searchInputEl.addEventListener('focus', () => {
-            const query = searchInputEl.value.trim();
-            if (query) {
-                fetchSearchSuggestions(query);
-            } else {
-                renderRecentAndTrending();
-            }
-        });
+    const searchFocus = (e) => {
+        const query = e.target.value.trim();
+        if (query) {
+            fetchSearchSuggestions(query);
+        } else {
+            renderRecentAndTrending();
+        }
+    };
 
-        searchInputEl.addEventListener('keydown', function (e) {
-            if (dropdown.classList.contains('hidden')) {
+    // Keyboard navigation helper
+    const makeSearchKeydown = (inputEl, isMobile = false) => {
+        return function (e) {
+            const dd = getActiveDropdown();
+            if (!dd) return;
+
+            if (dd.classList.contains('hidden')) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    handleSearchSubmit();
+                    handleSearchSubmit(isMobile);
                 }
                 return;
             }
@@ -561,47 +718,96 @@
                 if (activeIndex >= 0 && activeIndex < itemsList.length) {
                     const selected = itemsList[activeIndex];
                     if (selected.type === 'suggestion') {
-                        searchInputEl.value = selected.value;
-                        dropdown.classList.add('hidden');
-                        handleSearchSubmit();
+                        inputEl.value = selected.value;
+                        dd.classList.add('hidden');
+                        handleSearchSubmit(isMobile);
                     } else if (selected.type === 'category') {
                         window.location.href = `allproducts.html?category=${encodeURIComponent(selected.value)}`;
                     } else if (selected.type === 'product') {
                         window.location.href = `product.html?id=${encodeURIComponent(selected.value)}`;
                     }
                 } else {
-                    handleSearchSubmit();
+                    handleSearchSubmit(isMobile);
                 }
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                dropdown.classList.add('hidden');
+                dd.classList.add('hidden');
             }
-        });
+        };
+    };
 
-        // Hide suggestions on document click outside
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && e.target !== searchInputEl) {
-                dropdown.classList.add('hidden');
+    // Bind event listeners to both search inputs
+    const desktopSearchInput = document.getElementById('desktop-search-input');
+    if (desktopSearchInput) {
+        desktopSearchInput.addEventListener('input', searchDebounce);
+        desktopSearchInput.addEventListener('focus', searchFocus);
+        desktopSearchInput.addEventListener('keydown', makeSearchKeydown(desktopSearchInput, false));
+    }
+
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', searchDebounce);
+        mobileSearchInput.addEventListener('focus', searchFocus);
+        mobileSearchInput.addEventListener('keydown', makeSearchKeydown(mobileSearchInput, true));
+    }
+
+    // Hide suggestions on document click outside
+    document.addEventListener('click', (e) => {
+        const dd = getActiveDropdown();
+        if (dd && !dd.contains(e.target) && e.target !== desktopSearchInput && e.target !== mobileSearchInput) {
+            dd.classList.add('hidden');
+        }
+    });
+
+    // Handles item click selections in the dropdown using event delegation
+    const dd = getActiveDropdown();
+    if (dd) {
+        dd.addEventListener('click', function (e) {
+            const item = e.target.closest('.suggest-item');
+            if (item) {
+                const type = item.getAttribute('data-type');
+                const val = item.getAttribute('data-val');
+
+                if (type === 'suggestion') {
+                    const isMobile = (mobileSearchInput && document.activeElement === mobileSearchInput) || 
+                                     (mobileSearchInput && mobileSearchInput.value.trim() !== '' && (!desktopSearchInput || !desktopSearchInput.value.trim()));
+                    if (isMobile) {
+                        mobileSearchInput.value = val;
+                        dd.classList.add('hidden');
+                        handleSearchSubmit(true);
+                    } else {
+                        if (desktopSearchInput) desktopSearchInput.value = val;
+                        dd.classList.add('hidden');
+                        handleSearchSubmit(false);
+                    }
+                } else if (type === 'category') {
+                    window.location.href = `allproducts.html?category=${encodeURIComponent(val)}`;
+                } else if (type === 'product') {
+                    window.location.href = `product.html?id=${encodeURIComponent(val)}`;
+                }
             }
         });
     }
 
-    // Handles item click selections in the dropdown using event delegation
-    dropdown.addEventListener('click', function (e) {
-        const item = e.target.closest('.suggest-item');
-        if (item) {
-            const type = item.getAttribute('data-type');
-            const val = item.getAttribute('data-val');
+    // Highlight mobile menu active state on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Remove duplicate static mobile menu if any
+        const menus = document.querySelectorAll('#mobile-menu');
+        if (menus.length > 1) {
+            for (let i = 1; i < menus.length; i++) {
+                menus[i].remove();
+            }
+        }
 
-            if (type === 'suggestion') {
-                if (searchInputEl) searchInputEl.value = val;
-                dropdown.classList.add('hidden');
-                handleSearchSubmit();
-            } else if (type === 'category') {
-                window.location.href = `allproducts.html?category=${encodeURIComponent(val)}`;
-            } else if (type === 'product') {
-                window.location.href = `product.html?id=${encodeURIComponent(val)}`;
+        const activePage = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
+        const activeItem = document.getElementById(`mobile-menu-${activePage}`);
+        if (activeItem) {
+            activeItem.classList.add('text-[#BE2229]', 'font-medium');
+            const indicator = activeItem.querySelector('.indicator');
+            if (indicator) {
+                indicator.classList.remove('bg-transparent');
+                indicator.classList.add('bg-[#BE2229]');
             }
         }
     });

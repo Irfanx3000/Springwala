@@ -327,15 +327,17 @@ function handleTracking(trackingId) {
 
 async function orderAgain(productId) {
     try {
-        const product = await apiCall(`/products/${productId}`, 'GET');
+        const data = await apiCall(`/user/products/${productId}`, 'GET');
+        const product = data.product;
         if (product) {
-            handleAddToCart(
+            Cart.add(
                 product._id,
                 product.name,
                 productImg(product),
-                product.price,
-                product.discountedPrice,
-                product.gstPercent || 18
+                product.finalPrice || product.price,
+                1,
+                1,
+                product.slug || ''
             );
         }
     } catch (err) {
@@ -367,3 +369,8 @@ function formatDate(d) {
     if (!d) return 'TBA';
     return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
+
+// Safely execute initOrdersPage on DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    initOrdersPage();
+});
