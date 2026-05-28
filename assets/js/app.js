@@ -165,8 +165,12 @@ function formatCurrency(n) {
 // ─── API Helper ───────────────────────────────────────────────────────────────
 async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
   const url = API_BASE + endpoint;
+  console.log("========== API REQUEST ==========");
+  console.log("ENDPOINT:", endpoint);
+  console.log("METHOD:", method);
+  console.log("BODY:", body);
+  console.log("=================================");
   console.log(`[API] Fetching: ${url} (${method})`);
-  console.log("Fetching products..."); // Specific log as requested by user
 
   const token = localStorage.getItem("token");
   const isProtected = auth || endpoint.includes('/user/') || endpoint.includes('/payment/');
@@ -1086,9 +1090,6 @@ const LocationManager = {
             <button id="loc-btn-allow" class="w-full bg-[#BE2229] hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform active:scale-95 text-sm">
               Allow Location Access
             </button>
-            <button id="loc-btn-manual" class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-colors text-sm">
-              Enter Pincode Manually
-            </button>
             <button id="loc-btn-cancel" class="w-full text-gray-400 hover:text-gray-500 font-semibold py-2 text-xs transition-colors">
               Not Now
             </button>
@@ -1124,10 +1125,6 @@ const LocationManager = {
     document.getElementById('loc-btn-allow').onclick = () => {
       this.toggleSoftPrompt(false);
       this.requestSystemLocation();
-    };
-    document.getElementById('loc-btn-manual').onclick = () => {
-      this.toggleSoftPrompt(false);
-      this.toggleManualPincodePrompt(true);
     };
     document.getElementById('loc-btn-cancel').onclick = () => {
       this.toggleSoftPrompt(false);
@@ -1232,11 +1229,24 @@ const LocationManager = {
   },
 
   getPermissionState: function() {
+    const stored = localStorage.getItem('locationPermission');
+    if (stored) {
+      try {
+        const obj = JSON.parse(stored);
+        if (obj.locationPermissionGranted === true) return 'granted';
+        if (obj.locationPermissionGranted === false) return 'denied';
+      } catch (e) {}
+    }
     return localStorage.getItem('locationPermissionState') || 'prompt';
   },
 
   savePermissionState: function(state) {
     localStorage.setItem('locationPermissionState', state);
+    const permissionObj = {
+      locationPermissionGranted: state === 'granted',
+      lastLocationFetch: Date.now()
+    };
+    localStorage.setItem('locationPermission', JSON.stringify(permissionObj));
   },
 
   requestSystemLocation: function() {
@@ -1479,15 +1489,16 @@ const LocationManager = {
   },
 
   checkLocationLifecycle: async function() {
-    let permission = this.getPermissionState();
+    let browserPermission = null;
     
     if (navigator.permissions && navigator.permissions.query) {
       try {
         const result = await navigator.permissions.query({ name: 'geolocation' });
-        permission = result.state;
-        this.savePermissionState(permission);
+        browserPermission = result.state;
+        this.savePermissionState(result.state);
         
         result.onchange = () => {
+          console.log('[LOCATION-SYNC] Browser geolocation permission changed to:', result.state);
           this.savePermissionState(result.state);
           if (result.state === 'granted') {
             this.requestSystemLocation();
@@ -1500,12 +1511,19 @@ const LocationManager = {
       }
     }
 
+    const permission = browserPermission || this.getPermissionState();
+    console.log('[LOCATION-SYNC] Effective permission state is:', permission);
+
     if (permission === 'granted') {
-      console.log('[LOCATION-SYNC] Geolocation permission is granted. Fetching fresh location...');
+      console.log('[LOCATION-SYNC] Geolocation permission is granted. Fetching fresh location silently...');
       this.requestSystemLocation();
     } else if (permission === 'prompt') {
       console.log('[LOCATION-SYNC] Geolocation permission prompt required.');
-      setTimeout(() => this.toggleSoftPrompt(true), 2000);
+      const cached = this.getLocation();
+      // Only show soft prompt if no cached location exists to prevent prompt spam
+      if (!cached) {
+        setTimeout(() => this.toggleSoftPrompt(true), 2000);
+      }
     } else {
       console.log('[LOCATION-SYNC] Geolocation permission is denied/manual. Using fallback.');
       if (permission === 'denied') {
@@ -1552,12 +1570,26 @@ const LocationManager = {
       if (locTarget) {
         e.preventDefault();
         e.stopPropagation();
-        this.toggleSoftPrompt(true);
+        
+        const state = this.getPermissionState();
+        if (state === 'granted') {
+          showToast('Refreshing location...', 'info');
+          this.requestSystemLocation();
+        } else if (state === 'denied') {
+          showToast('Location access is blocked. Please enable location permissions in your browser settings.', 'info');
+        } else {
+          this.toggleSoftPrompt(true);
+        }
       }
     });
 
     // Recalculate summary / totals dynamically when locationChanged is received
     window.addEventListener('locationChanged', (e) => {
+      console.log("[LOCATION-CHANGED EVENT]");
+      console.log("LOCAL STORAGE LOCATION:", localStorage.getItem('selectedLocation'));
+      console.log("ship-pincode:", document.getElementById('ship-pincode')?.value);
+      console.log("shipping-zip:", document.getElementById('shipping-zip')?.value);
+
       const pin = e?.detail?.pincode || e?.detail?.zip;
       if (typeof initCheckoutPage === 'function' && document.body.dataset.page === 'checkout') {
         if (pin) {
@@ -3185,6 +3217,17 @@ function handleCheckout() {
 
 // ─── Page: checkout.html ─────────────────────────────────────────────────────
 async function initCheckoutPage() {
+  console.log("========== CHECKOUT INIT ==========");
+  console.log("BODY PAGE:", document.body.dataset.page);
+
+  const shipPincode = document.getElementById('ship-pincode');
+  const shippingZip = document.getElementById('shipping-zip');
+
+  console.log("ship-pincode field:", shipPincode?.value);
+  console.log("shipping-zip field:", shippingZip?.value);
+
+  console.log("===================================");
+
   if (!Auth.isLoggedIn()) {
     window.location.href = 'login.html';
     return;
@@ -3641,6 +3684,14 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
   window._paymentProcessing = true;
 
   try {
+    console.log("========== PAYMENT FLOW ==========");
+    console.log("CURRENT LOCATION:", localStorage.getItem('selectedLocation'));
+    const cart = Cart.get();
+    const amount   = Number(backendSummary?.totalAmount || backendSummary?.finalAmount || 0);
+    console.log("CART:", cart);
+    console.log("CHECKOUT TOTAL:", amount);
+    console.log("==================================");
+
     console.log('[PAYMENT] Starting Online Payment Flow...');
     console.log('[PAYMENT] Backend Summary:', backendSummary);
 
@@ -3649,7 +3700,6 @@ async function handleOnlinePaymentFlow(shippingAddress, backendSummary) {
     }
 
     // ── Capture everything at function entry, before any await ──
-    const amount   = Number(backendSummary.totalAmount || backendSummary.finalAmount || 0);
     const subtotal = Number(backendSummary.subtotal || 0);
     const shipping = Number(backendSummary.shippingCharge || 0);
     const items    = Array.isArray(backendSummary.items) ? [...backendSummary.items] : [];

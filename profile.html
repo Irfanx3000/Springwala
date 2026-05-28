@@ -260,14 +260,14 @@
             </div>
 
             <!-- Right Content Panel (Desktop Form / Mobile Accordion) -->
-            <div id="profile-form-container"
+            <form id="profile-form-container" autocomplete="off"
                 class="flex flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <!-- Header -->
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         My Profile</h2>
-                    <button id="update-profile-btn"
+                    <button id="update-profile-btn" type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
                         Profile</button>
                 </div>
@@ -284,7 +284,7 @@
                             <!-- First Name -->
                             <div
                                 class="relative w-full md:flex-1 bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-first-name" type="text" placeholder="Your First Name"
+                                <input id="profile-first-name" type="text" placeholder="Your First Name" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -295,7 +295,7 @@
                             <!-- Last Name -->
                             <div
                                 class="relative w-full md:flex-1 bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-last-name" type="text" placeholder="Your Last Name"
+                                <input id="profile-last-name" type="text" placeholder="Your Last Name" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -320,7 +320,7 @@
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </div>
-                                <input id="profile-phone" type="text" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                <input id="profile-phone" type="tel" pattern="[0-9]*" inputmode="numeric" maxlength="10" autocomplete="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -333,7 +333,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Email</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-email" type="email" placeholder="Your Email"
+                                <input id="profile-email" type="email" placeholder="Your Email" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -357,7 +357,7 @@
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </div>
-                                <input id="profile-alt-phone" type="text" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                <input id="profile-alt-phone" type="tel" pattern="[0-9]*" inputmode="numeric" maxlength="10" autocomplete="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -378,7 +378,7 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
                             <div
                                 class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-country" type="text" placeholder="Country"
+                                <input id="profile-country" type="text" placeholder="Country" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -393,7 +393,7 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State</label>
                             <div
                                 class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="profile-state" type="text" placeholder="State"
+                                <input id="profile-state" type="text" placeholder="State" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747474"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -406,16 +406,16 @@
                     </div>
 
                 </div>
-            </div>
+            </form>
 
             <!-- Company Profile Form Container -->
-            <div id="company-profile-form-container"
+            <form id="company-profile-form-container" autocomplete="off"
                 class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         Company Profile</h2>
-                    <button id="update-company-btn"
+                    <button id="update-company-btn" type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
                         Profile</button>
                 </div>
@@ -426,7 +426,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Company Name</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-name" type="text" placeholder="Your Company Name"
+                                <input id="company-name" type="text" placeholder="Your Company Name" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -438,7 +438,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Industry</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-industry" type="text" placeholder="Select Industry"
+                                <input id="company-industry" type="text" placeholder="Select Industry" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -453,7 +453,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Company Type</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-type" type="text" placeholder="e.g. LLC, Private Limited"
+                                <input id="company-type" type="text" placeholder="e.g. LLC, Private Limited" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -465,7 +465,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-country" type="text" placeholder="Enter Country" list="country-list"
+                                <input id="company-country" type="text" placeholder="Enter Country" list="country-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -480,7 +480,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-state" type="text" placeholder="Enter State" list="state-list"
+                                <input id="company-state" type="text" placeholder="Enter State" list="state-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -492,7 +492,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Website URL</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-website" type="text" placeholder="https://www.example.com"
+                                <input id="company-website" type="text" placeholder="https://www.example.com" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -507,7 +507,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Email Address</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-email" type="email" placeholder="company@example.com"
+                                <input id="company-email" type="email" placeholder="company@example.com" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -519,7 +519,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                <input id="company-phone" type="tel" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10" autocomplete="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -534,7 +534,7 @@
                         <div class="flex flex-col gap-2 w-full">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Full Address</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="company-address" type="text" placeholder="Enter Company Full Address"
+                                <input id="company-address" type="text" placeholder="Enter Company Full Address" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -545,16 +545,16 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <!-- GSTIN Form Container -->
-            <div id="gstin-form-container"
+            <form id="gstin-form-container" autocomplete="off"
                 class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         GSTIN Details</h2>
-                    <button id="update-gstin-btn"
+                    <button id="update-gstin-btn" type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
                         GSTIN</button>
                 </div>
@@ -564,7 +564,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">GSTIN Number</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="gstin-number" type="text" placeholder="Enter GSTIN Number"
+                                <input id="gstin-number" type="text" placeholder="Enter GSTIN Number" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -576,7 +576,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">PAN Number</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="gstin-pan" type="text" placeholder="Enter PAN Number"
+                                <input id="gstin-pan" type="text" placeholder="Enter PAN Number" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -587,16 +587,16 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <!-- Billing Address Form Container -->
-            <div id="billing-address-form-container"
+            <form id="billing-address-form-container" autocomplete="off"
                 class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         Billing Address</h2>
-                    <button id="save-billing-btn"
+                    <button id="save-billing-btn" type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Save
                         Address</button>
                 </div>
@@ -606,7 +606,7 @@
                         <div class="flex flex-col gap-2 w-full">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Street Address</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-street" type="text" placeholder="Enter Street Address"
+                                <input id="billing-street" type="text" placeholder="Enter Street Address" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -621,7 +621,7 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Apartment, suite, etc.
                                 (optional)</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc."
+                                <input id="billing-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc." autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -635,7 +635,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">City / Town</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-city" type="text" placeholder="Enter City"
+                                <input id="billing-city" type="text" placeholder="Enter City" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -647,7 +647,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State / Province</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-state" type="text" placeholder="Enter State" list="state-list"
+                                <input id="billing-state" type="text" placeholder="Enter State" list="state-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -661,7 +661,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-country" type="text" placeholder="Enter Country" list="country-list"
+                                <input id="billing-country" type="text" placeholder="Enter Country" list="country-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -673,7 +673,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Postal Code</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-zip" type="text" placeholder="Enter Zip/Postal Code"
+                                <input id="billing-zip" type="text" placeholder="Enter Zip/Postal Code" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -687,7 +687,7 @@
                         <div class="flex flex-col gap-2 w-full md:w-1/2">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="billing-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                <input id="billing-phone" type="tel" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10" autocomplete="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -698,16 +698,16 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <!-- Shipping Address Form Container -->
-            <div id="shipping-address-form-container"
+            <form id="shipping-address-form-container" autocomplete="off"
                 class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         Shipping Address</h2>
-                    <button id="save-shipping-btn"
+                    <button id="save-shipping-btn" type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Save
                         Address</button>
                 </div>
@@ -724,7 +724,7 @@
                         <div class="flex flex-col gap-2 w-full">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Street Address</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-street" type="text" placeholder="Enter Street Address"
+                                <input id="shipping-street" type="text" placeholder="Enter Street Address" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -739,7 +739,7 @@
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Apartment, suite, etc.
                                 (optional)</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc."
+                                <input id="shipping-apartment" type="text" placeholder="Apartment, suite, unit, building, floor, etc." autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -753,7 +753,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">City / Town</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-city" type="text" placeholder="Enter City"
+                                <input id="shipping-city" type="text" placeholder="Enter City" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -765,7 +765,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">State / Province</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-state" type="text" placeholder="Enter State" list="state-list"
+                                <input id="shipping-state" type="text" placeholder="Enter State" list="state-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -779,7 +779,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Country</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-country" type="text" placeholder="Enter Country" list="country-list"
+                                <input id="shipping-country" type="text" placeholder="Enter Country" list="country-list" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -791,7 +791,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Postal Code</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-zip" type="text" placeholder="Enter Zip/Postal Code"
+                                <input id="shipping-zip" type="text" placeholder="Enter Zip/Postal Code" autocomplete="off" spellcheck="false" autocapitalize="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -805,7 +805,7 @@
                         <div class="flex flex-col gap-2 w-full md:w-1/2">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Phone Number</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input id="shipping-phone" type="text" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10"
+                                <input id="shipping-phone" type="tel" placeholder="Enter Phone Number" pattern="[0-9]*" inputmode="numeric" maxlength="10" autocomplete="off"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -816,7 +816,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <!-- Orders Form Container -->
             <div id="orders-form-container"
@@ -843,13 +843,13 @@
             </div>
 
             <!-- Manage Password Form Container -->
-            <div id="manage-password-form-container"
+            <form id="manage-password-form-container" autocomplete="off"
                 class="hidden flex-col flex-1 bg-white md:bg-white rounded-[10px] p-4 sm:p-5 md:p-8 lg:p-10 shadow-sm relative w-full overflow-hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-1 sm:gap-2">
                     <h2
                         class="text-[16px] sm:text-[20px] md:text-[26px] font-['Poppins'] font-bold text-[#5f5f5f] leading-tight flex-1">
                         Manage Password</h2>
-                    <button
+                    <button type="button"
                         class="bg-[#BE2229] text-white text-[11px] sm:text-[13px] md:text-[15px] font-medium font-['Poppins'] px-2.5 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-[5px] hover:bg-red-800 transition whitespace-nowrap flex-shrink-0">Update
                         Password</button>
                 </div>
@@ -858,7 +858,7 @@
                     <div class="flex flex-col gap-2 w-full md:w-[60%]">
                         <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Current Password</label>
                         <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                            <input type="password" placeholder="Enter Current Password"
+                            <input type="password" placeholder="Enter Current Password" autocomplete="current-password"
                                 class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -872,7 +872,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">New Password</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input type="password" placeholder="Enter New Password"
+                                <input type="password" placeholder="Enter New Password" autocomplete="new-password"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -885,7 +885,7 @@
                         <div class="flex flex-col gap-2 flex-1">
                             <label class="text-[14px] text-[#2B2B2B] font-['Inter']">Confirm Password</label>
                             <div class="relative w-full bg-[#F1F1F1] rounded-[8px] flex items-center px-4 h-[45px]">
-                                <input type="password" placeholder="Confirm New Password"
+                                <input type="password" placeholder="Confirm New Password" autocomplete="new-password"
                                     class="w-full bg-transparent outline-none text-[14px] text-[#525252]">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A7A7A"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -897,7 +897,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
         </div>
 

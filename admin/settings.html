@@ -196,7 +196,7 @@
             </div>
 
             <!-- Tab Content: Site Config -->
-            <div id="content-site" class="tab-content">
+            <form id="content-site" class="tab-content" autocomplete="off">
                 <!-- Settings Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[1fr_1fr_300px] gap-6 items-start">
                 
@@ -362,17 +362,17 @@
                 </div>
                 <!-- Save Changes Button -->
                 <div class="flex justify-end mt-8">
-                    <button id="save-site-btn" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[16px] h-[45px] px-10 rounded-[7px] transition shadow-md">
+                    <button type="button" id="save-site-btn" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[16px] h-[45px] px-10 rounded-[7px] transition shadow-md">
                         Save Changes
                     </button>
                 </div>
-            </div>
+            </form>
 
             <!-- Tab Content: Personal Profile -->
             <div id="content-profile" class="tab-content hidden animate-fade-in">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Update Profile -->
-                    <div class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]">
+                    <form class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]" autocomplete="off">
                         <h2 class="font-['Poppins'] font-medium text-[20px] mb-6 border-b pb-2">Personal Profile</h2>
                         <div class="space-y-4">
                             <div class="p-4 bg-gray-50 rounded-lg flex items-center gap-4">
@@ -385,35 +385,35 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-                                <input id="edit-name-input" type="text" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
+                                <input id="edit-name-input" type="text" autocomplete="off" spellcheck="false" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input id="edit-email-input" type="email" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
+                                <input id="edit-email-input" type="email" autocomplete="off" spellcheck="false" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
                             </div>
-                            <button id="update-profile-btn" class="w-full h-11 bg-[#BE2229] text-white rounded-[5px] font-medium hover:bg-black transition mt-4">Save Profile Changes</button>
+                            <button type="button" id="update-profile-btn" class="w-full h-11 bg-[#BE2229] text-white rounded-[5px] font-medium hover:bg-black transition mt-4">Save Profile Changes</button>
                         </div>
-                    </div>
+                    </form>
 
                     <!-- Change Password -->
-                    <div class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]">
+                    <form class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]" autocomplete="off">
                         <h2 class="font-['Poppins'] font-medium text-[20px] mb-6 border-b pb-2">Security & Password</h2>
                         <div class="space-y-4 font-['Roboto']">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                                <input id="current-password" type="password" placeholder="••••••••" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
+                                <input id="current-password" type="password" placeholder="••••••••" autocomplete="current-password" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                                <input id="new-password" type="password" placeholder="Min. 6 chars" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
+                                <input id="new-password" type="password" placeholder="Min. 6 chars" autocomplete="new-password" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                                <input id="confirm-password" type="password" placeholder="••••••••" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
+                                <input id="confirm-password" type="password" placeholder="••••••••" autocomplete="new-password" class="w-full h-11 bg-[#EDEDED] rounded-[5px] px-4 outline-none border-none">
                             </div>
-                            <button id="change-password-btn" class="w-full h-11 border border-[#BE2229] text-[#BE2229] rounded-[5px] font-medium hover:bg-[#BE2229] hover:text-white transition mt-4">Update Security Credentials</button>
+                            <button type="button" id="change-password-btn" class="w-full h-11 border border-[#BE2229] text-[#BE2229] rounded-[5px] font-medium hover:bg-[#BE2229] hover:text-white transition mt-4">Update Security Credentials</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -445,20 +445,20 @@
                     </div>
 
                     <!-- Add New Admin -->
-                    <div class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]">
+                    <form class="bg-white rounded-[10px] p-6 border border-[#E9E9E9]" autocomplete="off">
                         <h2 class="font-['Poppins'] font-medium text-[19px] mb-6">Provision New Administrator</h2>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                <input id="add-admin-name" type="text" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
+                                <input id="add-admin-name" type="text" autocomplete="off" spellcheck="false" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input id="add-admin-email" type="email" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
+                                <input id="add-admin-email" type="email" autocomplete="off" spellcheck="false" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input id="add-admin-password" type="password" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
+                                <input id="add-admin-password" type="password" autocomplete="new-password" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Permission Level</label>
@@ -468,9 +468,9 @@
                                     <option value="superadmin">Superadmin (Omnipotent)</option>
                                 </select>
                             </div>
-                            <button id="add-admin-btn" class="w-full h-11 bg-black text-white rounded-[5px] font-medium hover:bg-[#BE2229] transition mt-2">Provision Access</button>
+                            <button type="button" id="add-admin-btn" class="w-full h-11 bg-black text-white rounded-[5px] font-medium hover:bg-[#BE2229] transition mt-2">Provision Access</button>
                         </div>
-                    </div>
+                    </form>
 
                     <!-- Admin Access Requests Panel (NEW) -->
                     <div id="admin-requests-section" class="mt-8 pt-8 border-t border-black/10">

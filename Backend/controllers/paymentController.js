@@ -11,6 +11,13 @@ const KEY_ID = (process.env.RAZORPAY_KEY_ID || '').trim();
 const KEY_SECRET = (process.env.RAZORPAY_KEY_SECRET || '').trim();
 const KEY_MODE = KEY_ID.startsWith('rzp_live_') ? 'LIVE' : KEY_ID.startsWith('rzp_test_') ? 'TEST' : 'UNKNOWN';
 
+console.log("========== RAZORPAY ENV DEBUG ==========");
+console.log("KEY_ID:", KEY_ID);
+console.log("SECRET EXISTS:", !!KEY_SECRET);
+console.log("SECRET LENGTH:", KEY_SECRET.length);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("========================================");
+
 if (!KEY_ID || !KEY_SECRET) {
   console.error('[RAZORPAY] CRITICAL ERROR: API Keys are missing in .env or process.env');
 }
@@ -88,6 +95,13 @@ exports.createRazorpayOrder = async (req, res) => {
       receipt: receipt || `receipt_${Date.now()}`,
     };
 
+    console.log("========== ORDER CREATE DEBUG ==========");
+    console.log("OPTIONS:", options);
+    console.log("AMOUNT:", options.amount);
+    console.log("CURRENCY:", options.currency);
+    console.log("RECEIPT:", options.receipt);
+    console.log("========================================");
+
     console.log(`[RAZORPAY] Requesting Gateway Order:`, options);
     const razorpayOrder = await razorpay.orders.create(options);
     console.log(`[RAZORPAY] Gateway Order Created: ${razorpayOrder.id}`);
@@ -100,17 +114,30 @@ exports.createRazorpayOrder = async (req, res) => {
       key: KEY_ID,
     });
   } catch (error) {
-    const errorDetails = {
-      name: error?.name,
-      message: error?.message,
-      statusCode: error?.statusCode,
-      description: error?.description,
-      source: error?.source,
-      field: error?.field,
-      error: error?.error,
-      stack: error?.stack,
-    };
-    console.error('[RAZORPAY] Create Order Error:', errorDetails);
+    console.error("========== FULL RAZORPAY ERROR ==========");
+    console.error(error);
+
+    console.error("NAME:", error?.name);
+    console.error("MESSAGE:", error?.message);
+    console.error("STATUS:", error?.statusCode);
+    console.error("DESCRIPTION:", error?.description);
+    console.error("SOURCE:", error?.source);
+    console.error("FIELD:", error?.field);
+    console.error("STEP:", error?.step);
+    console.error("REASON:", error?.reason);
+    console.error("METADATA:", error?.metadata);
+    console.error("STACK:", error?.stack);
+
+    if (error?.error) {
+      console.error("INNER ERROR:", error.error);
+    }
+
+    if (error?.response) {
+      console.error("RESPONSE:", error.response);
+    }
+
+    console.error("=========================================");
+
     res.status(400).json({ 
       success: false, 
       message: error?.message || 'Payment initiation failed' 
