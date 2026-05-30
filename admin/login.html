@@ -1,486 +1,696 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Springwala Admin | Authentication</title>
 
-    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="icon" type="image/png" href="../favicon.png" />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        :root {
-            --primary: #BE2229;
-            --primary-dark: #8c191e;
-            --bg-glass: rgba(255, 255, 255, 0.9);
-        }
+      :root {
+        --primary: #be2229;
+        --primary-dark: #8c191e;
+        --bg-glass: rgba(255, 255, 255, 0.9);
+      }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-        }
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
 
-        .glass-card {
-            background: var(--bg-glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 500px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
+      .glass-card {
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+      }
 
-        /* Back Navigation Styles */
+      /* Back Navigation Styles */
+      .back-nav {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 50;
+      }
+
+      .back-btn-admin {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        color: #4b5563;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .back-btn-admin:hover {
+        background: white;
+        transform: translateX(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        color: var(--primary);
+      }
+
+      .back-btn-admin svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      @media (max-width: 640px) {
         .back-nav {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 50;
+          top: 15px;
+          left: 15px;
         }
-
         .back-btn-admin {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 12px;
-            color: #4b5563;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
+          padding: 6px 10px;
+          font-size: 12px;
+          border-radius: 8px;
         }
+      }
 
-        .back-btn-admin:hover {
-            background: white;
-            transform: translateX(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            color: var(--primary);
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(190, 34, 41, 0.3);
+      }
+
+      .btn-secondary {
+        background: #2d3436;
+        color: white;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .btn-secondary:hover {
+        background: #000;
+        transform: translateY(-2px);
+      }
+
+      .input-field {
+        width: 100%;
+        height: 52px;
+        background: #f1f3f6;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 0 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .input-field:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(190, 34, 41, 0.1);
+      }
+
+      .state-transition {
+        animation: slideIn 0.5s ease forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-
-        .back-btn-admin svg {
-            width: 18px;
-            height: 18px;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        @media (max-width: 640px) {
-            .back-nav {
-                top: 15px;
-                left: 15px;
-            }
-            .back-btn-admin {
-                padding: 6px 10px;
-                font-size: 12px;
-                border-radius: 8px;
-            }
+      /* Toast Styles */
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+      .toast.success {
+        background: #00b894;
+      }
+      .toast.error {
+        background: #d63031;
+      }
+      .toast.info {
+        background: #0984e3;
+      }
+
+      .loader {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(190, 34, 41, 0.3);
-        }
-
-        .btn-secondary {
-            background: #2D3436;
-            color: white;
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .btn-secondary:hover {
-            background: #000;
-            transform: translateY(-2px);
-        }
-
-        .input-field {
-            width: 100%;
-            height: 52px;
-            background: #f1f3f6;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 0 1rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .input-field:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(190, 34, 41, 0.1);
-        }
-
-        .state-transition {
-            animation: slideIn 0.5s ease forwards;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Toast Styles */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            color: white;
-            font-weight: 500;
-            transform: translateX(120%);
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .toast.show { transform: translateX(0); }
-        .toast.success { background: #00b894; }
-        .toast.error { background: #d63031; }
-        .toast.info { background: #0984e3; }
-
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+      }
     </style>
-    <script src="../assets/js/config.js"></script>
-</head>
+    <script src="../assets/js/config.js?v=4.0.0"></script>
+  </head>
 
-<body>
-
+  <body>
     <div class="glass-card p-8 sm:p-10">
-        <!-- Back Navigation -->
-        <div class="back-nav">
-            <button onclick="goBack()" class="back-btn-admin" aria-label="Go Back">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Back</span>
+      <!-- Back Navigation -->
+      <!-- Custom CSS -->
+      <link rel="stylesheet" href="../assets/css/style.css?v=4.0.0" />
+      <div class="back-nav">
+        <button onclick="goBack()" class="back-btn-admin" aria-label="Go Back">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          <span>Back</span>
+        </button>
+      </div>
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <img
+          src="../assets/images/header.png"
+          alt="Springwala Logo"
+          class="h-12 mx-auto mb-6 object-contain"
+        />
+        <div class="h-px bg-gray-200 w-full mb-8"></div>
+
+        <div id="dynamic-header">
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2>
+          <p class="text-gray-500">Secure access for authorized personnel</p>
+        </div>
+      </div>
+
+      <!-- Main Container for States -->
+      <div id="auth-container" class="space-y-6">
+        <!-- ENTRY STATE -->
+        <div id="state-entry" class="space-y-4 state-transition">
+          <button onclick="switchState('login')" class="btn-primary">
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              ></path>
+            </svg>
+            Login as Admin
+          </button>
+          <button onclick="switchState('request')" class="btn-secondary">
+            Request Admin Access
+          </button>
+        </div>
+
+        <!-- LOGIN STATE (EXISTING ADMIN) -->
+        <div id="state-login" class="hidden space-y-5 state-transition">
+          <!-- Login Method Switch -->
+          <div class="flex p-1 bg-gray-100 rounded-xl mb-4">
+            <button
+              onclick="toggleLoginMethod('password')"
+              id="tab-password"
+              class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-gray-800 transition-all"
+            >
+              Password
             </button>
+            <button
+              onclick="toggleLoginMethod('otp')"
+              id="tab-otp"
+              class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-500 transition-all"
+            >
+              OTP Login
+            </button>
+          </div>
+
+          <!-- Password Form -->
+          <div id="form-password" class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                id="login-email"
+                class="input-field"
+                placeholder="admin@springwala.in"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="login-password"
+                class="input-field"
+                placeholder="••••••••"
+              />
+            </div>
+            <button id="btn-login-submit" class="btn-primary">
+              Sign In with Password
+            </button>
+          </div>
+
+          <!-- OTP Form -->
+          <div id="form-otp" class="hidden space-y-4">
+            <div id="otp-login-email-step">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                id="login-otp-email"
+                class="input-field"
+                placeholder="admin@springwala.in"
+              />
+              <button id="btn-send-login-otp" class="btn-primary mt-4">
+                Send Login OTP
+              </button>
+            </div>
+            <div id="otp-login-verify-step" class="hidden">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Enter 6-Digit OTP</label
+              >
+              <input
+                type="text"
+                id="login-otp-input"
+                maxlength="6"
+                class="input-field text-center text-2xl tracking-widest"
+                placeholder="000000"
+              />
+              <button id="btn-verify-login-otp" class="btn-primary mt-4">
+                Verify & Login
+              </button>
+              <button
+                onclick="
+                  document
+                    .getElementById('otp-login-verify-step')
+                    .classList.add('hidden');
+                  document
+                    .getElementById('otp-login-email-step')
+                    .classList.remove('hidden');
+                "
+                class="text-xs text-gray-400 hover:text-gray-600 w-full text-center mt-2"
+              >
+                Change Email
+              </button>
+            </div>
+          </div>
+
+          <button
+            onclick="switchState('entry')"
+            class="text-sm text-gray-400 hover:text-gray-600 w-full text-center mt-2"
+          >
+            Back to portal
+          </button>
         </div>
 
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <img src="../assets/images/header.png" alt="Springwala Logo" class="h-12 mx-auto mb-6 object-contain">
-            <div class="h-px bg-gray-200 w-full mb-8"></div>
-            
-            <div id="dynamic-header">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2>
-                <p class="text-gray-500">Secure access for authorized personnel</p>
-            </div>
+        <!-- REQUEST ACCESS STATE -->
+        <div id="state-request" class="hidden space-y-5 state-transition">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Full Name</label
+            >
+            <input
+              type="text"
+              id="request-name"
+              class="input-field"
+              placeholder="John Doe"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Email Address</label
+            >
+            <input
+              type="email"
+              id="request-email"
+              class="input-field"
+              placeholder="john@example.com"
+            />
+          </div>
+          <button id="btn-request-submit" class="btn-primary">
+            Submit Request
+          </button>
+          <button
+            onclick="switchState('entry')"
+            class="text-sm text-gray-400 hover:text-gray-600 w-full text-center mt-2"
+          >
+            Back to main
+          </button>
         </div>
 
-        <!-- Main Container for States -->
-        <div id="auth-container" class="space-y-6">
-            
-            <!-- ENTRY STATE -->
-            <div id="state-entry" class="space-y-4 state-transition">
-                <button onclick="switchState('login')" class="btn-primary">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Login as Admin
-                </button>
-                <button onclick="switchState('request')" class="btn-secondary">
-                    Request Admin Access
-                </button>
-            </div>
-
-            <!-- LOGIN STATE (EXISTING ADMIN) -->
-            <div id="state-login" class="hidden space-y-5 state-transition">
-                <!-- Login Method Switch -->
-                <div class="flex p-1 bg-gray-100 rounded-xl mb-4">
-                    <button onclick="toggleLoginMethod('password')" id="tab-password" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-gray-800 transition-all">Password</button>
-                    <button onclick="toggleLoginMethod('otp')" id="tab-otp" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-500 transition-all">OTP Login</button>
-                </div>
-
-                <!-- Password Form -->
-                <div id="form-password" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                        <input type="email" id="login-email" class="input-field" placeholder="admin@springwala.in">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                        <input type="password" id="login-password" class="input-field" placeholder="••••••••">
-                    </div>
-                    <button id="btn-login-submit" class="btn-primary">
-                        Sign In with Password
-                    </button>
-                </div>
-
-                <!-- OTP Form -->
-                <div id="form-otp" class="hidden space-y-4">
-                    <div id="otp-login-email-step">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                        <input type="email" id="login-otp-email" class="input-field" placeholder="admin@springwala.in">
-                        <button id="btn-send-login-otp" class="btn-primary mt-4">
-                            Send Login OTP
-                        </button>
-                    </div>
-                    <div id="otp-login-verify-step" class="hidden">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Enter 6-Digit OTP</label>
-                        <input type="text" id="login-otp-input" maxlength="6" class="input-field text-center text-2xl tracking-widest" placeholder="000000">
-                        <button id="btn-verify-login-otp" class="btn-primary mt-4">
-                            Verify & Login
-                        </button>
-                        <button onclick="document.getElementById('otp-login-verify-step').classList.add('hidden'); document.getElementById('otp-login-email-step').classList.remove('hidden');" class="text-xs text-gray-400 hover:text-gray-600 w-full text-center mt-2">Change Email</button>
-                    </div>
-                </div>
-
-                <button onclick="switchState('entry')" class="text-sm text-gray-400 hover:text-gray-600 w-full text-center mt-2">Back to portal</button>
-            </div>
-
-            <!-- REQUEST ACCESS STATE -->
-            <div id="state-request" class="hidden space-y-5 state-transition">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                    <input type="text" id="request-name" class="input-field" placeholder="John Doe">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                    <input type="email" id="request-email" class="input-field" placeholder="john@example.com">
-                </div>
-                <button id="btn-request-submit" class="btn-primary">
-                    Submit Request
-                </button>
-                <button onclick="switchState('entry')" class="text-sm text-gray-400 hover:text-gray-600 w-full text-center mt-2">Back to main</button>
-            </div>
-
-            <!-- PENDING STATE -->
-            <div id="state-pending" class="hidden text-center space-y-6 state-transition">
-                <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800">Approval Pending</h3>
-                <p class="text-gray-500">Your request is currently being reviewed by a Superadmin. Please check back later.</p>
-                <button id="btn-check-status" class="btn-primary">
-                    Check Status Now
-                </button>
-            </div>
-
-            <!-- REJECTED STATE -->
-            <div id="state-rejected" class="hidden text-center space-y-6 state-transition">
-                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800">Request Rejected</h3>
-                <p class="text-gray-500">Sorry, your access request was not approved at this time.</p>
-                <button onclick="reRequest()" class="btn-secondary">
-                    Try Again with New Details
-                </button>
-            </div>
-
-            <!-- OTP STATE -->
-            <div id="state-otp" class="hidden space-y-6 state-transition">
-                <div class="text-center">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Verify Identity</h3>
-                    <p class="text-gray-500">We've sent an OTP to your email address.</p>
-                </div>
-                <div class="flex justify-center gap-2">
-                    <input type="text" maxlength="6" id="otp-input" class="input-field text-center text-2xl tracking-[0.5rem] font-bold" placeholder="000000">
-                </div>
-                <button id="btn-verify-otp" class="btn-primary">
-                    Verify & Continue
-                </button>
-                <button id="btn-resend-otp" class="text-sm text-primary font-medium hover:underline w-full text-center">Resend OTP</button>
-            </div>
-
-            <!-- SET PASSWORD STATE -->
-            <div id="state-password" class="hidden space-y-5 state-transition">
-                <div class="text-center">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Set Your Password</h3>
-                    <p class="text-gray-500">Almost there! Create a secure password for your account.</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-                    <input type="password" id="new-password" class="input-field" placeholder="Min. 6 characters">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-                    <input type="password" id="confirm-password" class="input-field" placeholder="Repeat password">
-                </div>
-                <button id="btn-set-password" class="btn-primary">
-                    Complete Setup
-                </button>
-            </div>
-
+        <!-- PENDING STATE -->
+        <div
+          id="state-pending"
+          class="hidden text-center space-y-6 state-transition"
+        >
+          <div
+            class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-10 h-10 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">Approval Pending</h3>
+          <p class="text-gray-500">
+            Your request is currently being reviewed by a Superadmin. Please
+            check back later.
+          </p>
+          <button id="btn-check-status" class="btn-primary">
+            Check Status Now
+          </button>
         </div>
 
-        <p id="auth-error" class="text-red-500 text-sm mt-6 text-center hidden"></p>
+        <!-- REJECTED STATE -->
+        <div
+          id="state-rejected"
+          class="hidden text-center space-y-6 state-transition"
+        >
+          <div
+            class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <svg
+              class="w-10 h-10 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">Request Rejected</h3>
+          <p class="text-gray-500">
+            Sorry, your access request was not approved at this time.
+          </p>
+          <button onclick="reRequest()" class="btn-secondary">
+            Try Again with New Details
+          </button>
+        </div>
+
+        <!-- OTP STATE -->
+        <div id="state-otp" class="hidden space-y-6 state-transition">
+          <div class="text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              Verify Identity
+            </h3>
+            <p class="text-gray-500">
+              We've sent an OTP to your email address.
+            </p>
+          </div>
+          <div class="flex justify-center gap-2">
+            <input
+              type="text"
+              maxlength="6"
+              id="otp-input"
+              class="input-field text-center text-2xl tracking-[0.5rem] font-bold"
+              placeholder="000000"
+            />
+          </div>
+          <button id="btn-verify-otp" class="btn-primary">
+            Verify & Continue
+          </button>
+          <button
+            id="btn-resend-otp"
+            class="text-sm text-primary font-medium hover:underline w-full text-center"
+          >
+            Resend OTP
+          </button>
+        </div>
+
+        <!-- SET PASSWORD STATE -->
+        <div id="state-password" class="hidden space-y-5 state-transition">
+          <div class="text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              Set Your Password
+            </h3>
+            <p class="text-gray-500">
+              Almost there! Create a secure password for your account.
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >New Password</label
+            >
+            <input
+              type="password"
+              id="new-password"
+              class="input-field"
+              placeholder="Min. 6 characters"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              id="confirm-password"
+              class="input-field"
+              placeholder="Repeat password"
+            />
+          </div>
+          <button id="btn-set-password" class="btn-primary">
+            Complete Setup
+          </button>
+        </div>
+      </div>
+
+      <p
+        id="auth-error"
+        class="text-red-500 text-sm mt-6 text-center hidden"
+      ></p>
     </div>
 
     <!-- Toast Component -->
     <div id="toast" class="toast"></div>
 
-    <script src="../assets/js/auth.js"></script>
-    <script src="../assets/js/api.js"></script>
-    <script src="../assets/js/login.js"></script>
+    <script src="../assets/js/auth.js?v=4.0.0"></script>
+    <script src="../assets/js/api.js?v=4.0.0"></script>
+    <script src="../assets/js/login.js?v=4.0.0"></script>
 
     <script>
-        // Navigation State Tracking
-        let currentState = "entry";
-        let stateHistory = [];
+      // Navigation State Tracking
+      let currentState = "entry";
+      let stateHistory = [];
 
-        function goBack() {
-            // If currently on root entry page
-            if (currentState === "entry") {
-                window.location.href = "../index.html";
-                return;
-            }
-
-            // Internal state navigation
-            if (stateHistory.length > 0) {
-                const previousState = stateHistory.pop();
-                switchState(previousState, false);
-            } else {
-                switchState("entry", false);
-            }
+      function goBack() {
+        // If currently on root entry page
+        if (currentState === "entry") {
+          window.location.href = "../index.html";
+          return;
         }
 
-        function updateBackButton() {
-            const backNav = document.querySelector(".back-nav");
-            if (!backNav) return;
+        // Internal state navigation
+        if (stateHistory.length > 0) {
+          const previousState = stateHistory.pop();
+          switchState(previousState, false);
+        } else {
+          switchState("entry", false);
+        }
+      }
 
-            if (currentState === "entry") {
-                backNav.style.display = "none";
-            } else {
-                backNav.style.display = "block";
-            }
+      function updateBackButton() {
+        const backNav = document.querySelector(".back-nav");
+        if (!backNav) return;
+
+        if (currentState === "entry") {
+          backNav.style.display = "none";
+        } else {
+          backNav.style.display = "block";
+        }
+      }
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.innerText = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
+      // State Management
+      function switchState(state, pushToHistory = true) {
+        if (pushToHistory && currentState !== state) {
+          stateHistory.push(currentState);
         }
 
-        function showToast(message, type = "success") {
-            const toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.className = `toast show ${type}`;
-            setTimeout(() => toast.classList.remove("show"), 3000);
-        }
+        currentState = state;
 
-        // State Management
-        function switchState(state, pushToHistory = true) {
-            if (pushToHistory && currentState !== state) {
-                stateHistory.push(currentState);
-            }
-            
-            currentState = state;
-
-            const containers = ['entry', 'login', 'request', 'pending', 'rejected', 'otp', 'password'];
-            containers.forEach(c => {
-                const element = document.getElementById(`state-${c}`);
-                if (element) element.classList.add('hidden');
-            });
-
-            const targetElement = document.getElementById(`state-${state}`);
-            if (targetElement) targetElement.classList.remove('hidden');
-
-            // Update header text based on state
-            const header = document.getElementById('dynamic-header');
-            if (header) {
-                switch(state) {
-                    case 'login': 
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Login</h2><p class="text-gray-500">Sign in to your dashboard</p>';
-                        break;
-                    case 'request':
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Request Access</h2><p class="text-gray-500">Join the administrative team</p>';
-                        break;
-                    case 'pending':
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting Room</h2><p class="text-gray-500">Approval in progress</p>';
-                        break;
-                    case 'otp':
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">One-Step Verification</h2><p class="text-gray-500">Check your inbox</p>';
-                        break;
-                    case 'password':
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Final Step</h2><p class="text-gray-500">Secure your account</p>';
-                        break;
-                    default:
-                        header.innerHTML = '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2><p class="text-gray-500">Secure access for authorized personnel</p>';
-                }
-            }
-
-            updateBackButton();
-        }
-
-        function reRequest() {
-            localStorage.removeItem("adminEmail");
-            switchState('request');
-        }
-
-        function toggleLoginMethod(method) {
-            const isPass = method === 'password';
-            document.getElementById('form-password').classList.toggle('hidden', !isPass);
-            document.getElementById('form-otp').classList.toggle('hidden', isPass);
-
-            // Update Tabs
-            const tabPass = document.getElementById('tab-password');
-            const tabOtp = document.getElementById('tab-otp');
-            
-            if (isPass) {
-                tabPass.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
-                tabPass.classList.remove('text-gray-500');
-                tabOtp.classList.add('text-gray-500');
-                tabOtp.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
-            } else {
-                tabOtp.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
-                tabOtp.classList.remove('text-gray-500');
-                tabPass.classList.add('text-gray-500');
-                tabPass.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
-            }
-        }
-
-        // Initialize Onboarding Check
-        document.addEventListener('DOMContentLoaded', () => {
-            switchState("entry", false);
-            
-            if (typeof checkAdminState === 'function') {
-                checkAdminState();
-            }
+        const containers = [
+          "entry",
+          "login",
+          "request",
+          "pending",
+          "rejected",
+          "otp",
+          "password",
+        ];
+        containers.forEach((c) => {
+          const element = document.getElementById(`state-${c}`);
+          if (element) element.classList.add("hidden");
         });
-    </script>
-</body>
 
+        const targetElement = document.getElementById(`state-${state}`);
+        if (targetElement) targetElement.classList.remove("hidden");
+
+        // Update header text based on state
+        const header = document.getElementById("dynamic-header");
+        if (header) {
+          switch (state) {
+            case "login":
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Login</h2><p class="text-gray-500">Sign in to your dashboard</p>';
+              break;
+            case "request":
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">Request Access</h2><p class="text-gray-500">Join the administrative team</p>';
+              break;
+            case "pending":
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting Room</h2><p class="text-gray-500">Approval in progress</p>';
+              break;
+            case "otp":
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">One-Step Verification</h2><p class="text-gray-500">Check your inbox</p>';
+              break;
+            case "password":
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">Final Step</h2><p class="text-gray-500">Secure your account</p>';
+              break;
+            default:
+              header.innerHTML =
+                '<h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Portal</h2><p class="text-gray-500">Secure access for authorized personnel</p>';
+          }
+        }
+
+        updateBackButton();
+      }
+
+      function reRequest() {
+        localStorage.removeItem("adminEmail");
+        switchState("request");
+      }
+
+      function toggleLoginMethod(method) {
+        const isPass = method === "password";
+        document
+          .getElementById("form-password")
+          .classList.toggle("hidden", !isPass);
+        document.getElementById("form-otp").classList.toggle("hidden", isPass);
+
+        // Update Tabs
+        const tabPass = document.getElementById("tab-password");
+        const tabOtp = document.getElementById("tab-otp");
+
+        if (isPass) {
+          tabPass.classList.add("bg-white", "shadow-sm", "text-gray-800");
+          tabPass.classList.remove("text-gray-500");
+          tabOtp.classList.add("text-gray-500");
+          tabOtp.classList.remove("bg-white", "shadow-sm", "text-gray-800");
+        } else {
+          tabOtp.classList.add("bg-white", "shadow-sm", "text-gray-800");
+          tabOtp.classList.remove("text-gray-500");
+          tabPass.classList.add("text-gray-500");
+          tabPass.classList.remove("bg-white", "shadow-sm", "text-gray-800");
+        }
+      }
+
+      // Initialize Onboarding Check
+      document.addEventListener("DOMContentLoaded", () => {
+        switchState("entry", false);
+
+        if (typeof checkAdminState === "function") {
+          checkAdminState();
+        }
+      });
+    </script>
+  </body>
 </html>

@@ -135,6 +135,22 @@ function timeAgo(d) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+// ─── Global Error Handlers (non-invasive) ───────────────────────────────
+// Logs errors and shows a user-friendly toast. Do not expose raw error details in UI.
+window.addEventListener('error', function (ev) {
+  try {
+    console.error('[Global Error]', ev.error || ev.message || ev);
+    showToast('An unexpected error occurred. Check console for details.', 'error');
+  } catch (e) { /* swallow */ }
+});
+
+window.addEventListener('unhandledrejection', function (ev) {
+  try {
+    console.error('[Unhandled Rejection]', ev.reason);
+    showToast('An unexpected error occurred. Check console for details.', 'error');
+  } catch (e) { /* swallow */ }
+});
+
 function imageUrl(path) {
   if (!path) return '../assets/images/deafult.png';
   if (path.startsWith('http')) return path;

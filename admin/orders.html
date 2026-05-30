@@ -1,268 +1,657 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Master Admin | Orders</title>
 
-    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="icon" type="image/png" href="../favicon.png" />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=4.0.0" />
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
-        .sidebar-item { transition: all 0.3s ease; border-radius: 5px; }
-        .sidebar-item.active { background-color: #FFD9D9; }
-        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
-        .sidebar-item.active img { filter: brightness(0) saturate(100%) invert(18%) sepia(87%) saturate(2716%) hue-rotate(345deg) brightness(91%) contrast(97%); }
-        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .box-shadow-card { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
-        .pill-ordered { background-color: #B2E1FF; color: #074972; padding: 2px 12px; border-radius: 100px; font-size: 14px; }
-        .pill-completed { background-color: #DBFFDE; color: #2F4D04; padding: 2px 12px; border-radius: 100px; font-size: 14px; }
-        .pill-pending { background-color: #FEF3C7; color: #92400E; padding: 2px 12px; border-radius: 100px; font-size: 14px; }
-        .pill-cancelled { background-color: #FEE2E2; color: #991B1B; padding: 2px 12px; border-radius: 100px; font-size: 14px; }
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f2f2f2;
+      }
+      .sidebar-item {
+        transition: all 0.3s ease;
+        border-radius: 5px;
+      }
+      .sidebar-item.active {
+        background-color: #ffd9d9;
+      }
+      .sidebar-item.active span {
+        color: #be2229;
+        font-weight: 500;
+      }
+      .sidebar-item.active img {
+        filter: brightness(0) saturate(100%) invert(18%) sepia(87%)
+          saturate(2716%) hue-rotate(345deg) brightness(91%) contrast(97%);
+      }
+      .sidebar-item:hover:not(.active) {
+        background-color: #f8f8f8;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .box-shadow-card {
+        box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15);
+      }
+      .pill-ordered {
+        background-color: #b2e1ff;
+        color: #074972;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 14px;
+      }
+      .pill-completed {
+        background-color: #dbffde;
+        color: #2f4d04;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 14px;
+      }
+      .pill-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 14px;
+      }
+      .pill-cancelled {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 2px 12px;
+        border-radius: 100px;
+        font-size: 14px;
+      }
     </style>
-	<script src="../assets/js/config.js"></script>
-</head>
+    <script src="../assets/js/config.js?v=4.0.0"></script>
+  </head>
 
-<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
-
+  <body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
     <!-- Sidebar Overlay (Mobile) -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden transition-opacity"></div>
+    <div
+      id="sidebar-overlay"
+      class="fixed inset-0 bg-black/50 z-40 hidden xl:hidden transition-opacity"
+    ></div>
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
-        <button id="close-sidebar" class="xl:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+    <aside
+      id="sidebar"
+      class="fixed xl:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full xl:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden"
+    >
+      <button
+        id="close-sidebar"
+        class="xl:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
 
-        <!-- Logo -->
-        <div class="px-11 mb-10 w-full flex justify-start">
-            <img src="../assets/images/header.png" alt="Springwala Admin Logo" class="h-[43px] w-auto">
+      <!-- Logo -->
+      <div class="px-11 mb-10 w-full flex justify-start">
+        <img
+          src="../assets/images/header.png"
+          alt="Springwala Admin Logo"
+          class="h-[43px] w-auto"
+        />
+      </div>
+
+      <!-- Navigation Links -->
+      <nav
+        class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10"
+      >
+        <a
+          href="dashboard.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/dashboard.svg"
+            alt="Dashboard"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Dashboard</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <a
+          href="categories.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/categories.svg"
+            alt="Categories"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Categories</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <div class="w-full flex flex-col group relative">
+          <button
+            id="products-menu-btn"
+            class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer"
+          >
+            <div class="flex items-center gap-[15px]">
+              <img
+                src="../assets/icons/admin/products.svg"
+                alt="Products"
+                class="w-6 h-6 shrink-0"
+              />
+              <span
+                class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+                >Products</span
+              >
+            </div>
+            <svg
+              id="products-menu-chevron"
+              class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div
+            id="products-submenu"
+            class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative"
+          >
+            <div
+              class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"
+            ></div>
+            <a
+              href="products/product-list.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Product List</a
+            >
+            <a
+              href="products/add-product.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Add a Product</a
+            >
+            <a
+              href="products/bulk-upload.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Bulk Upload</a
+            >
+          </div>
         </div>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
-            <a href="dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="orders.html"
+          class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/oders.svg"
+            alt="Orders"
+            class="w-6 h-6 shrink-0"
+          />
+          <span class="font-['Poppins'] text-[19px] leading-[28px]"
+            >Orders</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="users.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/users.svg"
+            alt="Users"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Users</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <div class="w-full flex flex-col group relative">
-                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
-                    <div class="flex items-center gap-[15px]">
-                        <img src="../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
-                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Products</span>
-                    </div>
-                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                 <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
-                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
-                    <a href="products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
-                    <a href="products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
-                    <a href="products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
-                </div>
+        <a
+          href="inventory.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/inventry.svg"
+            alt="Inventory"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Inventory</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <a
+          href="analytics.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/analytics.svg"
+            alt="Analytics"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Analytics</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <div class="w-full flex flex-col group relative">
+          <button
+            id="banners-menu-btn"
+            class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer"
+          >
+            <div class="flex items-center gap-[15px]">
+              <img
+                src="../assets/icons/admin/banners.svg"
+                alt="Banners"
+                class="w-6 h-6 shrink-0"
+              />
+              <span
+                class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+                >Banners</span
+              >
             </div>
-            <div class="w-full h-[1px] bg-black/15"></div>
+            <svg
+              id="banners-menu-chevron"
+              class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div
+            id="banners-submenu"
+            class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 ..."
+          >
+            <a
+              href="banners/homepage.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Homepage</a
+            >
+            <a
+              href="banners/category.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Category</a
+            >
+            <a
+              href="banners/promotional.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Promotional</a
+            >
+            <a
+              href="banners/features.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Features</a
+            >
+            <a
+              href="banners/advertisement.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Advertisement</a
+            >
+            <a
+              href="banners/section.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Section</a
+            >
+            <a
+              href="banners/informational.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Informational</a
+            >
+          </div>
+        </div>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="orders.html" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px]">Orders</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="settings.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/settings.svg"
+            alt="Settings"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Settings</span
+          >
+        </a>
 
-            <a href="users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Users</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
 
-            <a href="inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <a href="analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <div class="w-full flex flex-col group relative">
-                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
-                    <div class="flex items-center gap-[15px]">
-                        <img src="../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
-                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
-                    </div>
-                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 ...">                    <a href="banners/homepage.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Homepage</a>
-                    <a href="banners/category.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Category</a>
-                    <a href="banners/promotional.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Promotional</a>
-                    <a href="banners/features.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Features</a>
-                    <a href="banners/advertisement.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Advertisement</a>
-                    <a href="banners/section.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Section</a>
-                    <a href="banners/informational.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Informational</a>
-                </div>
-            </div>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <a href="settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
-            </a>
-        
-            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
-
-            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
-                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
-            </button>
-        </nav>
+        <button
+          onclick="Auth.logout()"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer"
+        >
+          <svg
+            class="w-6 h-6 shrink-0 text-[#BE2229]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            ></path>
+          </svg>
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium"
+            >Logout</span
+          >
+        </button>
+      </nav>
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
-        <!-- Persistent Top Bar -->
-        <div class="px-4 sm:px-[24px] xl:px-8 pt-6 xl:pt-8 flex items-center justify-between">
-            <div class="flex items-center gap-4 flex-1">
-                <button id="open-sidebar" class="xl:hidden p-2 -ml-2 text-gray-600 hover:text-black">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <h2 class="font-['Roboto'] font-medium text-[26px] leading-[30px] text-black shrink-0 admin-name">Springwala</h2>
-                <!-- Search -->
-                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[532px] h-[43px] px-3 ml-6">
-                    <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
-                    <input id="order-search-header" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[15px] bg-transparent">
-                </div>
-            </div>
-            <!-- Header Actions -->
-            <div class="hidden md:flex items-center gap-3">
-                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition">+ Add Product</a>
-                <a href="orders.html" class="border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition">View Orders</a>
-                <button class="border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition">Vendors</button>
-            </div>
+      <!-- Persistent Top Bar -->
+      <div
+        class="px-4 sm:px-[24px] xl:px-8 pt-6 xl:pt-8 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-4 flex-1">
+          <button
+            id="open-sidebar"
+            class="xl:hidden p-2 -ml-2 text-gray-600 hover:text-black"
+          >
+            <svg
+              class="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+          <h2
+            class="font-['Roboto'] font-medium text-[26px] leading-[30px] text-black shrink-0 admin-name"
+          >
+            Springwala
+          </h2>
+          <!-- Search -->
+          <div
+            class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[532px] h-[43px] px-3 ml-6"
+          >
+            <img
+              src="../assets/icons/admin/search.svg"
+              alt="Search"
+              class="w-5 h-5 mr-2 opacity-60"
+            />
+            <input
+              id="order-search-header"
+              type="text"
+              placeholder="Search orders, products, customers....."
+              class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[15px] bg-transparent"
+            />
+          </div>
+        </div>
+        <!-- Header Actions -->
+        <div class="hidden md:flex items-center gap-3">
+          <a
+            href="products/add-product.html"
+            class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition"
+            >+ Add Product</a
+          >
+          <a
+            href="orders.html"
+            class="border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition"
+            >View Orders</a
+          >
+          <button
+            class="border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition"
+          >
+            Vendors
+          </button>
+        </div>
+      </div>
+
+      <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mt-8 flex flex-col">
+        <!-- Back & Title -->
+        <div class="flex items-center gap-3 mb-6">
+          <a
+            href="dashboard.html"
+            class="w-[40px] h-[40px] flex items-center justify-center bg-white rounded-[5px] border border-[#E9E9E9] shadow-[0px_2px_4px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition"
+          >
+            <svg
+              class="w-4 h-4 text-black"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+          </a>
+          <h2
+            class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black"
+          >
+            Orders
+          </h2>
         </div>
 
-        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-10 mt-8 flex flex-col">
-            <!-- Back & Title -->
-            <div class="flex items-center gap-3 mb-6">
-                <a href="dashboard.html" class="w-[40px] h-[40px] flex items-center justify-center bg-white rounded-[5px] border border-[#E9E9E9] shadow-[0px_2px_4px_rgba(0,0,0,0.05)] hover:bg-gray-50 transition">
-                    <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </a>
-                <h2 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Orders</h2>
-            </div>
-
-            <!-- Stats Cards (Image 1 Style) -->
-            <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-8 w-full mb-6">
-                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2">
-                    <span class="font-['Roboto'] font-normal text-[18px] text-black">Total Orders</span>
-                    <span id="stat-total-orders" class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2">0</span>
-                </div>
-                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2">
-                    <span class="font-['Roboto'] font-normal text-[18px] text-black">Orders this Month</span>
-                    <span id="stat-orders-month" class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2">0</span>
-                </div>
-                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2">
-                    <span class="font-['Roboto'] font-normal text-[18px] text-black">Orders Pending</span>
-                    <span id="stat-pending-orders" class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2">0</span>
-                </div>
-                <div class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2">
-                    <span class="font-['Roboto'] font-normal text-[18px] text-black">Orders Completed</span>
-                    <span id="stat-completed-orders" class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2">0</span>
-                </div>
-            </div>
-
-            <!-- Filters Box -->
-            <div class="w-full bg-white rounded-[10px] p-6 border border-transparent box-shadow-card mb-8 relative flex flex-wrap items-end gap-6">
-                <div class="flex-1 min-w-[300px]">
-                    <label class="block font-['Roboto'] font-medium text-[18px] mb-2">Search Order</label>
-                    <input id="order-search" type="text" placeholder="Enter Order ID / Product Name / Date" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none">
-                </div>
-                <div class="w-[300px]">
-                    <label class="block font-['Roboto'] font-medium text-[18px] mb-2">Status</label>
-                    <select id="order-status-filter" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer">
-                        <option value="">Select Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Ordered">Ordered</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                </div>
-                <div class="w-[300px]">
-                    <label class="block font-['Roboto'] font-medium text-[18px] mb-2">Sort By</label>
-                    <select id="order-sort" class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer">
-                        <option value="desc">Sort By</option>
-                        <option value="desc">Newest First</option>
-                        <option value="asc">Oldest First</option>
-                    </select>
-                </div>
-                <button id="refresh-orders" class="ml-auto mb-2"><img src="../assets/icons/admin/refresh.svg" class="w-6 h-6"></button>
-            </div>
-
-            <!-- Table Container -->
-            <div class="w-full bg-white border border-[#B9B9B9] rounded-[10px] overflow-hidden box-shadow-card flex flex-col mb-4">
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1000px]">
-                        <thead>
-                            <tr class="bg-[#F7F7F9] border-b border-[#B9B9B9] h-[58px] text-left">
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Order ID</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Customer Name</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Date</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Product</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Status</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Payment Status</th>
-                                <th class="px-6 font-['Roboto'] font-normal text-[18px]">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody" class="divide-y divide-[#B9B9B9]">
-                            <!-- Load via orders.js -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex items-center justify-between mt-4 mb-10">
-                <div class="flex items-center gap-4">
-                    <span class="text-[18px]">Download Data As</span>
-                    <button class="bg-[#D4D4D4] px-4 py-1 rounded">.csv</button>
-                    <button class="bg-[#D4D4D4] px-4 py-1 rounded">.xlsx</button>
-                </div>
-                <div id="orders-pagination" class="flex gap-2 items-center">
-                    <!-- Pagination via JS -->
-                </div>
-            </div>
+        <!-- Stats Cards (Image 1 Style) -->
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-8 w-full mb-6">
+          <div
+            class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2"
+          >
+            <span class="font-['Roboto'] font-normal text-[18px] text-black"
+              >Total Orders</span
+            >
+            <span
+              id="stat-total-orders"
+              class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2"
+              >0</span
+            >
+          </div>
+          <div
+            class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2"
+          >
+            <span class="font-['Roboto'] font-normal text-[18px] text-black"
+              >Orders this Month</span
+            >
+            <span
+              id="stat-orders-month"
+              class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2"
+              >0</span
+            >
+          </div>
+          <div
+            class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2"
+          >
+            <span class="font-['Roboto'] font-normal text-[18px] text-black"
+              >Orders Pending</span
+            >
+            <span
+              id="stat-pending-orders"
+              class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2"
+              >0</span
+            >
+          </div>
+          <div
+            class="bg-white border border-[#E9E9E9] rounded-[5px] box-shadow-card h-[134px] flex flex-col items-center justify-center gap-1 p-2"
+          >
+            <span class="font-['Roboto'] font-normal text-[18px] text-black"
+              >Orders Completed</span
+            >
+            <span
+              id="stat-completed-orders"
+              class="font-['Poppins'] font-semibold text-[32px] text-black leading-none mt-2"
+              >0</span
+            >
+          </div>
         </div>
+
+        <!-- Filters Box -->
+        <div
+          class="w-full bg-white rounded-[10px] p-6 border border-transparent box-shadow-card mb-8 relative flex flex-wrap items-end gap-6"
+        >
+          <div class="flex-1 min-w-[300px]">
+            <label class="block font-['Roboto'] font-medium text-[18px] mb-2"
+              >Search Order</label
+            >
+            <input
+              id="order-search"
+              type="text"
+              placeholder="Enter Order ID / Product Name / Date"
+              class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none"
+            />
+          </div>
+          <div class="w-[300px]">
+            <label class="block font-['Roboto'] font-medium text-[18px] mb-2"
+              >Status</label
+            >
+            <select
+              id="order-status-filter"
+              class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer"
+            >
+              <option value="">Select Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Ordered">Ordered</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="w-[300px]">
+            <label class="block font-['Roboto'] font-medium text-[18px] mb-2"
+              >Sort By</label
+            >
+            <select
+              id="order-sort"
+              class="w-full h-10 bg-[#EDEDED] rounded-[5px] px-4 outline-none appearance-none cursor-pointer"
+            >
+              <option value="desc">Sort By</option>
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
+          </div>
+          <button id="refresh-orders" class="ml-auto mb-2">
+            <img src="../assets/icons/admin/refresh.svg" class="w-6 h-6" />
+          </button>
+        </div>
+
+        <!-- Table Container -->
+        <div
+          class="w-full bg-white border border-[#B9B9B9] rounded-[10px] overflow-hidden box-shadow-card flex flex-col mb-4"
+        >
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[1000px]">
+              <thead>
+                <tr
+                  class="bg-[#F7F7F9] border-b border-[#B9B9B9] h-[58px] text-left"
+                >
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Order ID
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Customer Name
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Date
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Product
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Status
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Payment Status
+                  </th>
+                  <th class="px-6 font-['Roboto'] font-normal text-[18px]">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody" class="divide-y divide-[#B9B9B9]">
+                <!-- Load via orders.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between mt-4 mb-10">
+          <div class="flex items-center gap-4">
+            <span class="text-[18px]">Download Data As</span>
+            <button class="bg-[#D4D4D4] px-4 py-1 rounded">.csv</button>
+            <button class="bg-[#D4D4D4] px-4 py-1 rounded">.xlsx</button>
+          </div>
+          <div id="orders-pagination" class="flex gap-2 items-center">
+            <!-- Pagination via JS -->
+          </div>
+        </div>
+      </div>
     </main>
 
-    <script src="../assets/js/auth.js"></script>
-    <script src="../assets/js/api.js"></script>
-    <script src="../assets/js/admin-orders.js"></script>
-    <script src="../assets/js/admin-sidebar.js"></script>
+    <script src="../assets/js/auth.js?v=4.0.0"></script>
+    <script src="../assets/js/api.js?v=4.0.0"></script>
+    <script src="../assets/js/admin-orders.js?v=4.0.0"></script>
+    <script src="../assets/js/admin-sidebar.js?v=4.0.0"></script>
     <script>
-        Auth.requireAuth();
+      Auth.requireAuth();
     </script>
-</body>
+  </body>
 </html>
-
-

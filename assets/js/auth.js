@@ -1,6 +1,6 @@
 /**
- * Springwala Admin — auth.js
- * Optimized authentication logic: Optimistic access + Silent background validation.
+ * Springwala Admin — auth.js (Production-Safe Version)
+ * NO infinite loops. NO body hiding. NO race conditions.
  */
 
 const Auth = window.Auth = {
@@ -14,12 +14,8 @@ const Auth = window.Auth = {
         token: null
     },
 
-    /**
-     * Optimistic hydration. Instant access if token exists.
-     */
     init: function () {
         if (this.state.isInitialized) return this.isLoggedIn();
-
         this.state.token = localStorage.getItem(this.TOKEN_KEY);
         try {
             const userData = localStorage.getItem(this.USER_KEY);
@@ -27,14 +23,7 @@ const Auth = window.Auth = {
         } catch (e) {
             this.state.admin = null;
         }
-
         this.state.isInitialized = true;
-
-        // Instant UI stabilization
-        document.documentElement.classList.add('auth-initialized');
-        const loader = document.getElementById('sw-auth-loader');
-        if (loader) loader.style.display = 'none';
-
         return this.isLoggedIn();
     },
 
@@ -65,10 +54,10 @@ const Auth = window.Auth = {
         return !!this.getToken();
     },
 
-    logout: function (reason = "Manual") {
-        console.warn(`[AUTH] Logout: ${reason}`);
+    logout: function (reason) {
+        console.warn('[AUTH] Logout:', reason || 'Manual');
         this.clearSession();
-        if (!window.location.pathname.includes('login.html')) {
+        if (!window.location.pathname.includes('login')) {
             window.location.href = '/admin/login.html';
         }
     },
@@ -77,10 +66,6 @@ const Auth = window.Auth = {
         return this.requireAdminAuth();
     },
 
-    /**
-     * OPTIMISTIC GUARD: Only check if token exists.
-     * Never blocks dashboard rendering.
-     */
     requireAdminAuth: function () {
         if (!this.getToken()) {
             this.logout("Session missing");
@@ -89,10 +74,6 @@ const Auth = window.Auth = {
         return true;
     },
 
-    /**
-     * SILENT BACKGROUND VALIDATION
-     * Runs after page load. Non-blocking.
-     */
     validate: async function () {
         if (this.state.isValidating) return;
         const token = this.getToken();
@@ -100,9 +81,15 @@ const Auth = window.Auth = {
 
         this.state.isValidating = true;
         try {
-            const res = await fetch(`${CONFIG.API_BASE_URL}/auth/admin/me`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const controller = new AbortController();
+            const timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+
+            const res = await fetch(CONFIG.API_BASE_URL + '/auth/admin/me', {
+                headers: { 'Authorization': 'Bearer ' + token },
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (res.status === 401) {
                 this.logout("Session expired");
@@ -118,7 +105,7 @@ const Auth = window.Auth = {
             }
             return true;
         } catch (err) {
-            // Network failure: Preserve session
+            console.warn('[AUTH] Validate failed:', err.message);
             return true;
         } finally {
             this.state.isValidating = false;
@@ -126,53 +113,27 @@ const Auth = window.Auth = {
     }
 };
 
-// ─── Auth Bootstrap ──────────────────────────────────────────────────
+// Simple bootstrap - waits for DOM properly, no polling
 (function () {
     const path = window.location.pathname;
-    const isLoginPage = path.includes('login.html');
-    const isAdminPage = path.includes('/admin/');
+    const isLoginPage = path.includes('login');
+    const isAdminPage = path.includes('/admin');
 
-    if (isAdminPage && !isLoginPage) {
-        // Prevent FOPC with instant hydration
-        const style = document.createElement('style');
-        style.textContent = `
-            html:not(.auth-initialized) body { display: none !important; }
-            #sw-auth-loader { 
-                position: fixed; inset: 0; background: #fff; z-index: 999999;
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-                font-family: sans-serif;
-            }
-            .sw-spinner { 
-                width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-                border-top: 4px solid #BE2229; border-radius: 50%; 
-                animation: sw-spin 1s linear infinite; 
-            }
-            @keyframes sw-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        `;
-        document.head.appendChild(style);
+    if (!isAdminPage || isLoginPage) return;
 
-        const loader = document.createElement('div');
-        loader.id = 'sw-auth-loader';
-        loader.innerHTML = '<div class="sw-spinner"></div><p style="margin-top:15px;color:#666;font-size:14px;">Initializing...</p>';
+    function bootstrap() {
+        const loggedIn = Auth.init();
+        if (!loggedIn) {
+            Auth.logout("Bootstrap: No session");
+        } else {
+            setTimeout(function() { Auth.validate(); }, 1000);
+        }
+    }
 
-        // Ensure body exists before appending
-        const checkBody = setInterval(() => {
-            if (document.body) {
-                document.body.appendChild(loader);
-                clearInterval(checkBody);
-
-                // Optimistic Init after loader is attached
-                const loggedIn = Auth.init();
-                if (!loggedIn) {
-                    Auth.logout("Bootstrap: No session");
-                } else {
-                    // Silent background validation after load
-                    window.addEventListener('load', () => {
-                        setTimeout(() => Auth.validate(), 500);
-                    });
-                }
-            }
-        }, 1);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrap);
+    } else {
+        bootstrap();
     }
 })();
 

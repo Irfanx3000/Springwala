@@ -25,20 +25,36 @@ function initSidebar() {
     if (openBtn.dataset.sidebarInit) return;
     openBtn.dataset.sidebarInit = 'true';
 
-    function toggleSidebar() {
-        const isOpen = !sidebar.classList.contains('-translate-x-full');
+    // Lightweight guard + instrumentation to avoid rapid toggles and main-thread spikes
+    let _sidebarToggleInProgress = false;
 
-        if (isOpen) {
-            // Closing
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-            document.body.style.overflow = '';
-        } else {
-            // Opening
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+    function toggleSidebar() {
+        if (_sidebarToggleInProgress) return;
+        _sidebarToggleInProgress = true;
+
+        const start = (window.performance && performance.now) ? performance.now() : Date.now();
+
+        requestAnimationFrame(() => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+
+            if (isOpen) {
+                // Closing
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                if (document.body.style.overflow) document.body.style.overflow = '';
+            } else {
+                // Opening
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                if (document.body.style.overflow !== 'hidden') document.body.style.overflow = 'hidden';
+            }
+
+            const delta = ((window.performance && performance.now) ? performance.now() : Date.now()) - start;
+            if (delta > 50) console.warn(`[Sidebar] toggle took ${delta.toFixed(1)}ms`);
+
+            // Small cooldown to prevent click floods
+            setTimeout(() => { _sidebarToggleInProgress = false; }, 200);
+        });
     }
 
     openBtn.addEventListener('click', (e) => {

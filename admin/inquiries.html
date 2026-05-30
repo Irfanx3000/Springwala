@@ -1,488 +1,1238 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Springwala Admin | Inquiries & Subscriptions</title>
 
-    <link rel="icon" type="image/png" href="../favicon.png">
+    <link rel="icon" type="image/png" href="../favicon.png" />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=4.0.0" />
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #F2F2F2; }
-        .sidebar-item { transition: all 0.3s ease; }
-        .sidebar-item.active { background-color: #FFD9D9; border-radius: 5px; }
-        .sidebar-item.active span { color: #BE2229; font-weight: 500; }
-        .sidebar-item:hover:not(.active) { background-color: #f8f8f8; border-radius: 5px; }
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f2f2f2;
+      }
+      .sidebar-item {
+        transition: all 0.3s ease;
+      }
+      .sidebar-item.active {
+        background-color: #ffd9d9;
+        border-radius: 5px;
+      }
+      .sidebar-item.active span {
+        color: #be2229;
+        font-weight: 500;
+      }
+      .sidebar-item:hover:not(.active) {
+        background-color: #f8f8f8;
+        border-radius: 5px;
+      }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .stat-card-shadow { box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15); }
-        .active-tab { position: relative; color: #000; }
-        .active-tab::after { content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 2px; background-color: #000; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .stat-card-shadow {
+        box-shadow: 0px 5px 4px rgba(0, 0, 0, 0.15);
+      }
+      .active-tab {
+        position: relative;
+        color: #000;
+      }
+      .active-tab::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -8px;
+        height: 2px;
+        background-color: #000;
+      }
 
-        /* Modal Styles */
-        .modal-overlay { transition: opacity 0.3s ease; }
-        .modal-container { transition: transform 0.3s ease, opacity 0.3s ease; }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        transition: opacity 0.3s ease;
+      }
+      .modal-container {
+        transition:
+          transform 0.3s ease,
+          opacity 0.3s ease;
+      }
     </style>
-	<script src="../assets/js/config.js"></script>
-</head>
+    <script src="../assets/js/config.js?v=4.0.0"></script>
+  </head>
 
-<body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
-
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+  <body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
+    <div
+      id="sidebar-overlay"
+      class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"
+    ></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden">
-        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
+    <aside
+      id="sidebar"
+      class="fixed md:sticky top-0 left-0 h-screen w-[257px] bg-white shadow-[2px_0px_5px_1px_rgba(0,0,0,0.1)] flex flex-col pt-7 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 overflow-hidden"
+    >
+      <button
+        id="close-sidebar"
+        class="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-500"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
 
-        <div class="px-11 mb-10 w-full flex justify-center">
-            <a href="dashboard.html"><img src="../assets/images/header.png" alt="Springwala Admin Logo" class="h-[40px] w-auto"></a>
+      <div class="px-11 mb-10 w-full flex justify-center">
+        <a href="dashboard.html"
+          ><img
+            src="../assets/images/header.png"
+            alt="Springwala Admin Logo"
+            class="h-[40px] w-auto"
+        /></a>
+      </div>
+
+      <nav
+        class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10"
+      >
+        <a
+          href="dashboard.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/dashboard.svg"
+            alt="Dashboard"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Dashboard</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <a
+          href="categories.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/categories.svg"
+            alt="Categories"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Categories</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <div class="w-full flex flex-col group relative">
+          <button
+            id="products-menu-btn"
+            class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer"
+          >
+            <div class="flex items-center gap-[15px]">
+              <img
+                src="../assets/icons/admin/products.svg"
+                alt="Products"
+                class="w-6 h-6 shrink-0"
+              />
+              <span
+                class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]"
+                >Products</span
+              >
+            </div>
+            <svg
+              id="products-menu-chevron"
+              class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div
+            id="products-submenu"
+            class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative"
+          >
+            <div
+              class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"
+            ></div>
+            <a
+              href="products/product-list.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Product List</a
+            >
+            <a
+              href="products/add-product.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Add a Product</a
+            >
+            <a
+              href="products/bulk-upload.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Bulk Upload</a
+            >
+          </div>
         </div>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-        <nav class="flex-1 overflow-y-auto no-scrollbar flex flex-col px-[34px] gap-[2px] w-full pb-10">
-            <a href="dashboard.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/dashboard.svg" alt="Dashboard" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Dashboard</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="orders.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/oders.svg"
+            alt="Orders"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Orders</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="categories.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/categories.svg" alt="Categories" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Categories</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="users.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/users.svg"
+            alt="Users"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229] text-black"
+            >Users</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <div class="w-full flex flex-col group relative">
-                <button id="products-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
-                    <div class="flex items-center gap-[15px]">
-                        <img src="../assets/icons/admin/products.svg" alt="Products" class="w-6 h-6 shrink-0">
-                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black font-medium group-hover:text-[#BE2229]">Products</span>
-                    </div>
-                    <svg id="products-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="products-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
-                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
-                    <a href="products/product-list.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Product List</a>
-                    <a href="products/add-product.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Add a Product</a>
-                    <a href="products/bulk-upload.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Bulk Upload</a>
-                </div>
+        <!-- Inquiries Menu Link -->
+        <a
+          href="inquiries.html"
+          class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <!-- Using a simple mail icon for inquiries -->
+          <svg
+            class="w-6 h-6 shrink-0 text-[#BE2229]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            ></path>
+          </svg>
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229] text-black"
+            >Inquiries</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <a
+          href="inventory.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/inventry.svg"
+            alt="Inventory"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Inventory</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <a
+          href="analytics.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/analytics.svg"
+            alt="Analytics"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Analytics</span
+          >
+        </a>
+        <div class="w-full h-[1px] bg-black/15"></div>
+
+        <!-- Banners Dropdown -->
+        <div class="w-full flex flex-col group relative">
+          <button
+            id="banners-menu-btn"
+            class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer"
+          >
+            <div class="flex items-center gap-[15px]">
+              <img
+                src="../assets/icons/admin/banners.svg"
+                alt="Banners"
+                class="w-6 h-6 shrink-0"
+              />
+              <span
+                class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+                >Banners</span
+              >
             </div>
-            <div class="w-full h-[1px] bg-black/15"></div>
+            <svg
+              id="banners-menu-chevron"
+              class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          <div
+            id="banners-submenu"
+            class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative"
+          >
+            <div
+              class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"
+            ></div>
+            <a
+              href="banners/homepage.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Homepage</a
+            >
+            <a
+              href="banners/category.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Category</a
+            >
+            <a
+              href="banners/promotional.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Promotional</a
+            >
+            <a
+              href="banners/features.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Features</a
+            >
+            <a
+              href="banners/advertisement.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Advertisement</a
+            >
+            <a
+              href="banners/section.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Section</a
+            >
+            <a
+              href="banners/informational.html"
+              class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]"
+              >Informational</a
+            >
+          </div>
+        </div>
+        <div class="w-full h-[1px] bg-black/15"></div>
 
-            <a href="orders.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/oders.svg" alt="Orders" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Orders</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <a
+          href="settings.html"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group"
+        >
+          <img
+            src="../assets/icons/admin/settings.svg"
+            alt="Settings"
+            class="w-6 h-6 shrink-0"
+          />
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+            >Settings</span
+          >
+        </a>
 
-            <a href="users.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/users.svg" alt="Users" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229] text-black">Users</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
+        <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
 
-            <!-- Inquiries Menu Link -->
-            <a href="inquiries.html" class="sidebar-item active flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <!-- Using a simple mail icon for inquiries -->
-                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                <span class="font-['Poppins'] text-[19px] leading-[28px] group-hover:text-[#BE2229] text-black">Inquiries</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <a href="inventory.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/inventry.svg" alt="Inventory" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Inventory</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <a href="analytics.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/analytics.svg" alt="Analytics" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Analytics</span>
-            </a>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <!-- Banners Dropdown -->
-            <div class="w-full flex flex-col group relative">
-                <button id="banners-menu-btn" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full justify-between focus:outline-none cursor-pointer">
-                    <div class="flex items-center gap-[15px]">
-                        <img src="../assets/icons/admin/banners.svg" alt="Banners" class="w-6 h-6 shrink-0">
-                        <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Banners</span>
-                    </div>
-                    <svg id="banners-menu-chevron" class="w-5 h-5 text-black transition-transform duration-300 transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="banners-submenu" class="hidden md:group-hover:flex flex-col pl-[60px] py-3 gap-3 transition-all duration-300 origin-top relative">
-                    <div class="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#A2A2A2]"></div>
-                    <a href="banners/homepage.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Homepage</a>
-                    <a href="banners/category.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Category</a>
-                    <a href="banners/promotional.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Promotional</a>
-                    <a href="banners/features.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Features</a>
-                    <a href="banners/advertisement.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Advertisement</a>
-                    <a href="banners/section.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Section</a>
-                    <a href="banners/informational.html" class="font-['Poppins'] text-[18px] text-black hover:text-[#BE2229] leading-[27px]">Informational</a>
-                </div>
-            </div>
-            <div class="w-full h-[1px] bg-black/15"></div>
-
-            <a href="settings.html" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group">
-                <img src="../assets/icons/admin/settings.svg" alt="Settings" class="w-6 h-6 shrink-0">
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]">Settings</span>
-            </a>
-            
-            <div class="mt-8 mb-2 w-full h-[1px] bg-black/15"></div>
-
-            <button onclick="Auth.logout()" class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer">
-                <svg class="w-6 h-6 shrink-0 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                <span class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium">Logout</span>
-            </button>
-        </nav>
+        <button
+          onclick="Auth.logout()"
+          class="sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group hover:bg-red-50 transition cursor-pointer"
+        >
+          <svg
+            class="w-6 h-6 shrink-0 text-[#BE2229]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            ></path>
+          </svg>
+          <span
+            class="font-['Poppins'] text-[19px] leading-[28px] text-[#BE2229] font-medium"
+            >Logout</span
+          >
+        </button>
+      </nav>
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0 pb-[100px] relative">
-        <!-- Persistent Top Bar -->
-        <div class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-[24px] xl:px-8 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all">
-            <div class="flex items-center gap-4 flex-1">
-                <button id="open-sidebar" class="md:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <h2 class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center admin-name">Springwala</h2>
+      <!-- Persistent Top Bar -->
+      <div
+        class="sticky top-0 z-30 bg-[#F2F2F2] md:static md:bg-transparent w-full px-4 sm:px-[24px] xl:px-8 h-[70px] md:h-auto md:pt-6 xl:pt-8 flex items-center justify-between transition-all"
+      >
+        <div class="flex items-center gap-4 flex-1">
+          <button
+            id="open-sidebar"
+            class="md:hidden p-2 -ml-2 text-gray-600 hover:text-black shrink-0 font-bold flex items-center justify-center"
+          >
+            <svg
+              class="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+          <h2
+            class="font-['Roboto'] font-medium text-[24px] sm:text-[26px] leading-[30px] text-black shrink-0 flex items-center admin-name"
+          >
+            Springwala
+          </h2>
 
-                <!-- Desktop Search -->
-                <div class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink">
-                    <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
-                    <input id="desktop-search-input" type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent">
-                </div>
-            </div>
-
-            <!-- Desktop Action Buttons -->
-            <div class="hidden md:flex items-center gap-3">
-                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
-                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">View Orders</a>
-                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap">Vendors</button>
-            </div>
+          <!-- Desktop Search -->
+          <div
+            class="hidden sm:flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full max-w-[400px] xl:w-[532px] h-[43px] px-3 ml-2 md:ml-6 shrink"
+          >
+            <img
+              src="../assets/icons/admin/search.svg"
+              alt="Search"
+              class="w-5 h-5 mr-2 opacity-60"
+            />
+            <input
+              id="desktop-search-input"
+              type="text"
+              placeholder="Search orders, products, customers....."
+              class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] sm:text-[15px] bg-transparent"
+            />
+          </div>
         </div>
 
-        <!-- Mobile Scrollable Section -->
-        <div class="md:hidden px-4 sm:px-[24px] flex flex-col gap-4 mt-2">
-            <div class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink">
-                <img src="../assets/icons/admin/search.svg" alt="Search" class="w-5 h-5 mr-2 opacity-60">
-                <input type="text" placeholder="Search orders, products, customers....." class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent">
-            </div>
+        <!-- Desktop Action Buttons -->
+        <div class="hidden md:flex items-center gap-3">
+          <a
+            href="products/add-product.html"
+            class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] flex items-center justify-center transition whitespace-nowrap"
+            >+ Add Product</a
+          >
+          <a
+            href="orders.html"
+            class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap"
+            >View Orders</a
+          >
+          <button
+            class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[15px] h-[43px] px-4 rounded-[7px] items-center justify-center transition whitespace-nowrap"
+          >
+            Vendors
+          </button>
+        </div>
+      </div>
 
-            <div class="flex items-center gap-3 justify-between">
-                <a href="products/add-product.html" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap">+ Add Product</a>
-                <a href="orders.html" class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center">View Orders</a>
-                <button class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap">Vendors</button>
-            </div>
+      <!-- Mobile Scrollable Section -->
+      <div class="md:hidden px-4 sm:px-[24px] flex flex-col gap-4 mt-2">
+        <div
+          class="sm:hidden flex items-center bg-white border border-[#656565]/60 rounded-[7px] w-full h-[43px] px-3 shrink"
+        >
+          <img
+            src="../assets/icons/admin/search.svg"
+            alt="Search"
+            class="w-5 h-5 mr-2 opacity-60"
+          />
+          <input
+            type="text"
+            placeholder="Search orders, products, customers....."
+            class="w-full outline-none text-[#656565] font-['Poppins'] font-light text-[14px] bg-transparent"
+          />
         </div>
 
-        <!-- Content Area -->
-        <div class="w-full px-4 sm:px-[24px] xl:px-8 mt-[20px] flex flex-col gap-4">
-            
-            <!-- Page Title Row -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between w-full gap-4 md:gap-0">
-                <div class="flex items-center gap-4">
-                    <button onclick="history.back()" class="w-10 h-10 bg-white border border-[#E9E9E9] rounded-[5px] flex items-center justify-center hover:bg-gray-50 transition shrink-0 shadow-sm">
-                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <h1 class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black">Inquiries & Subscriptions</h1>
-                </div>
-                
-                <!-- Download Dropdowns -->
-                <div class="flex flex-row gap-3 w-full md:w-auto">
-                    <button class="flex-1 md:flex-none justify-center bg-white border border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap" onclick="alert('Downloading Data as CSV...')">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download .csv
-                    </button>
-                    <button class="flex-1 md:flex-none justify-center bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap" onclick="alert('Downloading Data as XLSX...')">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download .xlsx
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Statistic Cards Grid -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-[15px] w-full mt-2">
-                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
-                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Total Messages</span>
-                    <span class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black">128</span>
-                </div>
-                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
-                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Unread Messages</span>
-                    <span class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black">12</span>
-                </div>
-                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
-                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">Newsletter Subs</span>
-                    <span class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black">1,402</span>
-                </div>
-                <div class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2">
-                    <span class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center">New Subs (This Week)</span>
-                    <span class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black">45</span>
-                </div>
-            </div>
-
-            <!-- Main Table Card -->
-            <div class="w-full bg-white rounded-[10px] pb-[30px] pt-4 mb-[40px] flex flex-col border border-[#E9E9E9] shadow-sm mt-4">
-                
-                <!-- Tabs Row -->
-                <div class="flex items-center gap-[45px] px-6 pb-2 border-b border-black/10 w-full mb-6">
-                    <button id="tab-messages" class="active-tab font-['Poppins'] font-medium text-[20px] leading-[30px]" onclick="switchTab('messages')">Contact Us Messages</button>
-                    <button id="tab-newsletter" class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition" onclick="switchTab('newsletter')">Newsletter Emails</button>
-                </div>
-
-                <!-- Tab 1: Contact Us Messages -->
-                <div id="content-messages" class="tab-content active">
-                    <!-- Table Header (Desktop Only) -->
-                    <div class="hidden lg:grid grid-cols-[120px_1fr_220px_150px_200px_100px] gap-4 w-full px-[28px] pb-4 border-b border-gray-100">
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Date</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Full Name</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Email ID</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Phone Number</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Subject</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center">Actions</span>
-                    </div>
-
-                    <!-- Dynamic Table Body -->
-                    <div class="w-full flex flex-col gap-0">
-                        
-                        <!-- Row 1 (Unread) -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 bg-red-50/30 lg:hover:bg-gray-50 transition cursor-pointer relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 24, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center">Arun Sharma <span class="bg-[#BE2229] text-white text-[10px] px-2 py-0.5 rounded-full ml-2">New</span></span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none">arun.sharma@example.com</span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none">+91 9876543210</span>
-                            <span class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none">Bulk order inquiry for Fasteners</span>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none">
-                                <button onclick="openMessageModal('Arun Sharma', 'arun.sharma@example.com', '+91 9876543210', 'Bulk order inquiry for Fasteners', 'Oct 24, 2026', 'Hi, I would like to know if you can supply 50,000 units of Die Springs by next week. Please let me know your best quote and timeline.')" class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded">View</button>
-                            </div>
-                        </div>
-
-                        <!-- Row 2 -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 22, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center">Priya Singh</span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none">priya99@gmail.com</span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none">+91 8899776655</span>
-                            <span class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none">Delay in shipping delivery</span>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none">
-                                <button onclick="openMessageModal('Priya Singh', 'priya99@gmail.com', '+91 8899776655', 'Delay in shipping delivery', 'Oct 22, 2026', 'My order #12044 was supposed to arrive yesterday but the tracking has not updated since 3 days. Can you please check?')" class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded">View</button>
-                            </div>
-                        </div>
-
-                        <!-- Row 3 -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 20, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center">TechWorks India</span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none">procurement@techworks.in</span>
-                            <span class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none">+91 9988112233</span>
-                            <span class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none">Vendor registration process</span>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none">
-                                <button onclick="openMessageModal('TechWorks India', 'procurement@techworks.in', '+91 9988112233', 'Vendor registration process', 'Oct 20, 2026', 'We manufacture custom moulds and are interested in registering as a vendor on Springwala. Could you share the requirements and commission structure?')" class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded">View</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab 2: Newsletter Emails -->
-                <div id="content-newsletter" class="tab-content">
-                    <!-- Table Header (Desktop Only) -->
-                    <div class="hidden lg:grid grid-cols-[150px_1fr_150px_100px] gap-4 w-full px-[28px] pb-4 border-b border-gray-100">
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Date Subscribed</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Email ID</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center">Status</span>
-                        <span class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center">Actions</span>
-                    </div>
-
-                    <!-- Dynamic Table Body -->
-                    <div class="w-full flex flex-col gap-0">
-                        
-                        <!-- Row 1 -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 25, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none">vikas.kumar@company.com</span>
-                            <div class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0">
-                                <span class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full">Subscribed</span>
-                            </div>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none">
-                                <button class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded" title="Remove Subscriber">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Row 2 -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 24, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none">manufacturing.hub@gmail.com</span>
-                            <div class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0">
-                                <span class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full">Subscribed</span>
-                            </div>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none">
-                                <button class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded" title="Remove Subscriber">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Row 3 -->
-                        <div class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative">
-                            <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">Oct 23, 2026</span>
-                            <span class="text-black font-medium text-[16px] order-2 lg:order-none">info@springtech.co.in</span>
-                            <div class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0">
-                                <span class="bg-red-100 text-red-700 font-medium text-[12px] px-3 py-1 rounded-full">Unsubscribed</span>
-                            </div>
-                            <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none">
-                                <button class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded" title="Remove Data">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pagination Area -->
-                <div class="flex flex-row items-center justify-center lg:justify-end gap-[9px] w-full mt-8 px-[28px]">
-                    <div class="flex items-center gap-2">
-                        <button class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm">&lt;</button>
-                        <button class="w-8 h-8 rounded bg-[#BE2229] text-white flex items-center justify-center font-medium shadow-sm">1</button>
-                        <button class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-black hover:bg-gray-50 transition shadow-sm">2</button>
-                        <button class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm">&gt;</button>
-                    </div>
-                    <span class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] ml-4">1–3 of 128</span>
-                </div>
-            </div>
-
+        <div class="flex items-center gap-3 justify-between">
+          <a
+            href="products/add-product.html"
+            class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 flex items-center justify-center transition whitespace-nowrap"
+            >+ Add Product</a
+          >
+          <a
+            href="orders.html"
+            class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap text-center"
+            >View Orders</a
+          >
+          <button
+            class="flex bg-transparent border-2 border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] font-medium text-[13px] h-[40px] px-2 rounded-[7px] flex-1 items-center justify-center transition whitespace-nowrap"
+          >
+            Vendors
+          </button>
         </div>
+      </div>
+
+      <!-- Content Area -->
+      <div
+        class="w-full px-4 sm:px-[24px] xl:px-8 mt-[20px] flex flex-col gap-4"
+      >
+        <!-- Page Title Row -->
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between w-full gap-4 md:gap-0"
+        >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="history.back()"
+              class="w-10 h-10 bg-white border border-[#E9E9E9] rounded-[5px] flex items-center justify-center hover:bg-gray-50 transition shrink-0 shadow-sm"
+            >
+              <svg
+                class="w-5 h-5 text-black"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"
+                ></path>
+              </svg>
+            </button>
+            <h1
+              class="font-['Poppins'] font-medium text-[21px] leading-[32px] text-black"
+            >
+              Inquiries & Subscriptions
+            </h1>
+          </div>
+
+          <!-- Download Dropdowns -->
+          <div class="flex flex-row gap-3 w-full md:w-auto">
+            <button
+              class="flex-1 md:flex-none justify-center bg-white border border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap"
+              onclick="alert('Downloading Data as CSV...')"
+            >
+              <svg
+                class="w-4 h-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                ></path>
+              </svg>
+              Download .csv
+            </button>
+            <button
+              class="flex-1 md:flex-none justify-center bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap"
+              onclick="alert('Downloading Data as XLSX...')"
+            >
+              <svg
+                class="w-4 h-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                ></path>
+              </svg>
+              Download .xlsx
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistic Cards Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-[15px] w-full mt-2">
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >Total Messages</span
+            >
+            <span
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >128</span
+            >
+          </div>
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >Unread Messages</span
+            >
+            <span
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >12</span
+            >
+          </div>
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >Newsletter Subs</span
+            >
+            <span
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >1,402</span
+            >
+          </div>
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >New Subs (This Week)</span
+            >
+            <span
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >45</span
+            >
+          </div>
+        </div>
+
+        <!-- Main Table Card -->
+        <div
+          class="w-full bg-white rounded-[10px] pb-[30px] pt-4 mb-[40px] flex flex-col border border-[#E9E9E9] shadow-sm mt-4"
+        >
+          <!-- Tabs Row -->
+          <div
+            class="flex items-center gap-[45px] px-6 pb-2 border-b border-black/10 w-full mb-6"
+          >
+            <button
+              id="tab-messages"
+              class="active-tab font-['Poppins'] font-medium text-[20px] leading-[30px]"
+              onclick="switchTab('messages')"
+            >
+              Contact Us Messages
+            </button>
+            <button
+              id="tab-newsletter"
+              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition"
+              onclick="switchTab('newsletter')"
+            >
+              Newsletter Emails
+            </button>
+          </div>
+
+          <!-- Tab 1: Contact Us Messages -->
+          <div id="content-messages" class="tab-content active">
+            <!-- Table Header (Desktop Only) -->
+            <div
+              class="hidden lg:grid grid-cols-[120px_1fr_220px_150px_200px_100px] gap-4 w-full px-[28px] pb-4 border-b border-gray-100"
+            >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Date</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Full Name</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Email ID</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Phone Number</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Subject</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center"
+                >Actions</span
+              >
+            </div>
+
+            <!-- Dynamic Table Body -->
+            <div class="w-full flex flex-col gap-0">
+              <!-- Row 1 (Unread) -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 bg-red-50/30 lg:hover:bg-gray-50 transition cursor-pointer relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 24, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
+                  >Arun Sharma
+                  <span
+                    class="bg-[#BE2229] text-white text-[10px] px-2 py-0.5 rounded-full ml-2"
+                    >New</span
+                  ></span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
+                  >arun.sharma@example.com</span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
+                  >+91 9876543210</span
+                >
+                <span
+                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
+                  >Bulk order inquiry for Fasteners</span
+                >
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
+                >
+                  <button
+                    onclick="
+                      openMessageModal(
+                        'Arun Sharma',
+                        'arun.sharma@example.com',
+                        '+91 9876543210',
+                        'Bulk order inquiry for Fasteners',
+                        'Oct 24, 2026',
+                        'Hi, I would like to know if you can supply 50,000 units of Die Springs by next week. Please let me know your best quote and timeline.',
+                      )
+                    "
+                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <!-- Row 2 -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 22, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
+                  >Priya Singh</span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
+                  >priya99@gmail.com</span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
+                  >+91 8899776655</span
+                >
+                <span
+                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
+                  >Delay in shipping delivery</span
+                >
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
+                >
+                  <button
+                    onclick="
+                      openMessageModal(
+                        'Priya Singh',
+                        'priya99@gmail.com',
+                        '+91 8899776655',
+                        'Delay in shipping delivery',
+                        'Oct 22, 2026',
+                        'My order #12044 was supposed to arrive yesterday but the tracking has not updated since 3 days. Can you please check?',
+                      )
+                    "
+                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <!-- Row 3 -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 20, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
+                  >TechWorks India</span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
+                  >procurement@techworks.in</span
+                >
+                <span
+                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
+                  >+91 9988112233</span
+                >
+                <span
+                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
+                  >Vendor registration process</span
+                >
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
+                >
+                  <button
+                    onclick="
+                      openMessageModal(
+                        'TechWorks India',
+                        'procurement@techworks.in',
+                        '+91 9988112233',
+                        'Vendor registration process',
+                        'Oct 20, 2026',
+                        'We manufacture custom moulds and are interested in registering as a vendor on Springwala. Could you share the requirements and commission structure?',
+                      )
+                    "
+                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Newsletter Emails -->
+          <div id="content-newsletter" class="tab-content">
+            <!-- Table Header (Desktop Only) -->
+            <div
+              class="hidden lg:grid grid-cols-[150px_1fr_150px_100px] gap-4 w-full px-[28px] pb-4 border-b border-gray-100"
+            >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Date Subscribed</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141]"
+                >Email ID</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center"
+                >Status</span
+              >
+              <span
+                class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center"
+                >Actions</span
+              >
+            </div>
+
+            <!-- Dynamic Table Body -->
+            <div class="w-full flex flex-col gap-0">
+              <!-- Row 1 -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 25, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none"
+                  >vikas.kumar@company.com</span
+                >
+                <div
+                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
+                >
+                  <span
+                    class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full"
+                    >Subscribed</span
+                  >
+                </div>
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
+                >
+                  <button
+                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
+                    title="Remove Subscriber"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Row 2 -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 24, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none"
+                  >manufacturing.hub@gmail.com</span
+                >
+                <div
+                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
+                >
+                  <span
+                    class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full"
+                    >Subscribed</span
+                  >
+                </div>
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
+                >
+                  <button
+                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
+                    title="Remove Subscriber"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Row 3 -->
+              <div
+                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
+              >
+                <span
+                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
+                  >Oct 23, 2026</span
+                >
+                <span
+                  class="text-black font-medium text-[16px] order-2 lg:order-none"
+                  >info@springtech.co.in</span
+                >
+                <div
+                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
+                >
+                  <span
+                    class="bg-red-100 text-red-700 font-medium text-[12px] px-3 py-1 rounded-full"
+                    >Unsubscribed</span
+                  >
+                </div>
+                <div
+                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
+                >
+                  <button
+                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
+                    title="Remove Data"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination Area -->
+          <div
+            class="flex flex-row items-center justify-center lg:justify-end gap-[9px] w-full mt-8 px-[28px]"
+          >
+            <div class="flex items-center gap-2">
+              <button
+                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm"
+              >
+                &lt;
+              </button>
+              <button
+                class="w-8 h-8 rounded bg-[#BE2229] text-white flex items-center justify-center font-medium shadow-sm"
+              >
+                1
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-black hover:bg-gray-50 transition shadow-sm"
+              >
+                2
+              </button>
+              <button
+                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm"
+              >
+                &gt;
+              </button>
+            </div>
+            <span
+              class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] ml-4"
+              >1–3 of 128</span
+            >
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- View Message Modal -->
-    <div id="view-message-modal" class="fixed inset-0 bg-black/40 z-[60] hidden items-center justify-center modal-overlay opacity-0 p-4 overflow-y-auto">
-        <div id="message-modal-container" class="bg-white rounded-[15px] shadow-2xl w-full max-w-[600px] p-6 sm:p-8 modal-container scale-95 opacity-0 my-8">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-['Poppins'] font-semibold text-[20px] sm:text-[24px] text-black">Inquiry Details</h2>
-                <button onclick="closeMessageModal()" class="text-gray-500 hover:text-red-500 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div class="w-full h-[1px] bg-black/10 mb-4"></div>
-
-            <div class="flex flex-col gap-3">
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                        <span class="block text-[#656565] text-[13px] mb-0.5">Date</span>
-                        <span id="modal-msg-date" class="block font-medium text-[15px] text-black"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[#656565] text-[13px] mb-0.5">Full Name</span>
-                        <span id="modal-msg-name" class="block font-medium text-[15px] text-black"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[#656565] text-[13px] mb-0.5">Email ID</span>
-                        <span id="modal-msg-email" class="block font-medium text-[15px] text-black break-all"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[#656565] text-[13px] mb-0.5">Phone Number</span>
-                        <span id="modal-msg-phone" class="block font-medium text-[15px] text-black"></span>
-                    </div>
-                </div>
-                
-                <div class="mt-1">
-                    <span class="block text-[#656565] text-[13px] mb-0.5">Subject</span>
-                    <span id="modal-msg-subject" class="block font-medium text-[15px] text-black"></span>
-                </div>
-
-                <div class="mt-1 bg-[#F9F9F9] border border-[#E9E9E9] rounded-[8px] p-3 sm:p-4">
-                    <span class="block text-[#656565] text-[13px] mb-1 font-medium">Message</span>
-                    <p id="modal-msg-body" class="text-black leading-snug whitespace-pre-wrap font-['Roboto'] text-[14px] sm:text-[15px]"></p>
-                </div>
-
-                <div class="flex items-center justify-end mt-2">
-                    <button onclick="closeMessageModal()" class="w-[100px] h-[40px] bg-[#BE2229] text-white rounded-[8px] font-['Roboto'] font-medium text-[15px] hover:bg-red-800 transition">
-                        Close
-                    </button>
-                </div>
-            </div>
+    <div
+      id="view-message-modal"
+      class="fixed inset-0 bg-black/40 z-[60] hidden items-center justify-center modal-overlay opacity-0 p-4 overflow-y-auto"
+    >
+      <div
+        id="message-modal-container"
+        class="bg-white rounded-[15px] shadow-2xl w-full max-w-[600px] p-6 sm:p-8 modal-container scale-95 opacity-0 my-8"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2
+            class="font-['Poppins'] font-semibold text-[20px] sm:text-[24px] text-black"
+          >
+            Inquiry Details
+          </h2>
+          <button
+            onclick="closeMessageModal()"
+            class="text-gray-500 hover:text-red-500 transition"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <div class="w-full h-[1px] bg-black/10 mb-4"></div>
+
+        <div class="flex flex-col gap-3">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <span class="block text-[#656565] text-[13px] mb-0.5">Date</span>
+              <span
+                id="modal-msg-date"
+                class="block font-medium text-[15px] text-black"
+              ></span>
+            </div>
+            <div>
+              <span class="block text-[#656565] text-[13px] mb-0.5"
+                >Full Name</span
+              >
+              <span
+                id="modal-msg-name"
+                class="block font-medium text-[15px] text-black"
+              ></span>
+            </div>
+            <div>
+              <span class="block text-[#656565] text-[13px] mb-0.5"
+                >Email ID</span
+              >
+              <span
+                id="modal-msg-email"
+                class="block font-medium text-[15px] text-black break-all"
+              ></span>
+            </div>
+            <div>
+              <span class="block text-[#656565] text-[13px] mb-0.5"
+                >Phone Number</span
+              >
+              <span
+                id="modal-msg-phone"
+                class="block font-medium text-[15px] text-black"
+              ></span>
+            </div>
+          </div>
+
+          <div class="mt-1">
+            <span class="block text-[#656565] text-[13px] mb-0.5">Subject</span>
+            <span
+              id="modal-msg-subject"
+              class="block font-medium text-[15px] text-black"
+            ></span>
+          </div>
+
+          <div
+            class="mt-1 bg-[#F9F9F9] border border-[#E9E9E9] rounded-[8px] p-3 sm:p-4"
+          >
+            <span class="block text-[#656565] text-[13px] mb-1 font-medium"
+              >Message</span
+            >
+            <p
+              id="modal-msg-body"
+              class="text-black leading-snug whitespace-pre-wrap font-['Roboto'] text-[14px] sm:text-[15px]"
+            ></p>
+          </div>
+
+          <div class="flex items-center justify-end mt-2">
+            <button
+              onclick="closeMessageModal()"
+              class="w-[100px] h-[40px] bg-[#BE2229] text-white rounded-[8px] font-['Roboto'] font-medium text-[15px] hover:bg-red-800 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- <script src="../assets/js/auth.js"></script> -->
-    <script src="../assets/js/api.js"></script>
+    <!-- <script src="../assets/js/auth.js?v=4.0.0"></script> -->
+    <script src="../assets/js/api.js?v=4.0.0"></script>
     <script>
-        // Auth.requireAuth(); // Disabled for static preview
+      // Auth.requireAuth(); // Disabled for static preview
 
-        // Simple Tab Switch Logic
-        function switchTab(tabId) {
-            // Reset Tabs UI
-            document.getElementById('tab-messages').classList.remove('active-tab');
-            document.getElementById('tab-messages').classList.add('text-[#A4A4A4]');
-            
-            document.getElementById('tab-newsletter').classList.remove('active-tab');
-            document.getElementById('tab-newsletter').classList.add('text-[#A4A4A4]');
+      // Simple Tab Switch Logic
+      function switchTab(tabId) {
+        // Reset Tabs UI
+        document.getElementById("tab-messages").classList.remove("active-tab");
+        document.getElementById("tab-messages").classList.add("text-[#A4A4A4]");
 
-            // Reset Content
-            document.getElementById('content-messages').classList.remove('active');
-            document.getElementById('content-newsletter').classList.remove('active');
+        document
+          .getElementById("tab-newsletter")
+          .classList.remove("active-tab");
+        document
+          .getElementById("tab-newsletter")
+          .classList.add("text-[#A4A4A4]");
 
-            // Set Active UI
-            document.getElementById('tab-' + tabId).classList.add('active-tab');
-            document.getElementById('tab-' + tabId).classList.remove('text-[#A4A4A4]');
-            
-            // Show Active Content
-            document.getElementById('content-' + tabId).classList.add('active');
+        // Reset Content
+        document.getElementById("content-messages").classList.remove("active");
+        document
+          .getElementById("content-newsletter")
+          .classList.remove("active");
+
+        // Set Active UI
+        document.getElementById("tab-" + tabId).classList.add("active-tab");
+        document
+          .getElementById("tab-" + tabId)
+          .classList.remove("text-[#A4A4A4]");
+
+        // Show Active Content
+        document.getElementById("content-" + tabId).classList.add("active");
+      }
+
+      // Modal Logic
+      const msgModal = document.getElementById("view-message-modal");
+      const msgModalContainer = document.getElementById(
+        "message-modal-container",
+      );
+
+      function openMessageModal(name, email, phone, subject, date, message) {
+        document.getElementById("modal-msg-name").innerText = name;
+        document.getElementById("modal-msg-email").innerText = email;
+        document.getElementById("modal-msg-phone").innerText = phone;
+        document.getElementById("modal-msg-subject").innerText = subject;
+        document.getElementById("modal-msg-date").innerText = date;
+        document.getElementById("modal-msg-body").innerText = message;
+
+        msgModal.classList.remove("hidden");
+        msgModal.classList.add("flex");
+
+        // Trigger animation
+        setTimeout(() => {
+          msgModal.classList.remove("opacity-0");
+          msgModalContainer.classList.remove("scale-95", "opacity-0");
+        }, 10);
+      }
+
+      function closeMessageModal() {
+        msgModal.classList.add("opacity-0");
+        msgModalContainer.classList.add("scale-95", "opacity-0");
+
+        setTimeout(() => {
+          msgModal.classList.add("hidden");
+          msgModal.classList.remove("flex");
+        }, 300); // match transition duration
+      }
+
+      // Close on overlay click
+      msgModal.addEventListener("click", function (e) {
+        if (e.target === msgModal) {
+          closeMessageModal();
         }
-
-        // Modal Logic
-        const msgModal = document.getElementById('view-message-modal');
-        const msgModalContainer = document.getElementById('message-modal-container');
-
-        function openMessageModal(name, email, phone, subject, date, message) {
-            document.getElementById('modal-msg-name').innerText = name;
-            document.getElementById('modal-msg-email').innerText = email;
-            document.getElementById('modal-msg-phone').innerText = phone;
-            document.getElementById('modal-msg-subject').innerText = subject;
-            document.getElementById('modal-msg-date').innerText = date;
-            document.getElementById('modal-msg-body').innerText = message;
-
-            msgModal.classList.remove('hidden');
-            msgModal.classList.add('flex');
-            
-            // Trigger animation
-            setTimeout(() => {
-                msgModal.classList.remove('opacity-0');
-                msgModalContainer.classList.remove('scale-95', 'opacity-0');
-            }, 10);
-        }
-
-        function closeMessageModal() {
-            msgModal.classList.add('opacity-0');
-            msgModalContainer.classList.add('scale-95', 'opacity-0');
-            
-            setTimeout(() => {
-                msgModal.classList.add('hidden');
-                msgModal.classList.remove('flex');
-            }, 300); // match transition duration
-        }
-
-        // Close on overlay click
-        msgModal.addEventListener('click', function(e) {
-            if (e.target === msgModal) {
-                closeMessageModal();
-            }
-        });
+      });
     </script>
-    <script src="../assets/js/admin-sidebar.js"></script>
-</body>
+    <script src="../assets/js/admin-sidebar.js?v=4.0.0"></script>
+  </body>
 </html>
