@@ -257,13 +257,22 @@ function updatePagination(sectionKey, paginationId) {
     const start = (page - 1) * HOME_LIMIT + 1;
     const end = Math.min(page * HOME_LIMIT, total);
 
-    pag.querySelector('.page-info').textContent = `${start}-${end} of ${total}`;
+    pag.querySelector('.page-info').textContent = `${start}–${end} of ${total}`;
 
     const prevBtn = pag.querySelector('.prev-btn');
     const nextBtn = pag.querySelector('.next-btn');
 
+    // Hide arrows if all items fit on one page
+    if (total <= HOME_LIMIT) {
+        if (prevBtn) { prevBtn.disabled = true; prevBtn.style.opacity = '0.3'; prevBtn.style.pointerEvents = 'none'; }
+        if (nextBtn) { nextBtn.disabled = true; nextBtn.style.opacity = '0.3'; nextBtn.style.pointerEvents = 'none'; }
+        return;
+    }
+
     if (prevBtn) {
         prevBtn.disabled = page <= 1;
+        prevBtn.style.opacity = page <= 1 ? '0.3' : '1';
+        prevBtn.style.pointerEvents = page <= 1 ? 'none' : '';
         prevBtn.onclick = () => {
             if (page > 1) {
                 state[sectionKey].page--;
@@ -274,6 +283,8 @@ function updatePagination(sectionKey, paginationId) {
 
     if (nextBtn) {
         nextBtn.disabled = page >= totalPages;
+        nextBtn.style.opacity = page >= totalPages ? '0.3' : '1';
+        nextBtn.style.pointerEvents = page >= totalPages ? 'none' : '';
         nextBtn.onclick = () => {
             if (page < totalPages) {
                 state[sectionKey].page++;

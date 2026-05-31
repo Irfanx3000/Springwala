@@ -4,6 +4,16 @@
  * Supports both Desktop and Mobile layouts based on index.html responsive architecture.
  */
 
+// ── Auto-inject Springwala Modal System (sw-modal.js) ─────────────────────────
+(function injectSWModal() {
+    if (window.__swModalLoaded) return;
+    window.__swModalLoaded = true;
+    const s = document.createElement('script');
+    s.src = 'assets/js/sw-modal.js';
+    s.async = false;
+    document.head.appendChild(s);
+})();
+
 (function () {
     // 1. Render immediate static shell of header to prevent layout shift
     const headerPlaceholder = document.getElementById('sw-header');
@@ -40,12 +50,13 @@
         console.warn('Failed to parse cached location in header render:', e);
     }
 
+    const routes = (typeof ROUTES !== 'undefined') ? ROUTES : { knowledge: 'coming-soon.html' };
     const page = window.location.pathname.split('/').pop() || 'index.html';
     const links = [
         { name: 'Home', href: 'index.html', active: page === 'index.html' || page === '' },
         { name: 'All Products', href: 'allproducts.html', active: page === 'allproducts.html' },
         { name: 'Orders', href: 'orders.html', active: page === 'orders.html' },
-        { name: 'Knowledge Centre', href: '#', active: false },
+        { name: 'Knowledge Centre', href: routes.knowledge, active: page === routes.knowledge },
         { name: 'Contact Us', href: 'contact-us.html', active: page === 'contact-us.html' }
     ];
 

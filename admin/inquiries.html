@@ -80,6 +80,14 @@
           transform 0.3s ease,
           opacity 0.3s ease;
       }
+      .admin-fixed-grid > * {
+        min-width: 0;
+      }
+      .admin-cell-ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     </style>
     <script src="../assets/js/config.js?v=4.0.0"></script>
   </head>
@@ -607,7 +615,7 @@
         </div>
 
         <!-- Statistic Cards Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-[15px] w-full mt-2">
+        <div class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-[15px] w-full mt-2">
           <div
             class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
           >
@@ -673,6 +681,19 @@
               >0</span
             >
           </div>
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >Coming Soon Notifications</span
+            >
+            <span
+              id="stat-coming-soon-notifications"
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >0</span
+            >
+          </div>
         </div>
 
         <!-- Main Table Card -->
@@ -710,6 +731,13 @@
               onclick="switchTab('partners')"
             >
               Partners
+            </button>
+            <button
+              id="tab-coming-soon"
+              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition shrink-0"
+              onclick="switchTab('comingSoon')"
+            >
+              Coming Soon Notifications
             </button>
           </div>
 
@@ -823,7 +851,7 @@
 
             <!-- Table Header (Desktop Only) -->
             <div
-              class="hidden xl:grid grid-cols-[110px_160px_180px_120px_160px_100px_110px_100px_140px_80px] gap-2 w-full px-[28px] pb-4 border-b border-gray-100 font-['Roboto'] font-medium text-[15px] text-[#414141]"
+              class="admin-fixed-grid hidden lg:grid grid-cols-[100px_minmax(0,1.1fr)_minmax(0,1.4fr)_110px_minmax(0,1.2fr)_95px_minmax(0,1fr)_90px_130px_80px] gap-3 w-full px-[28px] pb-4 border-b border-gray-100 font-['Roboto'] font-medium text-[15px] text-[#414141]"
             >
               <span>Date</span>
               <span>Applicant Name</span>
@@ -892,6 +920,23 @@
             <!-- Dynamic Table Body -->
             <div id="partners-tbody" class="w-full flex flex-col gap-0">
               <!-- Dynamically populated partner applications go here -->
+            </div>
+          </div>
+
+          <!-- Tab 5: Coming Soon Notifications -->
+          <div id="content-coming-soon" class="tab-content">
+            <div
+              class="hidden lg:grid grid-cols-[150px_minmax(0,1fr)_180px_140px_100px] gap-4 w-full px-[28px] pb-4 border-b border-gray-100"
+            >
+              <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Date</span>
+              <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Email</span>
+              <span class="font-['Roboto'] font-medium text-[16px] text-[#414141]">Source Page</span>
+              <span class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center">Status</span>
+              <span class="font-['Roboto'] font-medium text-[16px] text-[#414141] text-center">Actions</span>
+            </div>
+
+            <div id="coming-soon-tbody" class="w-full flex flex-col gap-0">
+              <!-- Dynamically populated coming soon notifications go here -->
             </div>
           </div>
 

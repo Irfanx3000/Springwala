@@ -27,6 +27,9 @@ var API_BASE = CONFIG.API_BASE_URL;
 var BASE_URL = CONFIG.IMAGE_BASE_URL;
 var IMAGE_BASE = CONFIG.IMAGE_BASE_URL;
 
+// Network error behavior is centralized in assets/js/network-error-handler.js.
+// That file is injected globally through config.js for all storefront and admin pages.
+
 // ─── Pricing Engine ───────────────────────────────────────────────────────────
 // Uses PricingEngine from pricingEngine.js (loaded in HTML)
 const Pricing = {
@@ -194,17 +197,50 @@ async function apiCall(endpoint, method = 'GET', body = null, auth = false) {
 
     if (res.status === 401 && isProtected) {
       console.error('[API] 401 Unauthorized - Session expired');
-      Auth.logout();
-      throw new Error('Session expired. Please login again.');
+      redirectToErrorPage('session-expired');
+      return;
     }
 
-    const data = await res.json();
-    console.log(`[API-TRACE] JSON parsed successfully:`, data);
+    if (res.status === 403) {
+      console.error('[API] 403 Forbidden - Access denied');
+      redirectToErrorPage('access-denied');
+      return;
+    }
 
-    if (!res.ok) throw new Error(data.message || 'Request failed');
+    if ([500, 502, 503].includes(res.status)) {
+      console.error('[API] Server error - redirecting to maintenance page');
+      redirectToErrorPage('server');
+      return;
+    }
+
+    let data;
+    try {
+      data = await res.json();
+      console.log(`[API-TRACE] JSON parsed successfully:`, data);
+    } catch (jsonErr) {
+      if ([500, 502, 503].includes(res.status)) {
+        redirectToErrorPage('server');
+        return;
+      }
+      throw jsonErr;
+    }
+
+    if (!res.ok) {
+      const error = new Error(data.message || 'Request failed');
+      error.status = res.status;
+      throw error;
+    }
     return data;
   } catch (err) {
     console.error(`[API-TRACE] Fetch/Parse Error for ${endpoint}:`, err);
+    if (window.location.pathname.endsWith('error.html')) {
+      throw err;
+    }
+    const message = String(err.message || '').toLowerCase();
+    if (err.name === 'TypeError' || message.includes('failed to fetch') || message.includes('networkerror') || message.includes('network')) {
+      redirectToErrorPage('network');
+      return;
+    }
     throw err;
   }
 }
@@ -1824,22 +1860,44 @@ async function loadFeaturedProducts() {
   if (!grid) return;
 
   try {
-    // Fetch a sample of products for filtering
     const data = await apiCall('/user/products?limit=50');
-    const products = data.products || [];
+    const products = (data.products || []).filter(p => p.isFeatured === true);
 
-    // Business Logic: Admin decides if isFeatured is true
-    const featured = products.filter(p => p.isFeatured === true);
-
-    if (!featured.length) {
-      // Hide section if nothing is featured
+    if (!products.length) {
       const section = grid.closest('section');
       if (section) section.style.display = 'none';
       return;
     }
 
-    // Render featured items (Top 6)
-    grid.innerHTML = featured.slice(0, 6).map(p => buildProductCard(p)).join('');
+    const perPage = 6;
+    let page = 0;
+    const total = products.length;
+    const paginationId = 'featured-offers-pagination';
+
+    function render() {
+      const start = page * perPage;
+      const slice = products.slice(start, start + perPage);
+      grid.innerHTML = slice.map(p => buildProductCard(p)).join('');
+
+      const pag = document.getElementById(paginationId);
+      if (pag) {
+        const info = pag.querySelector('.page-info');
+        if (info) info.textContent = `${start + 1}–${Math.min(start + perPage, total)} of ${total}`;
+        updatePaginationUI(paginationId, page, total, perPage);
+      }
+    }
+
+    render();
+
+    const pag = document.getElementById(paginationId);
+    if (pag) {
+      pag.querySelector('.prev-btn')?.addEventListener('click', () => {
+        if (page > 0) { page--; render(); }
+      });
+      pag.querySelector('.next-btn')?.addEventListener('click', () => {
+        if ((page + 1) * perPage < total) { page++; render(); }
+      });
+    }
   } catch (err) {
     console.error("Featured Products Load Error:", err);
   }
@@ -1922,25 +1980,19 @@ async function loadTopCategories() {
     const categoryMap = {};
     products.forEach(p => {
       const catName = p.category?.name;
-      if (!catName) return; // Skip if no category
+      if (!catName) return;
       if (!categoryMap[catName]) categoryMap[catName] = [];
       categoryMap[catName].push(p);
     });
 
     // 2. Selection: Best product per category
     const categoryRepresentatives = Object.entries(categoryMap).map(([name, prods]) => {
-      // Sort items inside this category by sales
       const sortedProds = prods.sort((a, b) => (b.totalSold || 0) - (a.totalSold || 0));
-      // Sum of sales for the whole category (for ranking)
       const totalSales = prods.reduce((sum, item) => sum + (item.totalSold || 0), 0);
-
-      return {
-        bestProduct: sortedProds[0],
-        totalSales
-      };
+      return { bestProduct: sortedProds[0], totalSales };
     });
 
-    // 3. Ranking for Limit: Sort categories by their total popularity
+    // 3. Ranking: Sort categories by total popularity
     categoryRepresentatives.sort((a, b) => b.totalSales - a.totalSales);
 
     // Pick top 12 representative products
@@ -1954,8 +2006,35 @@ async function loadTopCategories() {
       return;
     }
 
-    // 4. Render in a clean grid
-    grid.innerHTML = finalSelection.map(p => buildProductCard(p)).join('');
+    const perPage = 6;
+    let page = 0;
+    const total = finalSelection.length;
+    const paginationId = 'top-categories-pagination';
+
+    function render() {
+      const start = page * perPage;
+      const slice = finalSelection.slice(start, start + perPage);
+      grid.innerHTML = slice.map(p => buildProductCard(p)).join('');
+
+      const pag = document.getElementById(paginationId);
+      if (pag) {
+        const info = pag.querySelector('.page-info');
+        if (info) info.textContent = `${start + 1}–${Math.min(start + perPage, total)} of ${total}`;
+        updatePaginationUI(paginationId, page, total, perPage);
+      }
+    }
+
+    render();
+
+    const pag = document.getElementById(paginationId);
+    if (pag) {
+      pag.querySelector('.prev-btn')?.addEventListener('click', () => {
+        if (page > 0) { page--; render(); }
+      });
+      pag.querySelector('.next-btn')?.addEventListener('click', () => {
+        if ((page + 1) * perPage < total) { page++; render(); }
+      });
+    }
 
   } catch (err) {
     console.error("Top Categories Selection Error:", err);
@@ -2127,6 +2206,21 @@ async function initAllProductsPage() {
 
       const catData = await apiCall('/user/categories').catch(() => ({ categories: [] }));
       state.allCategories = catData.categories || [];
+
+      if (state.filters.category) {
+        const catMatch = state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category);
+        if (!catMatch) {
+          window.location.href = 'error.html?type=category-not-found';
+          return;
+        }
+      }
+      if (state.filters.subcategory) {
+        const subMatch = state.allCategories.flatMap(c => c.subcategories || []).find(s => s._id === state.filters.subcategory || s.slug === state.filters.subcategory);
+        if (!subMatch) {
+          window.location.href = 'error.html?type=category-not-found';
+          return;
+        }
+      }
 
       // Initialize UI controls from state
       const availabilityCheckbox = document.querySelector('.filter-availability');
@@ -2640,9 +2734,9 @@ async function initProductPage() {
 
   try {
     const data = await apiCall(`/user/products/${productId}`);
-    const p = data.product;
+    const p = data?.product;
     if (!p) {
-      showToast('Product not found', 'error');
+      window.location.href = 'error.html?type=product-not-found';
       return;
     }
 
@@ -2974,7 +3068,14 @@ async function initProductPage() {
     if (latestGrid) latestGrid.innerHTML = (soldData.products || []).slice(0, 6).map(lp => buildProductCard(lp)).join('');
 
   } catch (e) {
+    if (e?.status === 404) {
+      window.location.href = 'error.html?type=product-not-found';
+      return;
+    }
     console.warn('Product page load failed:', e.message);
+    if (!window.location.pathname.endsWith('error.html')) {
+      redirectToErrorPage('server');
+    }
   }
 }
 
@@ -4727,7 +4828,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Better page detection using data-page attribute or pathname
   const bodyPage = document.body.dataset.page || window.location.pathname.split('/').pop().replace('.html', '') || 'index';
 
-  if (bodyPage === 'index' || bodyPage === '') initHomePage();
+  if (bodyPage === 'index' || bodyPage === '') {
+    initHomePage();
+    initKnowledgePagination();
+  }
   if (bodyPage === 'allproducts') initAllProductsPage();
   if (bodyPage === 'product') initProductPage();
   if (bodyPage === 'cart') initCartPage();
@@ -4754,12 +4858,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           e.preventDefault();
           const email = input.value.trim();
           if (!email) {
-            alert('Please enter your email address.');
+            showModal({ type: 'warning', title: 'Email Required', message: 'Please enter your email address.', buttonText: 'Okay' });
             return;
           }
           const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
           if (!emailRegex.test(email)) {
-            alert('Please enter a valid email address.');
+            showModal({ type: 'warning', title: 'Invalid Email', message: 'Please enter a valid email address.', buttonText: 'Okay' });
             return;
           }
 
@@ -4777,17 +4881,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.disabled = false;
             btn.textContent = originalText;
 
-            if (response.ok && data.success) {
-              alert(data.message || 'Thank you for subscribing to our newsletter!');
+              if (response.ok && data.success) {
+              const msg = data.message || '';
+              if (msg.toLowerCase().includes('already')) {
+                showModal({ type: 'warning', title: 'Already Subscribed', message: 'This email address is already subscribed to our newsletter.', buttonText: 'Okay' });
+              } else {
+                showModal({ type: 'success', title: 'Subscription Successful', message: 'You have successfully subscribed to Springwala updates.', buttonText: 'Done' });
+              }
               input.value = '';
             } else {
-              alert(data.message || 'Subscription failed. Please try again.');
+              showModal({ type: 'error', title: 'Subscription Failed', message: data.message || 'Subscription failed. Please try again.', buttonText: 'Retry' });
             }
           } catch (err) {
             console.error('[Newsletter Global Error]', err);
             btn.disabled = false;
             if (typeof originalText !== 'undefined') btn.textContent = originalText;
-            alert('Unable to connect to the server. Please try again later.');
+            showModal({ type: 'error', title: 'Connection Error', message: 'Unable to connect to the server. Please try again later.', buttonText: 'Okay' });
           }
         });
       }
@@ -4809,6 +4918,13 @@ function updatePaginationUI(paginationId, currentPage, totalItems, perPage) {
   const prevBtn = pag.querySelector('.prev-btn');
   const nextBtn = pag.querySelector('.next-btn');
 
+  // Hide arrows completely when all items fit on one page
+  if (totalItems <= perPage) {
+    if (prevBtn) prevBtn.classList.add('disabled-btn');
+    if (nextBtn) nextBtn.classList.add('disabled-btn');
+    return;
+  }
+
   if (prevBtn) {
     if (currentPage === 0) prevBtn.classList.add('disabled-btn');
     else prevBtn.classList.remove('disabled-btn');
@@ -4817,5 +4933,33 @@ function updatePaginationUI(paginationId, currentPage, totalItems, perPage) {
   if (nextBtn) {
     if (currentPage + 1 >= totalPages) nextBtn.classList.add('disabled-btn');
     else nextBtn.classList.remove('disabled-btn');
+  }
+}
+
+/**
+ * Knowledge Section Pagination Initializer
+ * Reads actual .ks-card count from the DOM and updates pagination label + arrow state.
+ * Called only on the index page after DOMContentLoaded.
+ */
+function initKnowledgePagination() {
+  const grid = document.querySelector('.ks-grid');
+  const pageInfoEl = document.querySelector('.ks-page-info');
+  if (!grid || !pageInfoEl) return;
+
+  const cards = grid.querySelectorAll('.ks-card');
+  const total = cards.length;
+  if (total === 0) return;
+
+  // Show all visible cards as page 1
+  const perPage = 6;
+  const visible = Math.min(perPage, total);
+  pageInfoEl.textContent = `1\u2013${visible} of ${total}`;
+
+  // Hide arrows if everything fits on one page
+  const prevBtn = document.querySelector('.ks-pagination .ks-page-btn:first-child');
+  const nextBtn = document.querySelector('.ks-pagination .ks-page-btn:last-child');
+  if (total <= perPage) {
+    if (prevBtn) prevBtn.classList.add('disabled-btn');
+    if (nextBtn) nextBtn.classList.add('disabled-btn');
   }
 }

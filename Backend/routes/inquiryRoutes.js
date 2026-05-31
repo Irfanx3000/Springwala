@@ -3,24 +3,30 @@ const router = express.Router();
 const {
   submitInquiry,
   subscribeNewsletter,
+  submitComingSoonNotification,
   getInquiries,
   getInquiry,
   markInquiryRead,
   updateInquiryStatus,
   getInquiryStats,
   getNewsletterSubs,
-  deleteNewsletterSub
+  deleteNewsletterSub,
+  getComingSoonNotifications,
+  markComingSoonNotificationViewed
 } = require('../controllers/inquiryController');
 const { protect } = require('../middleware/auth');
 
 // ── Public User-Facing Routes ────────────────────────────────────────────────
 router.post('/', submitInquiry);
 router.post('/newsletter', subscribeNewsletter);
+router.post('/coming-soon', submitComingSoonNotification);
 
 // ── Protected Admin Routes ────────────────────────────────────────────────────
 router.get('/stats', protect, getInquiryStats);
 router.get('/newsletter', protect, getNewsletterSubs);
 router.delete('/newsletter/:id', protect, deleteNewsletterSub);
+router.get('/coming-soon', protect, getComingSoonNotifications);
+router.patch('/coming-soon/:id/viewed', protect, markComingSoonNotificationViewed);
 
 router.get('/', protect, getInquiries);
 router.get('/:id', protect, getInquiry);

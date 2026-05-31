@@ -1472,7 +1472,12 @@
                         submitButton.textContent = 'Join the Waitlist';
 
                         if (data.success) {
-                            alert('Success! You have been added to the Springwala seller waitlist. Our onboarding team will contact you shortly.');
+                            showModal({
+                                type: 'success',
+                                title: 'Partner Request Submitted',
+                                message: 'Thank you for your interest in partnering with Springwala.\nOur team will contact you shortly.',
+                                buttonText: 'Done'
+                            });
                             form.reset();
 
                             // Reset dropdown
@@ -1483,14 +1488,19 @@
                             const placeholderOpt = customSelect.querySelector('.custom-option.placeholder');
                             if (placeholderOpt) placeholderOpt.classList.add('selected');
                         } else {
-                            alert(data.message || 'Something went wrong. Please try again.');
+                            const msg = data.message || '';
+                            if (msg.toLowerCase().includes('already')) {
+                                showModal({ type: 'warning', title: 'Request Already Exists', message: 'A partnership request already exists for this email address.', buttonText: 'Okay' });
+                            } else {
+                                showModal({ type: 'error', title: 'Something Went Wrong', message: msg || 'Unable to process your request. Please try again later.', buttonText: 'Retry' });
+                            }
                         }
                     })
                     .catch(err => {
                         submitButton.disabled = false;
                         submitButton.textContent = 'Join the Waitlist';
                         console.error('[Waitlist Submit Error]', err);
-                        alert('Unable to connect to the server. Please check your network and try again.');
+                        showModal({ type: 'error', title: 'Connection Error', message: 'Unable to connect to the server. Please check your network and try again.', buttonText: 'Okay' });
                     });
                 }
             });

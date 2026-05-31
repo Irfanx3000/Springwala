@@ -106,7 +106,14 @@ async function approveRequest(requestId) {
 }
 
 async function rejectRequest(requestId) {
-  if (!confirm('Are you sure you want to reject this request?')) return;
+  const confirmed = await showConfirm({
+    title: 'Reject Request',
+    message: 'Are you sure you want to reject this request?',
+    confirmText: 'Reject',
+    cancelText: 'Cancel'
+  });
+  if (!confirmed) return;
+
   try {
     const res = await api.post('/admin/reject', { requestId });
     if (res.success) {

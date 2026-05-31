@@ -2,6 +2,7 @@ const Inquiry = require('../models/Inquiry');
 const Newsletter = require('../models/Newsletter');
 const CareerApplication = require('../models/CareerApplication');
 const PartnerApplication = require('../models/PartnerApplication');
+const ComingSoonNotification = require('../models/ComingSoonNotification');
 
 // Helper to sanitize input and prevent basic XSS
 const sanitize = (val) => {
@@ -114,6 +115,46 @@ exports.subscribeNewsletter = async (req, res) => {
   } catch (err) {
     console.error('[Newsletter Controller Error]', err);
     return res.status(500).json({ success: false, message: 'Unable to connect to the server. Please try again later.' });
+  }
+};
+
+/**
+ * Submit Coming Soon Notification Lead
+ */
+exports.submitComingSoonNotification = async (req, res) => {
+  try {
+    let { email, sourcePage } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please enter your email address.' });
+    }
+
+    email = sanitize(email).toLowerCase();
+    sourcePage = sanitize(sourcePage) || 'coming-soon.html';
+
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
+
+    let notification = await ComingSoonNotification.findOne({ email, sourcePage });
+    if (notification) {
+      notification.status = 'New';
+      await notification.save();
+    } else {
+      notification = await ComingSoonNotification.create({ email, sourcePage, status: 'New' });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Thank you! You will be notified when this page goes live.',
+      notification
+    });
+  } catch (err) {
+    console.error('[Coming Soon Notification Error]', err);
+    if (err.code === 11000) {
+      return res.status(409).json({ success: false, message: 'This email is already on the notification list.' });
+    }
+    return res.status(500).json({ success: false, message: 'Unable to save your notification request.' });
   }
 };
 
@@ -233,6 +274,7 @@ exports.getInquiryStats = async (req, res) => {
     const newsletterSubs = await Newsletter.countDocuments({ status: 'Subscribed' });
     const careerApps = await CareerApplication.countDocuments();
     const partnerApps = await PartnerApplication.countDocuments();
+    const comingSoonNotifications = await ComingSoonNotification.countDocuments();
 
     // Calculate new subscribers this week (past 7 days)
     const sevenDaysAgo = new Date();
@@ -250,13 +292,73 @@ exports.getInquiryStats = async (req, res) => {
         newsletterSubs,
         newSubsThisWeek,
         careerApps,
-        partnerApps
+        partnerApps,
+        comingSoonNotifications
       }
     });
 
   } catch (err) {
     console.error('[Admin Inquiry Stats Error]', err);
     return res.status(500).json({ success: false, message: 'Server error loading stats.' });
+  }
+};
+
+/**
+ * Get Coming Soon Notification Leads
+ */
+exports.getComingSoonNotifications = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || '';
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { sourcePage: { $regex: search, $options: 'i' } },
+        { status: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const total = await ComingSoonNotification.countDocuments(query);
+    const pages = Math.ceil(total / limit) || 1;
+
+    const notifications = await ComingSoonNotification.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    return res.json({
+      success: true,
+      notifications,
+      page,
+      pages,
+      total
+    });
+  } catch (err) {
+    console.error('[Admin Coming Soon Notifications Error]', err);
+    return res.status(500).json({ success: false, message: 'Server error retrieving coming soon notifications.' });
+  }
+};
+
+/**
+ * Mark Coming Soon Notification as Viewed
+ */
+exports.markComingSoonNotificationViewed = async (req, res) => {
+  try {
+    const notification = await ComingSoonNotification.findById(req.params.id);
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification lead not found.' });
+    }
+
+    notification.status = 'Viewed';
+    await notification.save();
+
+    return res.json({ success: true, message: 'Notification lead marked as viewed.', notification });
+  } catch (err) {
+    console.error('[Admin Coming Soon Viewed Error]', err);
+    return res.status(500).json({ success: false, message: 'Server error updating notification lead.' });
   }
 };
 

@@ -28,7 +28,10 @@ async function apiFetch(endpoint, opts = {}) {
     res = await fetch(url, { ...opts, headers });
   } catch (e) {
     console.error(`[API-ERROR] Fetch failed for ${url}:`, e);
-    // Don't throw for simple network failures, just return null or rethrow
+    if (window.__networkErrorHandler?.isNetworkError?.(e) && typeof redirectToErrorPage === 'function') {
+      redirectToErrorPage('network', window.location.href);
+      return null;
+    }
     throw new Error('Network error. Please check your connection.');
   }
 
@@ -100,6 +103,16 @@ function showToast(msg, type = 'success') {
 
 // ─── Confirm Dialog ───────────────────────────────────────────────────────────
 function showConfirm(message, onConfirm) {
+  if (typeof window.showConfirm === 'function' && window.showConfirm !== showConfirm) {
+    window.showConfirm({
+      title: 'Confirm Action',
+      message,
+      confirmText: 'Confirm',
+      cancelText: 'Cancel'
+    }).then((confirmed) => { if (confirmed) onConfirm?.(); });
+    return;
+  }
+
   document.getElementById('sw-confirm')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'sw-confirm';

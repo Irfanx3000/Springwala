@@ -1223,7 +1223,12 @@
                         submitBtn.textContent = 'Submit Application';
                         
                         if (data.success) {
-                            alert(data.message || 'Your application has been submitted successfully!');
+                            showModal({
+                                type: 'success',
+                                title: 'Application Submitted Successfully',
+                                message: 'Thank you for applying.\nOur HR team will review your application and contact you if your profile matches the requirements.',
+                                buttonText: 'Done'
+                            });
                             form.reset();
                             fileNameDisplay.textContent = 'No file chosen';
 
@@ -1242,14 +1247,19 @@
                                 if (placeholderOpt) placeholderOpt.classList.add('selected');
                             });
                         } else {
-                            alert(data.message || 'Submission failed. Please try again.');
+                            const msg = data.message || '';
+                            if (msg.toLowerCase().includes('already')) {
+                                showModal({ type: 'warning', title: 'Application Already Submitted', message: 'You have already submitted an application using this email address.', buttonText: 'Okay' });
+                            } else {
+                                showModal({ type: 'error', title: 'Submission Failed', message: msg || 'Submission failed. Please try again.', buttonText: 'Retry' });
+                            }
                         }
                     })
                     .catch(err => {
                         console.error('Error submitting career form:', err);
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Submit Application';
-                        alert('A connection error occurred. Please check your connection and try again.');
+                        showModal({ type: 'error', title: 'Connection Error', message: 'A connection error occurred. Please check your connection and try again.', buttonText: 'Okay' });
                     });
                 }
             });

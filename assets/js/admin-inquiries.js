@@ -3,16 +3,18 @@
  */
 
 // Global State
-let currentTab = 'messages'; // 'messages', 'newsletter', 'careers', or 'partners'
+let currentTab = 'messages'; // 'messages', 'newsletter', 'careers', 'partners', or 'comingSoon'
 let messagesPage = 1;
 let newsletterPage = 1;
 let careersPage = 1;
 let partnersPage = 1;
+let comingSoonPage = 1;
 const recordsPerPage = 10;
 let messagesSearch = '';
 let newsletterSearch = '';
 let careersSearch = '';
 let partnersSearch = '';
+let comingSoonSearch = '';
 let careersFilters = { status: '', position: '', experience: '' };
 let partnersFilters = { status: '', category: '' };
 
@@ -44,6 +46,10 @@ window.switchTab = function(tabId) {
     document.getElementById("tab-partners").classList.toggle("active-tab", tabId === 'partners');
     document.getElementById("tab-partners").classList.toggle("text-[#A4A4A4]", tabId !== 'partners');
   }
+  if (document.getElementById("tab-coming-soon")) {
+    document.getElementById("tab-coming-soon").classList.toggle("active-tab", tabId === 'comingSoon');
+    document.getElementById("tab-coming-soon").classList.toggle("text-[#A4A4A4]", tabId !== 'comingSoon');
+  }
 
   // Content Visibility toggle
   document.getElementById("content-messages").classList.toggle("active", tabId === 'messages');
@@ -51,6 +57,9 @@ window.switchTab = function(tabId) {
   document.getElementById("content-careers").classList.toggle("active", tabId === 'careers');
   if (document.getElementById("content-partners")) {
     document.getElementById("content-partners").classList.toggle("active", tabId === 'partners');
+  }
+  if (document.getElementById("content-coming-soon")) {
+    document.getElementById("content-coming-soon").classList.toggle("active", tabId === 'comingSoon');
   }
 
   // Rerender pagination & search for active tab
@@ -60,6 +69,7 @@ window.switchTab = function(tabId) {
     else if (tabId === 'newsletter') activeSearchInput.value = newsletterSearch;
     else if (tabId === 'careers') activeSearchInput.value = careersSearch;
     else if (tabId === 'partners') activeSearchInput.value = partnersSearch;
+    else if (tabId === 'comingSoon') activeSearchInput.value = comingSoonSearch;
   }
   
   if (tabId === 'messages') {
@@ -70,6 +80,8 @@ window.switchTab = function(tabId) {
     fetchCareers(careersPage);
   } else if (tabId === 'partners') {
     fetchPartners(partnersPage);
+  } else if (tabId === 'comingSoon') {
+    fetchComingSoonNotifications(comingSoonPage);
   }
 };
 
@@ -111,6 +123,9 @@ async function fetchStats() {
       }
       if (document.getElementById('stat-partner-apps')) {
         document.getElementById('stat-partner-apps').innerText = (data.stats.partnerApps || 0).toLocaleString();
+      }
+      if (document.getElementById('stat-coming-soon-notifications')) {
+        document.getElementById('stat-coming-soon-notifications').innerText = (data.stats.comingSoonNotifications || 0).toLocaleString();
       }
     }
   } catch (err) {
@@ -326,17 +341,17 @@ async function fetchCareers(page = 1) {
         const resumeDownloadUrl = `${CONFIG.IMAGE_BASE_URL.replace(/\/$/, '')}/${app.resumeUrl}`;
 
         const row = document.createElement('div');
-        row.className = `flex flex-col xl:grid xl:grid-cols-[110px_160px_180px_120px_160px_100px_110px_100px_140px_80px] gap-2 xl:items-center p-4 xl:px-[28px] xl:py-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition relative font-['Roboto']`;
+        row.className = `admin-fixed-grid flex flex-col lg:grid lg:grid-cols-[100px_minmax(0,1.1fr)_minmax(0,1.4fr)_110px_minmax(0,1.2fr)_95px_minmax(0,1fr)_90px_130px_80px] gap-2 lg:gap-3 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition relative font-['Roboto']`;
         row.innerHTML = `
-          <span class="text-[#656565] text-[13px] xl:text-[15px] order-1 xl:order-none">${formattedDate}</span>
-          <span class="text-black font-semibold text-[16px] order-2 xl:order-none truncate">${app.fullName}</span>
-          <span class="text-[#656565] text-[14px] xl:text-[15px] order-3 xl:order-none truncate break-all">${app.email}</span>
-          <span class="text-[#656565] text-[14px] xl:text-[15px] order-4 xl:order-none">${app.phone}</span>
-          <span class="text-black font-medium text-[14px] xl:text-[15px] order-5 xl:order-none truncate">${app.position}</span>
-          <span class="text-[#656565] text-[14px] xl:text-[15px] order-6 xl:order-none capitalize">${app.experience}</span>
-          <span class="text-[#656565] text-[14px] xl:text-[15px] order-7 xl:order-none truncate">${app.location}</span>
+          <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none min-w-0 admin-cell-ellipsis">${formattedDate}</span>
+          <span class="text-black font-semibold text-[16px] order-2 lg:order-none min-w-0 admin-cell-ellipsis" title="${app.fullName}">${app.fullName}</span>
+          <span class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none min-w-0 admin-cell-ellipsis" title="${app.email}">${app.email}</span>
+          <span class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none min-w-0 admin-cell-ellipsis">${app.phone}</span>
+          <span class="text-black font-medium text-[14px] lg:text-[15px] order-5 lg:order-none min-w-0 admin-cell-ellipsis" title="${app.position}">${app.position}</span>
+          <span class="text-[#656565] text-[14px] lg:text-[15px] order-6 lg:order-none capitalize min-w-0 admin-cell-ellipsis">${app.experience}</span>
+          <span class="text-[#656565] text-[14px] lg:text-[15px] order-7 lg:order-none min-w-0 admin-cell-ellipsis" title="${app.location}">${app.location}</span>
           
-          <div class="flex items-center justify-start xl:justify-center order-8 xl:order-none gap-2">
+          <div class="flex items-center justify-start lg:justify-center order-8 lg:order-none gap-2 min-w-0">
             <a href="${resumeDownloadUrl}" target="_blank" class="text-blue-500 hover:text-blue-700 transition" title="View Resume">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             </a>
@@ -345,20 +360,20 @@ async function fetchCareers(page = 1) {
             </button>
           </div>
 
-          <div class="flex items-center justify-start xl:justify-center order-9 xl:order-none">
+          <div class="flex items-center justify-start lg:justify-center order-9 lg:order-none min-w-0">
             <select 
               onchange="updateCareerStatus('${app._id}', this.value)"
-              class="border rounded px-2 py-1 text-[13px] bg-white outline-none cursor-pointer font-medium w-full"
+              class="border rounded px-2 py-1 text-[13px] bg-white outline-none cursor-pointer font-medium w-full min-w-0 max-w-full truncate"
               style="color: ${getStatusColor(app.status)}; border-color: ${getStatusColor(app.status)}88"
             >
               ${statusOptions}
             </select>
           </div>
 
-          <div class="absolute right-4 top-4 xl:relative xl:right-auto xl:top-auto flex items-center justify-end xl:justify-center gap-3 order-10 xl:order-none font-medium">
+          <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-10 lg:order-none font-medium min-w-0">
             <button
               onclick="viewCareerDetail('${app._id}', '${escName}', '${escEmail}', '${escPhone}', '${escPosition}', '${escExperience}', '${escLocation}', '${resumeDownloadUrl}', '${formattedDate}', '${escCover}')"
-              class="text-[#BE2229] hover:underline text-[14px] font-bold bg-red-50 xl:bg-transparent px-3 py-1 xl:px-0 xl:py-0 rounded"
+              class="text-[#BE2229] hover:underline text-[14px] font-bold bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
             >
               View
             </button>
@@ -596,7 +611,115 @@ window.changePage = function(newPage) {
     fetchCareers(newPage);
   } else if (currentTab === 'partners') {
     fetchPartners(newPage);
+  } else if (currentTab === 'comingSoon') {
+    fetchComingSoonNotifications(newPage);
   }
+};
+
+async function fetchComingSoonNotifications(page = 1) {
+  comingSoonPage = page;
+  const tbody = document.getElementById('coming-soon-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <div class="p-8 text-center text-[#656565] font-medium">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#BE2229] mb-2"></div>
+      <div>Loading coming soon notifications...</div>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/inquiries/coming-soon?page=${page}&limit=${recordsPerPage}&search=${encodeURIComponent(comingSoonSearch)}`, {
+      headers: {
+        'Authorization': `Bearer ${Auth.getToken()}`
+      }
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (!data.notifications || data.notifications.length === 0) {
+        tbody.innerHTML = `<div class="p-8 text-center text-[#656565] font-medium">No coming soon notifications found.</div>`;
+        if (currentTab === 'comingSoon') {
+          renderPagination(0, page, recordsPerPage);
+        }
+        return;
+      }
+
+      tbody.innerHTML = '';
+      data.notifications.forEach(item => {
+        const isNew = item.status === 'New';
+        const rowBg = isNew ? 'bg-red-50/30' : 'bg-white';
+        const badge = isNew ? `<span class="bg-[#BE2229] text-white text-[10px] px-2 py-0.5 rounded-full font-['Inter']">NEW</span>` : '';
+        const statusBadge = isNew
+          ? `<span class="bg-red-100 text-[#BE2229] font-medium text-[12px] px-3 py-1 rounded-full">New</span>`
+          : `<span class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full">Viewed</span>`;
+        const formatted = formatDate(item.createdAt);
+        const detailDate = formatDetailedDate(item.createdAt);
+        const escEmail = (item.email || '').replace(/'/g, "\\'");
+        const escSource = (item.sourcePage || '').replace(/'/g, "\\'");
+
+        const row = document.createElement('div');
+        row.id = `coming-soon-row-${item._id}`;
+        row.className = `flex flex-col lg:grid lg:grid-cols-[150px_minmax(0,1fr)_180px_140px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 ${rowBg} lg:hover:bg-gray-50 transition relative`;
+        row.innerHTML = `
+          <span class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none">${formatted}</span>
+          <span class="text-black font-medium text-[16px] order-2 lg:order-none min-w-0 break-all flex items-center gap-2">${item.email} ${badge}</span>
+          <span class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none min-w-0 admin-cell-ellipsis" title="${item.sourcePage || ''}">${item.sourcePage || 'coming-soon.html'}</span>
+          <div class="flex lg:justify-center order-4 lg:order-none mt-1 lg:mt-0">${statusBadge}</div>
+          <div class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-5 lg:order-none">
+            <button
+              onclick="viewComingSoonNotification('${item._id}', '${escEmail}', '${escSource}', '${detailDate}', ${isNew})"
+              class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
+            >
+              View
+            </button>
+          </div>
+        `;
+        tbody.appendChild(row);
+      });
+
+      if (currentTab === 'comingSoon') {
+        renderPagination(data.total, page, recordsPerPage);
+      }
+    } else {
+      tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Failed to retrieve coming soon notifications.</div>`;
+    }
+  } catch (err) {
+    console.error('[Fetch Coming Soon Notifications Error]', err);
+    tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Server connection error.</div>`;
+  }
+}
+
+window.viewComingSoonNotification = async function(id, email, sourcePage, date, isNew) {
+  if (isNew) {
+    try {
+      const res = await fetch(`${CONFIG.API_BASE_URL}/inquiries/coming-soon/${id}/viewed`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${Auth.getToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const row = document.getElementById(`coming-soon-row-${id}`);
+        if (row) {
+          row.classList.remove('bg-red-50/30');
+          row.classList.add('bg-white');
+          const newBadge = row.querySelector("span.bg-\\[\\#BE2229\\]");
+          if (newBadge) newBadge.remove();
+        }
+        fetchStats();
+        if (currentTab === 'comingSoon') {
+          fetchComingSoonNotifications(comingSoonPage);
+        }
+      }
+    } catch (err) {
+      console.error('[Mark Coming Soon Viewed Error]', err);
+    }
+  }
+
+  openMessageModal('Coming Soon Notification', email, 'N/A', sourcePage || 'coming-soon.html', date, `Email: ${email}\nSource Page: ${sourcePage || 'coming-soon.html'}\nStatus: Viewed`);
 };
 
 /**
@@ -641,9 +764,13 @@ window.viewInquiryDetail = async function(id, name, email, phone, subject, date,
  * Delete newsletter subscriber from backend
  */
 window.removeSubscriber = async function(id, email) {
-  if (!confirm(`Are you sure you want to remove the subscriber '${email}'?`)) {
-    return;
-  }
+  const confirmed = await showConfirm({
+    title: 'Remove Subscriber',
+    message: `Are you sure you want to remove the subscriber '${email}'?\n\nThis action cannot be undone.`,
+    confirmText: 'Yes, Remove',
+    cancelText: 'Cancel'
+  });
+  if (!confirmed) return;
 
   try {
     const res = await fetch(`${CONFIG.API_BASE_URL}/inquiries/newsletter/${id}`, {
@@ -654,15 +781,15 @@ window.removeSubscriber = async function(id, email) {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      alert(data.message || 'Subscriber removed successfully.');
+      showModal({ type: 'success', title: 'Subscriber Removed', message: data.message || 'Subscriber removed successfully.', buttonText: 'Okay' });
       fetchStats();
       fetchNewsletter(newsletterPage);
     } else {
-      alert(data.message || 'Failed to remove subscriber.');
+      showModal({ type: 'error', title: 'Removal Failed', message: data.message || 'Failed to remove subscriber.', buttonText: 'Okay' });
     }
   } catch (err) {
     console.error('[Delete Subscriber Error]', err);
-    alert('Server error removing subscriber.');
+    showModal({ type: 'error', title: 'Server Error', message: 'A server error occurred while removing the subscriber.', buttonText: 'Okay' });
   }
 };
 
@@ -675,7 +802,8 @@ const msgModalContainer = document.getElementById("message-modal-container");
 window.openMessageModal = function(name, email, phone, subject, date, message) {
   document.getElementById("modal-msg-name").innerText = name;
   document.getElementById("modal-msg-email").innerText = email;
-  document.getElementById("modal-msg-phone").innerText = `+91 ${phone.replace(/^\+91\s?/, '')}`;
+  const normalizedPhone = phone && phone !== 'N/A' ? `+91 ${phone.replace(/^\+91\s?/, '')}` : 'N/A';
+  document.getElementById("modal-msg-phone").innerText = normalizedPhone;
   document.getElementById("modal-msg-subject").innerText = subject;
   document.getElementById("modal-msg-date").innerText = date;
   document.getElementById("modal-msg-body").innerText = message;
@@ -729,6 +857,9 @@ if (searchInput) {
       } else if (currentTab === 'partners') {
         partnersSearch = val;
         fetchPartners(1);
+      } else if (currentTab === 'comingSoon') {
+        comingSoonSearch = val;
+        fetchComingSoonNotifications(1);
       }
     }, 400); // 400ms debounce
   });
@@ -818,6 +949,16 @@ window.downloadInquiriesExport = async function(format) {
         part.productCategory,
         part.status
       ];
+    } else if (currentTab === 'comingSoon') {
+      endpoint = `${CONFIG.API_BASE_URL}/inquiries/coming-soon?page=1&limit=2000`;
+      filenamePrefix = 'springwala_coming_soon_notifications';
+      headers = ['Date', 'Email', 'Source Page', 'Status'];
+      mapRowFn = (item) => [
+        formatDate(item.createdAt),
+        item.email,
+        item.sourcePage,
+        item.status
+      ];
     }
 
     if (!endpoint) return;
@@ -832,6 +973,7 @@ window.downloadInquiriesExport = async function(format) {
     else if (currentTab === 'newsletter') items = data.subscribers || [];
     else if (currentTab === 'careers')    items = data.applications || [];
     else if (currentTab === 'partners')   items = data.applications || [];
+    else if (currentTab === 'comingSoon') items = data.notifications || [];
 
     if (!res.ok || !data.success || items.length === 0) {
       showToast('No records found to export.', 'warning');
@@ -1091,6 +1233,7 @@ window.viewPartnerDetail = function(id, name, email, phone, businessName, gstNum
 fetchStats();
 fetchInquiries(1);
 fetchNewsletter(1);
+fetchComingSoonNotifications(1);
 
 // Auto-open inquiry detail if id param exists
 const urlParams = new URLSearchParams(window.location.search);

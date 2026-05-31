@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found | 404 Error</title>
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS reset and design tokens */
+      :root {
+        --bg-color: #f8f9fa;
+        --white: #ffffff;
+        --charcoal: #1a1a1a;
+        --text-muted: #718096;
+        --primary: #d60a17;
+        --primary-hover: #b50813;
+        --primary-light: rgba(214, 10, 23, 0.05);
+        --border: #e2e8f0;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+        --shadow-md:
+          0 10px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.03);
+        --shadow-lg: 0 20px 35px -10px rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--charcoal);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      /* 1. Main Card Panel */
+      .main-card {
+        background-color: var(--white);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        padding: 60px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 50px;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .info-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      /* 404 Visual Header Wrapper */
+      .visual-404-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .blast-lines {
+        position: absolute;
+        top: -12px;
+        left: -22px;
+        width: 32px;
+        height: 32px;
+      }
+
+      .visual-404 {
+        font-size: 7.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 0.9;
+        letter-spacing: -3px;
+        user-select: none;
+      }
+
+      .error-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--charcoal);
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+
+      .title-divider {
+        width: 48px;
+        height: 4px;
+        background-color: var(--primary);
+        border-radius: 2px;
+        margin-bottom: 24px;
+      }
+
+      .error-desc {
+        font-size: 1rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 35px;
+        max-width: 380px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: var(--white);
+        border: 1px solid var(--primary);
+        box-shadow: 0 4px 14px rgba(214, 10, 23, 0.2);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(214, 10, 23, 0.3);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--primary);
+        border: 1.5px solid var(--primary);
+      }
+
+      .btn-outline:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-2px);
+      }
+
+      .btn svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        transition: transform 0.2s ease;
+      }
+
+      .btn-primary:hover svg {
+        transform: translateX(-3px);
+      }
+
+      .btn-outline:hover svg {
+        transform: scale(1.05);
+      }
+
+      /* 2. Graphic Panel */
+      .graphic-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .error-character-img {
+        width: 100%;
+        height: auto;
+        max-width: 280px;
+        display: block;
+        margin: 0 auto;
+      }
+
+      /* 4. Responsive Breakpoints */
+      @media (max-width: 768px) {
+        body {
+          padding: 20px 12px;
+        }
+
+        .container {
+          gap: 16px;
+        }
+
+        .main-card {
+          grid-template-columns: 1fr;
+          gap: 30px;
+          padding: 40px 24px;
+          text-align: center;
+        }
+
+        .info-panel {
+          align-items: center;
+          order: 2; /* Graphic on top */
+        }
+
+        .graphic-panel {
+          order: 1; /* Graphic on top */
+        }
+
+        .visual-404 {
+          font-size: 5.5rem;
+        }
+
+        .visual-404-wrapper {
+          margin-bottom: 12px;
+        }
+
+        .blast-lines {
+          top: -8px;
+          left: -18px;
+          width: 26px;
+          height: 26px;
+        }
+
+        .error-title {
+          font-size: 1.8rem;
+        }
+
+        .title-divider {
+          margin: 0 auto 16px auto;
+        }
+
+        .error-desc {
+          margin-bottom: 24px;
+          max-width: 100%;
+        }
+
+        .actions {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Main Panel Grid -->
+      <main class="main-card">
+        <!-- Left Column: Info Details -->
+        <div class="info-panel">
+          <div class="visual-404-wrapper">
+            <!-- Blast lines SVG -->
+            <svg
+              viewBox="0 0 30 30"
+              class="blast-lines"
+              fill="none"
+              stroke="#d60a17"
+              stroke-width="3"
+              stroke-linecap="round"
+            >
+              <line x1="12" y1="20" x2="4" y2="24" />
+              <line x1="18" y1="14" x2="8" y2="14" />
+              <line x1="20" y1="8" x2="14" y2="2" />
+            </svg>
+            <div class="visual-404">404</div>
+          </div>
+
+          <h1 class="error-title">Oops! Page Not Found</h1>
+          <div class="title-divider"></div>
+
+          <p class="error-desc">
+            The page you're looking for doesn't exist or may have been moved.
+          </p>
+
+          <div class="actions">
+            <a href="index.html" class="btn btn-primary" id="btn-back">
+              <!-- Left Arrow SVG -->
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Go Back Home
+            </a>
+          </div>
+          <p
+            id="network-status-message"
+            class="error-desc"
+            style="
+              display: none;
+              color: #be2229;
+              margin-top: 10px;
+              max-width: 380px;
+            "
+          ></p>
+        </div>
+
+        <!-- Right Column: Error Character Illustration -->
+        <div class="graphic-panel">
+          <img
+            src="assets/images/Character Error.png"
+            alt="Springwala Error Character"
+            class="error-character-img"
+          />
+        </div>
+      </main>
+    </div>
+
+    <!-- Basic Interactions Script -->
+    <script>
+      const ERROR_PAGE_CONFIG = {
+        404: {
+          code: "404",
+          title: "Oops! Page Not Found",
+          description:
+            "The page you're looking for doesn't exist or may have been moved.",
+          buttonText: "Go Back Home",
+          action: () => {
+            window.location.href = "index.html";
+          },
+        },
+        network: {
+          code: "NET",
+          title: "Network Connection Lost",
+          description:
+            "Unable to connect to Springwala servers.\nPlease check your internet connection and try again.",
+          buttonText: "Retry",
+          action: () => {
+            window.location.reload();
+          },
+        },
+        server: {
+          code: "500",
+          title: "Internal Server Error",
+          description:
+            "Something went wrong on our side.\nOur team has been notified and is working on it.",
+          buttonText: "Try Again",
+          action: () => {
+            window.location.reload();
+          },
+        },
+        "access-denied": {
+          code: "403",
+          title: "Access Denied",
+          description: "You do not have permission to access this page.",
+          buttonText: "Go Home",
+          action: () => {
+            window.location.href = "index.html";
+          },
+        },
+        "session-expired": {
+          code: "401",
+          title: "Session Expired",
+          description:
+            "Your login session has expired.\nPlease sign in again to continue.",
+          buttonText: "Login Again",
+          action: () => {
+            window.location.href = "login.html";
+          },
+        },
+        maintenance: {
+          code: "503",
+          title: "Website Under Maintenance",
+          description:
+            "Springwala is currently undergoing maintenance.\nPlease check back shortly.",
+          buttonText: "Refresh",
+          action: () => {
+            window.location.reload();
+          },
+        },
+        "product-not-found": {
+          code: "404",
+          title: "Product Not Found",
+          description:
+            "The requested product is no longer available or may have been removed.",
+          buttonText: "Browse Products",
+          action: () => {
+            window.location.href = "allproducts.html";
+          },
+        },
+        "category-not-found": {
+          code: "404",
+          title: "Category Not Found",
+          description: "The category you are looking for is unavailable.",
+          buttonText: "Browse Categories",
+          action: () => {
+            window.location.href = "allproducts.html";
+          },
+        },
+      };
+
+      function showErrorPage({ type = "404", returnUrl = null } = {}) {
+        const baseConfig = ERROR_PAGE_CONFIG[type] || ERROR_PAGE_CONFIG["404"];
+        const config = { ...baseConfig };
+        const safeReturnUrl =
+          type === "network" ? getSafeReturnUrl(returnUrl) : null;
+        const codeEl = document.querySelector(".visual-404");
+        const titleEl = document.querySelector(".error-title");
+        const descEl = document.querySelector(".error-desc");
+        const btn = document.getElementById("btn-back");
+
+        if (type === "network") {
+          config.buttonText = safeReturnUrl ? "Return to Page" : "Go Home";
+          config.description =
+            "Unable to connect to Springwala servers.\nPlease check your network and try again.";
+          config.action = () => handleNetworkRetry(safeReturnUrl);
+        }
+
+        if (codeEl) codeEl.textContent = config.code;
+        if (titleEl) titleEl.textContent = config.title;
+        if (descEl) descEl.textContent = config.description;
+        if (btn) {
+          btn.textContent = config.buttonText;
+          btn.href = "#";
+          btn.onclick = (e) => {
+            e.preventDefault();
+            config.action();
+          };
+        }
+
+        document.title = `${config.title} | Springwala`;
+        return { type, returnUrl: safeReturnUrl };
+      }
+
+      function getSafeReturnUrl(encodedUrl) {
+        if (!encodedUrl) return null;
+        try {
+          const decoded = decodeURIComponent(encodedUrl);
+          const parsed = new URL(decoded, window.location.origin);
+          if (parsed.origin !== window.location.origin) return null;
+          if (
+            parsed.pathname.endsWith("/error.html") ||
+            parsed.pathname === "/error.html"
+          )
+            return null;
+          return parsed.href;
+        } catch {
+          return null;
+        }
+      }
+
+      function showNetworkUnavailableMessage() {
+        const messageEl = document.getElementById("network-status-message");
+        if (!messageEl) return;
+        messageEl.textContent =
+          "Internet connection still unavailable. Please check your network and try again.";
+        messageEl.style.display = "block";
+      }
+
+      function handleNetworkRetry(returnUrl) {
+        if (navigator.onLine) {
+          window.location.href = returnUrl || "index.html";
+          return;
+        }
+        showNetworkUnavailableMessage();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get("type")?.trim().toLowerCase() || "404";
+        const encodedReturnUrl = params.get("returnUrl");
+        const safeReturnUrl = getSafeReturnUrl(encodedReturnUrl);
+        const state = showErrorPage({ type, returnUrl: encodedReturnUrl });
+
+        if (type === "network") {
+          const recoveryTarget = safeReturnUrl || "index.html";
+          const recover = () => {
+            if (navigator.onLine) {
+              window.location.href = recoveryTarget;
+            }
+          };
+
+          if (navigator.onLine) {
+            recover();
+            return;
+          }
+
+          window.addEventListener("online", recover, { once: true });
+        }
+      });
+    </script>
+  </body>
+</html>

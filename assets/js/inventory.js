@@ -344,9 +344,15 @@ function bindInventoryEvents() {
     if (!selected.length) return;
     const isActivating = activeFilters.isActive === false;
     const action = isActivating ? 'activate' : 'deactivate';
-    
-    if (!confirm(`Are you sure you want to ${action} ${selected.length} products?`)) return;
-    
+
+    const confirmed = await showConfirm({
+      title: `${isActivating ? 'Activate' : 'Deactivate'} Products`,
+      message: `Are you sure you want to ${action} ${selected.length} selected product${selected.length > 1 ? 's' : ''}?`,
+      confirmText: `Yes, ${isActivating ? 'Activate' : 'Deactivate'}`,
+      cancelText: 'Cancel'
+    });
+    if (!confirmed) return;
+
     try {
       bulkBtn.disabled = true;
       await api.post('/products/bulk-status', { ids: selected, isActive: isActivating });
