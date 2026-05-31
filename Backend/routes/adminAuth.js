@@ -14,12 +14,13 @@ const {
   getRequestStatus, requestAccess 
 } = require('../controllers/adminAuthController');
 const { protect, authorize } = require('../middleware/auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
 
 // Note: These are legacy paths mounted at /api/auth/admin/*
 // The new paths are at /api/admin/* (see adminManageRoutes.js)
 router.post('/admin/check-status',      getRequestStatus); // Compatibility
 router.post('/admin/request-access',    requestAccess);
-router.post('/admin/login',            login);
+router.post('/admin/login',            loginLimiter, login);
 router.get('/admin/me',                protect, getMe);
 router.post('/admin/register',         protect, authorize('superadmin'), register);
 router.put('/admin/change-password',   protect, changePassword);

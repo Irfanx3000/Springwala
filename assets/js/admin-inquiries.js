@@ -1232,8 +1232,6 @@ window.viewPartnerDetail = function(id, name, email, phone, businessName, gstNum
 // Initialize
 fetchStats();
 fetchInquiries(1);
-fetchNewsletter(1);
-fetchComingSoonNotifications(1);
 
 // Auto-open inquiry detail if id param exists
 const urlParams = new URLSearchParams(window.location.search);

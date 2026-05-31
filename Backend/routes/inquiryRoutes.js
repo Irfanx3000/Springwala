@@ -15,11 +15,16 @@ const {
   markComingSoonNotificationViewed
 } = require('../controllers/inquiryController');
 const { protect } = require('../middleware/auth');
+const {
+  inquiryLimiter,
+  newsletterLimiter,
+  comingSoonLimiter
+} = require('../middleware/rateLimiter');
 
 // ── Public User-Facing Routes ────────────────────────────────────────────────
-router.post('/', submitInquiry);
-router.post('/newsletter', subscribeNewsletter);
-router.post('/coming-soon', submitComingSoonNotification);
+router.post('/', inquiryLimiter, submitInquiry);
+router.post('/newsletter', newsletterLimiter, subscribeNewsletter);
+router.post('/coming-soon', comingSoonLimiter, submitComingSoonNotification);
 
 // ── Protected Admin Routes ────────────────────────────────────────────────────
 router.get('/stats', protect, getInquiryStats);

@@ -111,7 +111,8 @@ exports.getApplications = async (req, res) => {
     const applications = await CareerApplication.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return res.json({
       success: true,
@@ -132,7 +133,7 @@ exports.getApplications = async (req, res) => {
  */
 exports.getApplication = async (req, res) => {
   try {
-    const application = await CareerApplication.findById(req.params.id);
+    const application = await CareerApplication.findById(req.params.id).lean();
     if (!application) {
       return res.status(404).json({ success: false, message: 'Career application not found.' });
     }

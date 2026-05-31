@@ -22,5 +22,7 @@ const ComingSoonNotificationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 ComingSoonNotificationSchema.index({ email: 1, sourcePage: 1 }, { unique: true });
+ComingSoonNotificationSchema.index({ status: 1 });
+ComingSoonNotificationSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('ComingSoonNotification', ComingSoonNotificationSchema);

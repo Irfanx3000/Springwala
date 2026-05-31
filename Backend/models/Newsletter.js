@@ -20,4 +20,7 @@ const NewsletterSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+NewsletterSchema.index({ status: 1 });
+NewsletterSchema.index({ subscribedAt: -1 });
+
 module.exports = mongoose.model('Newsletter', NewsletterSchema);

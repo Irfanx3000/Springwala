@@ -100,7 +100,8 @@ exports.getPartnerApplications = async (req, res) => {
     const applications = await PartnerApplication.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return res.json({
       success: true,
@@ -121,7 +122,7 @@ exports.getPartnerApplications = async (req, res) => {
  */
 exports.getPartnerApplication = async (req, res) => {
   try {
-    const application = await PartnerApplication.findById(req.params.id);
+    const application = await PartnerApplication.findById(req.params.id).lean();
     if (!application) {
       return res.status(404).json({ success: false, message: 'Partner application not found.' });
     }

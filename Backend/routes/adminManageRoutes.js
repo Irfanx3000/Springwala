@@ -18,15 +18,16 @@ const {
   verifyLoginOTP
 } = require('../controllers/adminAuthController');
 const { protect, authorize } = require('../middleware/auth');
+const { loginLimiter, otpLimiter, resendLimiter } = require('../middleware/rateLimiter');
 
 // Public Onboarding & Auth Routes
-router.post('/login',            login);
-router.post('/send-login-otp',   sendLoginOTP);
-router.post('/verify-login-otp', verifyLoginOTP);
+router.post('/login',            loginLimiter, login);
+router.post('/send-login-otp',   resendLimiter, sendLoginOTP);
+router.post('/verify-login-otp', otpLimiter, verifyLoginOTP);
 router.post('/request-access',   requestAccess);
 router.get('/request-status',  getRequestStatus);
-router.post('/send-onboarding-otp',   sendOnboardingOTP);
-router.post('/verify-onboarding-otp', verifyOnboardingOTP);
+router.post('/send-onboarding-otp',   resendLimiter, sendOnboardingOTP);
+router.post('/verify-onboarding-otp', otpLimiter, verifyOnboardingOTP);
 router.post('/set-password',   setPassword);
 
 // Protected Admin Management routes (Superadmin only)

@@ -9,9 +9,10 @@ const {
 } = require('../controllers/careerController');
 const { protect } = require('../middleware/auth');
 const { uploadResume } = require('../middleware/upload');
+const { careerLimiter } = require('../middleware/rateLimiter');
 
 // Public user-facing application submission + resume upload
-router.post('/', uploadResume.single('resume'), submitApplication);
+router.post('/', careerLimiter, uploadResume.single('resume'), submitApplication);
 
 // Protected Admin management endpoints
 router.get('/', protect, getApplications);

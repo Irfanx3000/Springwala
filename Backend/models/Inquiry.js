@@ -36,4 +36,8 @@ const InquirySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+InquirySchema.index({ email: 1 });
+InquirySchema.index({ status: 1 });
+InquirySchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Inquiry', InquirySchema);

@@ -38,4 +38,8 @@ const PartnerApplicationSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+PartnerApplicationSchema.index({ email: 1 });
+PartnerApplicationSchema.index({ status: 1 });
+PartnerApplicationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('PartnerApplication', PartnerApplicationSchema);

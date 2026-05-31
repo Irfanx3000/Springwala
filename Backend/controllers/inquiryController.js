@@ -185,7 +185,8 @@ exports.getInquiries = async (req, res) => {
     const inquiries = await Inquiry.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return res.json({
       success: true,
@@ -206,7 +207,7 @@ exports.getInquiries = async (req, res) => {
  */
 exports.getInquiry = async (req, res) => {
   try {
-    const inquiry = await Inquiry.findById(req.params.id);
+    const inquiry = await Inquiry.findById(req.params.id).lean();
     if (!inquiry) {
       return res.status(404).json({ success: false, message: 'Inquiry not found.' });
     }
@@ -327,7 +328,8 @@ exports.getComingSoonNotifications = async (req, res) => {
     const notifications = await ComingSoonNotification.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return res.json({
       success: true,
@@ -382,7 +384,8 @@ exports.getNewsletterSubs = async (req, res) => {
     const subscribers = await Newsletter.find(query)
       .sort({ subscribedAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     return res.json({
       success: true,

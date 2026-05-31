@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const compression = require("compression");
 const passport = require("passport");
 const session = require("express-session");
 
@@ -20,6 +22,26 @@ app.set("trust proxy", 1);
 connectDB();
 
 // ── Core middleware ───────────────────────────────────────────────────────────
+app.disable("x-powered-by");
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+app.use(compression());
+
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - startedAt;
+    console.log(
+      `[HTTP] ${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`,
+    );
+  });
+  next();
+});
+
 const allowedOrigins = [
   "http://localhost:5500",
   "http://localhost:5503",

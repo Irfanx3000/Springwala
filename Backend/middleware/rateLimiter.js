@@ -42,6 +42,42 @@ const forgotPasswordLimiter = rateLimit({
   message: { success: false, message: 'Too many password reset requests. Please try again later.' },
 });
 
+const inquiryLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: 'Too many inquiry submissions. Please try again later.' },
+});
+
+const newsletterLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many newsletter submissions. Please try again later.' },
+});
+
+const comingSoonLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many notification requests. Please try again later.' },
+});
+
+const searchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: { success: false, message: 'Too many search requests. Please slow down and try again.' },
+});
+
+const careerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many career application submissions. Please try again later.' },
+});
+
+const partnerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many partner application submissions. Please try again later.' },
+});
+
 module.exports = {
   generalLimiter,
   registerLimiter,
@@ -49,4 +85,11 @@ module.exports = {
   otpLimiter,
   resendLimiter,
   forgotPasswordLimiter,
+  inquiryLimiter,
+  newsletterLimiter,
+  comingSoonLimiter,
+  searchLimiter,
+  careerLimiter,
+  partnerLimiter,
 };
+

@@ -52,4 +52,8 @@ const CareerApplicationSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+CareerApplicationSchema.index({ email: 1 });
+CareerApplicationSchema.index({ status: 1 });
+CareerApplicationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('CareerApplication', CareerApplicationSchema);
