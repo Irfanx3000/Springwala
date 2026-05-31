@@ -83,7 +83,7 @@
     </style>
     <script src="../assets/js/config.js?v=4.0.0"></script>
   </head>
-
+  
   <body class="bg-[#F2F2F2] text-[#363636] min-h-screen flex text-[17px]">
     <div
       id="sidebar-overlay"
@@ -567,7 +567,7 @@
           <div class="flex flex-row gap-3 w-full md:w-auto">
             <button
               class="flex-1 md:flex-none justify-center bg-white border border-[#BE2229] text-[#BE2229] hover:bg-red-50 font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap"
-              onclick="alert('Downloading Data as CSV...')"
+              onclick="downloadInquiriesExport('csv')"
             >
               <svg
                 class="w-4 h-4 shrink-0"
@@ -586,7 +586,7 @@
             </button>
             <button
               class="flex-1 md:flex-none justify-center bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] text-[12px] sm:text-[14px] font-medium px-2 sm:px-4 h-10 rounded-[5px] flex items-center gap-2 transition shadow-sm whitespace-nowrap"
-              onclick="alert('Downloading Data as XLSX...')"
+              onclick="downloadInquiriesExport('xlsx')"
             >
               <svg
                 class="w-4 h-4 shrink-0"
@@ -616,8 +616,9 @@
               >Total Messages</span
             >
             <span
+              id="stat-total-messages"
               class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
-              >128</span
+              >0</span
             >
           </div>
           <div
@@ -628,8 +629,9 @@
               >Unread Messages</span
             >
             <span
+              id="stat-unread-messages"
               class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
-              >12</span
+              >0</span
             >
           </div>
           <div
@@ -640,8 +642,9 @@
               >Newsletter Subs</span
             >
             <span
+              id="stat-newsletter-subs"
               class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
-              >1,402</span
+              >0</span
             >
           </div>
           <div
@@ -652,8 +655,9 @@
               >New Subs (This Week)</span
             >
             <span
+              id="stat-new-subs-week"
               class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
-              >45</span
+              >0</span
             >
           </div>
         </div>
@@ -715,145 +719,8 @@
             </div>
 
             <!-- Dynamic Table Body -->
-            <div class="w-full flex flex-col gap-0">
-              <!-- Row 1 (Unread) -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 bg-red-50/30 lg:hover:bg-gray-50 transition cursor-pointer relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 24, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
-                  >Arun Sharma
-                  <span
-                    class="bg-[#BE2229] text-white text-[10px] px-2 py-0.5 rounded-full ml-2"
-                    >New</span
-                  ></span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
-                  >arun.sharma@example.com</span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
-                  >+91 9876543210</span
-                >
-                <span
-                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
-                  >Bulk order inquiry for Fasteners</span
-                >
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
-                >
-                  <button
-                    onclick="
-                      openMessageModal(
-                        'Arun Sharma',
-                        'arun.sharma@example.com',
-                        '+91 9876543210',
-                        'Bulk order inquiry for Fasteners',
-                        'Oct 24, 2026',
-                        'Hi, I would like to know if you can supply 50,000 units of Die Springs by next week. Please let me know your best quote and timeline.',
-                      )
-                    "
-                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
-
-              <!-- Row 2 -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 22, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
-                  >Priya Singh</span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
-                  >priya99@gmail.com</span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
-                  >+91 8899776655</span
-                >
-                <span
-                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
-                  >Delay in shipping delivery</span
-                >
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
-                >
-                  <button
-                    onclick="
-                      openMessageModal(
-                        'Priya Singh',
-                        'priya99@gmail.com',
-                        '+91 8899776655',
-                        'Delay in shipping delivery',
-                        'Oct 22, 2026',
-                        'My order #12044 was supposed to arrive yesterday but the tracking has not updated since 3 days. Can you please check?',
-                      )
-                    "
-                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
-
-              <!-- Row 3 -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[120px_1fr_220px_150px_200px_100px] gap-1 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition cursor-pointer relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 20, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none flex items-center"
-                  >TechWorks India</span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-3 lg:order-none"
-                  >procurement@techworks.in</span
-                >
-                <span
-                  class="text-[#656565] text-[14px] lg:text-[15px] order-4 lg:order-none"
-                  >+91 9988112233</span
-                >
-                <span
-                  class="text-black font-medium text-[14px] lg:text-[15px] mt-1 lg:mt-0 truncate order-5 lg:order-none"
-                  >Vendor registration process</span
-                >
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-6 lg:order-none"
-                >
-                  <button
-                    onclick="
-                      openMessageModal(
-                        'TechWorks India',
-                        'procurement@techworks.in',
-                        '+91 9988112233',
-                        'Vendor registration process',
-                        'Oct 20, 2026',
-                        'We manufacture custom moulds and are interested in registering as a vendor on Springwala. Could you share the requirements and commission structure?',
-                      )
-                    "
-                    class="text-[#BE2229] hover:underline text-[14px] font-medium bg-red-50 lg:bg-transparent px-3 py-1 lg:px-0 lg:py-0 rounded"
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
+            <div id="messages-tbody" class="w-full flex flex-col gap-0">
+              <!-- Dynamically populated customer messages go here -->
             </div>
           </div>
 
@@ -882,171 +749,17 @@
             </div>
 
             <!-- Dynamic Table Body -->
-            <div class="w-full flex flex-col gap-0">
-              <!-- Row 1 -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 25, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none"
-                  >vikas.kumar@company.com</span
-                >
-                <div
-                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
-                >
-                  <span
-                    class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full"
-                    >Subscribed</span
-                  >
-                </div>
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
-                >
-                  <button
-                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
-                    title="Remove Subscriber"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Row 2 -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 24, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none"
-                  >manufacturing.hub@gmail.com</span
-                >
-                <div
-                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
-                >
-                  <span
-                    class="bg-green-100 text-green-700 font-medium text-[12px] px-3 py-1 rounded-full"
-                    >Subscribed</span
-                  >
-                </div>
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
-                >
-                  <button
-                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
-                    title="Remove Subscriber"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Row 3 -->
-              <div
-                class="flex flex-col lg:grid lg:grid-cols-[150px_1fr_150px_100px] gap-2 lg:gap-4 lg:items-center p-4 lg:px-[28px] lg:py-4 border-b border-gray-100 lg:hover:bg-gray-50 transition relative"
-              >
-                <span
-                  class="text-[#656565] text-[13px] lg:text-[15px] order-1 lg:order-none"
-                  >Oct 23, 2026</span
-                >
-                <span
-                  class="text-black font-medium text-[16px] order-2 lg:order-none"
-                  >info@springtech.co.in</span
-                >
-                <div
-                  class="flex lg:justify-center order-3 lg:order-none mt-1 lg:mt-0"
-                >
-                  <span
-                    class="bg-red-100 text-red-700 font-medium text-[12px] px-3 py-1 rounded-full"
-                    >Unsubscribed</span
-                  >
-                </div>
-                <div
-                  class="absolute right-4 top-4 lg:relative lg:right-auto lg:top-auto flex items-center justify-end lg:justify-center gap-3 order-4 lg:order-none"
-                >
-                  <button
-                    class="text-red-500 hover:text-red-700 transition bg-red-50 lg:bg-transparent p-1.5 lg:p-0 rounded"
-                    title="Remove Data"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
+            <div id="newsletter-tbody" class="w-full flex flex-col gap-0">
+              <!-- Dynamically populated newsletter subscribers go here -->
             </div>
           </div>
 
           <!-- Pagination Area -->
           <div
+            id="inquiries-pagination"
             class="flex flex-row items-center justify-center lg:justify-end gap-[9px] w-full mt-8 px-[28px]"
           >
-            <div class="flex items-center gap-2">
-              <button
-                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm"
-              >
-                &lt;
-              </button>
-              <button
-                class="w-8 h-8 rounded bg-[#BE2229] text-white flex items-center justify-center font-medium shadow-sm"
-              >
-                1
-              </button>
-              <button
-                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-black hover:bg-gray-50 transition shadow-sm"
-              >
-                2
-              </button>
-              <button
-                class="w-8 h-8 rounded border border-[#E9E9E9] flex items-center justify-center text-gray-500 hover:bg-gray-50 transition shadow-sm"
-              >
-                &gt;
-              </button>
-            </div>
-            <span
-              class="font-['Roboto'] font-medium text-[15px] leading-[18px] text-[#726565] ml-4"
-              >1–3 of 128</span
-            >
+            <!-- Dynamically populated pagination links go here -->
           </div>
         </div>
       </div>
@@ -1158,81 +871,9 @@
       </div>
     </div>
 
-    <!-- <script src="../assets/js/auth.js?v=4.0.0"></script> -->
-    <script src="../assets/js/api.js?v=4.0.0"></script>
-    <script>
-      // Auth.requireAuth(); // Disabled for static preview
-
-      // Simple Tab Switch Logic
-      function switchTab(tabId) {
-        // Reset Tabs UI
-        document.getElementById("tab-messages").classList.remove("active-tab");
-        document.getElementById("tab-messages").classList.add("text-[#A4A4A4]");
-
-        document
-          .getElementById("tab-newsletter")
-          .classList.remove("active-tab");
-        document
-          .getElementById("tab-newsletter")
-          .classList.add("text-[#A4A4A4]");
-
-        // Reset Content
-        document.getElementById("content-messages").classList.remove("active");
-        document
-          .getElementById("content-newsletter")
-          .classList.remove("active");
-
-        // Set Active UI
-        document.getElementById("tab-" + tabId).classList.add("active-tab");
-        document
-          .getElementById("tab-" + tabId)
-          .classList.remove("text-[#A4A4A4]");
-
-        // Show Active Content
-        document.getElementById("content-" + tabId).classList.add("active");
-      }
-
-      // Modal Logic
-      const msgModal = document.getElementById("view-message-modal");
-      const msgModalContainer = document.getElementById(
-        "message-modal-container",
-      );
-
-      function openMessageModal(name, email, phone, subject, date, message) {
-        document.getElementById("modal-msg-name").innerText = name;
-        document.getElementById("modal-msg-email").innerText = email;
-        document.getElementById("modal-msg-phone").innerText = phone;
-        document.getElementById("modal-msg-subject").innerText = subject;
-        document.getElementById("modal-msg-date").innerText = date;
-        document.getElementById("modal-msg-body").innerText = message;
-
-        msgModal.classList.remove("hidden");
-        msgModal.classList.add("flex");
-
-        // Trigger animation
-        setTimeout(() => {
-          msgModal.classList.remove("opacity-0");
-          msgModalContainer.classList.remove("scale-95", "opacity-0");
-        }, 10);
-      }
-
-      function closeMessageModal() {
-        msgModal.classList.add("opacity-0");
-        msgModalContainer.classList.add("scale-95", "opacity-0");
-
-        setTimeout(() => {
-          msgModal.classList.add("hidden");
-          msgModal.classList.remove("flex");
-        }, 300); // match transition duration
-      }
-
-      // Close on overlay click
-      msgModal.addEventListener("click", function (e) {
-        if (e.target === msgModal) {
-          closeMessageModal();
-        }
-      });
-    </script>
-    <script src="../assets/js/admin-sidebar.js?v=4.0.0"></script>
+    <script src="../assets/js/auth.js?v=3.0.0"></script>
+    <script src="../assets/js/api.js?v=3.0.0"></script>
+    <script src="../assets/js/admin-inquiries.js?v=3.0.0"></script>
+    <script src="../assets/js/admin-sidebar.js?v=3.0.0"></script>
   </body>
 </html>

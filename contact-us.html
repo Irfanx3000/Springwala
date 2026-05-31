@@ -51,11 +51,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="flex flex-col gap-2">
                                 <label class="text-[14px] text-[#2B2B2B] font-medium">Full Name</label>
-                                <input type="text" required oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')" placeholder="Ameen sarguroh" class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
+                                <input type="text" id="fullName" required oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')" placeholder="Your Name" class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
                             </div>
                             <div class="flex flex-col gap-2">
                                 <label class="text-[14px] text-[#2B2B2B] font-medium">Email Address</label>
-                                <input type="email" required placeholder="ameensarguroh@gmail.com" class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
+                                <input type="email" id="email" required placeholder="example@gmail.com" class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
                             </div>
                         </div>
                         
@@ -64,19 +64,21 @@
                                 <label class="text-[14px] text-[#2B2B2B] font-medium">Phone Number</label>
                                 <div class="flex w-full border border-[#D9D9D9] rounded-[5px] h-[45px] overflow-hidden focus-within:border-[#BE2229] transition bg-white">
                                     <div class="flex items-center justify-center px-3 bg-gray-50 border-r border-[#D9D9D9] text-[#525252] text-[15px] font-medium">+91</div>
-                                    <input type="tel" required pattern="[0-9]{10}" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10 digit number" class="w-full h-full px-3 outline-none text-[15px]">
+                                    <input type="tel" id="phoneNumber" required pattern="[0-9]{10}" minlength="10" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Enter 10 digit number" class="w-full h-full px-3 outline-none text-[15px]">
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2">
                                 <label class="text-[14px] text-[#2B2B2B] font-medium">Subject</label>
-                                <input type="text" required placeholder="Order Inquiry, Product Info, etc." class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
+                                <input type="text" id="subject" required placeholder="Order Inquiry, Product Info, etc." class="w-full border border-[#D9D9D9] rounded-[5px] h-[45px] px-4 outline-none focus:border-[#BE2229] transition">
                             </div>
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label class="text-[14px] text-[#2B2B2B] font-medium">Message</label>
-                            <textarea required rows="5" placeholder="How can we help you?" class="w-full border border-[#D9D9D9] rounded-[5px] p-4 outline-none focus:border-[#BE2229] transition resize-y"></textarea>
+                            <textarea id="message" required rows="5" placeholder="How can we help you?" class="w-full border border-[#D9D9D9] rounded-[5px] p-4 outline-none focus:border-[#BE2229] transition resize-y"></textarea>
                         </div>
+
+                        <div id="formErrorMessage" class="text-[#BE2229] text-[14px] font-medium hidden"></div>
 
                         <button type="submit" class="bg-[#BE2229] hover:bg-red-800 text-white font-['Poppins'] font-medium text-[16px] h-[50px] rounded-[5px] transition mt-2 shadow-md hover:shadow-lg active:scale-[0.98]">
                             Submit Message
@@ -322,17 +324,97 @@
     </div>
     
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const modal = document.getElementById('successModal');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.children[0].classList.remove('scale-95');
-                modal.children[0].classList.add('scale-100');
-            }, 10);
-            this.reset();
+            
+            const errorDiv = document.getElementById('formErrorMessage');
+            errorDiv.classList.add('hidden');
+            errorDiv.innerText = '';
+
+            // Retrieve fields
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            // Client-side validations
+            if (!fullName || !email || !phoneNumber || !subject || !message) {
+                showError('All fields are required.');
+                return;
+            }
+
+            if (fullName.length < 2) {
+                showError('Please enter your full name (minimum 2 letters).');
+                return;
+            }
+
+            const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address.');
+                return;
+            }
+
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                showError('Please enter a valid 10-digit phone number.');
+                return;
+            }
+
+            if (subject.length < 3) {
+                showError('Subject must be at least 3 characters.');
+                return;
+            }
+
+            if (message.length < 5) {
+                showError('Message must be at least 5 characters.');
+                return;
+            }
+
+            try {
+                const response = await fetch(CONFIG.API_BASE_URL + '/inquiries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        email,
+                        phoneNumber,
+                        subject,
+                        message
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    showError(data.message || 'Something went wrong. Please try again.');
+                    return;
+                }
+
+                // Success
+                const modal = document.getElementById('successModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.children[0].classList.remove('scale-95');
+                    modal.children[0].classList.add('scale-100');
+                }, 10);
+                
+                this.reset();
+
+            } catch (err) {
+                console.error('[Contact Submit Error]', err);
+                showError('Unable to connect to the server. Please check your network and try again.');
+            }
         });
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('formErrorMessage');
+            errorDiv.innerText = '⚠️ ' + msg;
+            errorDiv.classList.remove('hidden');
+        }
 
         function closeSuccessModal() {
             const modal = document.getElementById('successModal');

@@ -4,11 +4,67 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    injectInquiriesMenuItem();
     initSidebar();
     initDropdowns();
     initActiveLink();
     initAdminHeader();
 });
+
+/**
+ * Dynamically inject the "Inquiries" menu item globally in User-related sections
+ */
+function injectInquiriesMenuItem() {
+    // 1. Skip if inquiries link already exists on the page (prevents duplicate on inquiries.html)
+    if (document.querySelector('a[href*="inquiries.html"]')) return;
+
+    // 2. Select Users link case-insensitively (covers both users.html and Users.html in inventory.html)
+    const usersLink = document.querySelector('a[href*="users.html"], a[href*="Users.html"]');
+    if (!usersLink) return;
+
+    if (document.getElementById('sidebar-inquiries-link')) return;
+
+    // Detect nesting depth via existing links
+    const dashboardLink = document.querySelector('a[href*="dashboard.html"], a[href*="Dashboard.html"]');
+    const isSubfolder = dashboardLink && dashboardLink.getAttribute('href').startsWith('../');
+
+    const inquiriesHref = isSubfolder ? '../inquiries.html' : 'inquiries.html';
+    const iconSrc = isSubfolder ? '../../assets/icons/admin/inquiries.svg' : '../assets/icons/admin/inquiries.svg';
+
+    const inqLink = document.createElement('a');
+    inqLink.id = 'sidebar-inquiries-link';
+    inqLink.href = inquiriesHref;
+    inqLink.className = "sidebar-item flex items-center px-[10px] py-[10px] gap-[15px] w-full group";
+    inqLink.innerHTML = `
+      <img
+        src="${iconSrc}"
+        alt="Inquiries"
+        class="w-6 h-6 shrink-0"
+      />
+      <span
+        class="font-['Poppins'] text-[19px] leading-[28px] text-black group-hover:text-[#BE2229]"
+        >Inquiries</span
+      >
+    `;
+
+    const divider = document.createElement('div');
+    divider.className = "w-full h-[1px] bg-black/15";
+
+    // Find the next sibling of users link to place inquiries item after the divider
+    let nextEl = usersLink.nextElementSibling;
+    if (nextEl) {
+        if (nextEl.classList.contains('bg-black/15') || nextEl.tagName === 'DIV') {
+            nextEl.after(inqLink);
+            inqLink.after(divider);
+        } else {
+            usersLink.after(inqLink);
+            inqLink.after(divider);
+        }
+    } else {
+        usersLink.after(inqLink);
+        inqLink.after(divider);
+    }
+}
 
 /**
  * Mobile Sidebar Toggle Logic

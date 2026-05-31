@@ -101,6 +101,8 @@ app.use("/api/settings", require("./routes/settings"));
 app.use("/api/search", require("./routes/search"));
 app.use("/api/admin", require("./routes/adminManageRoutes"));
 app.use("/api/shipping", require("./routes/shippingRoutes"));
+app.use("/api/inquiries", require("./routes/inquiryRoutes"));
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  USER AUTH ROUTES

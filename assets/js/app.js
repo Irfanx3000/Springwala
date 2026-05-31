@@ -4738,6 +4738,63 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (bodyPage === 'wishlist') initWishlistPage();
 
   Wishlist.sync();
+
+  // Global Newsletter Subscription Integration
+  try {
+    const emailInputs = Array.from(document.querySelectorAll('input[type="email"]'));
+    emailInputs.forEach(input => {
+      const parent = input.parentElement;
+      if (!parent) return;
+      const btn = parent.querySelector('button');
+      if (btn && btn.textContent.trim().toLowerCase() === 'subscribe') {
+        if (btn.dataset.newsletterWired) return;
+        btn.dataset.newsletterWired = 'true';
+
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const email = input.value.trim();
+          if (!email) {
+            alert('Please enter your email address.');
+            return;
+          }
+          const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+          if (!emailRegex.test(email)) {
+            alert('Please enter a valid email address.');
+            return;
+          }
+
+          try {
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = '...';
+
+            const response = await fetch(CONFIG.API_BASE_URL + '/inquiries/newsletter', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            btn.disabled = false;
+            btn.textContent = originalText;
+
+            if (response.ok && data.success) {
+              alert(data.message || 'Thank you for subscribing to our newsletter!');
+              input.value = '';
+            } else {
+              alert(data.message || 'Subscription failed. Please try again.');
+            }
+          } catch (err) {
+            console.error('[Newsletter Global Error]', err);
+            btn.disabled = false;
+            if (typeof originalText !== 'undefined') btn.textContent = originalText;
+            alert('Unable to connect to the server. Please try again later.');
+          }
+        });
+      }
+    });
+  } catch (err) {
+    console.warn('[Newsletter setup failed]', err);
+  }
 });
 
 /**
