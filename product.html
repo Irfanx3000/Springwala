@@ -48,6 +48,98 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* ── Share Panel ─────────────────────────────────────── */
+        #sw-share-panel {
+            position: fixed;
+            z-index: 99999;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
+            padding: 18px 20px 14px;
+            min-width: 240px;
+            display: none;
+            animation: swShareFadeIn 0.18s ease;
+            font-family: 'Roboto', sans-serif;
+        }
+        #sw-share-panel.active { display: block; }
+        @keyframes swShareFadeIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        #sw-share-panel h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 14px;
+        }
+        .sw-share-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .sw-share-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Roboto', sans-serif;
+            transition: filter 0.15s, transform 0.15s;
+            text-align: left;
+            color: #fff;
+        }
+        .sw-share-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .sw-share-btn.whatsapp { background: #25D366; }
+        .sw-share-btn.facebook { background: #1877F2; }
+        .sw-share-btn.twitter  { background: #000000; }
+        .sw-share-btn.email    { background: #EA4335; }
+        .sw-copy-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f4f6f8;
+            border-radius: 9px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+        }
+        .sw-copy-url {
+            flex: 1;
+            font-size: 12px;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            user-select: all;
+        }
+        .sw-copy-btn {
+            flex-shrink: 0;
+            background: #BE2229;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .sw-copy-btn:hover { background: #9c1b1f; }
+        .sw-copy-btn.copied { background: #16a34a; }
+        #sw-share-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            display: none;
+        }
+        #sw-share-overlay.active { display: block; }
     </style>
 	<script src="assets/js/config.js"></script>
     <script src="assets/js/site-settings.js"></script>
@@ -99,7 +191,8 @@
 
                 <!-- Share & Star (Bottom Right) -->
                 <div class="absolute right-[15px] bottom-[40px] flex flex-col gap-[15px] items-center z-10">
-                    <button
+                    <button id="share-btn-mobile-img"
+                        onclick="openSharePanel(event)"
                         class="w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-80 transition text-[#525252]">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -196,7 +289,8 @@
                                 <!-- Share & Star Icons (Bottom Right) -->
                                 <div
                                     class="absolute right-[15px] bottom-[15px] flex flex-col gap-[12px] items-center z-10">
-                                    <button
+                                    <button id="share-btn-desktop-img"
+                                        onclick="openSharePanel(event)"
                                         class="w-[22px] h-[22px] flex items-center justify-center cursor-pointer hover:opacity-80 transition text-[#525252]">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -250,7 +344,9 @@
                                 mm L 25 mm Red (R)</h1>
 
                             <!-- Share Icon Top Right -->
-                            <div class="absolute right-6 top-6 cursor-pointer opacity-70 hover:opacity-100">
+                            <button id="share-btn-desktop-detail"
+                                onclick="openSharePanel(event)"
+                                class="absolute right-6 top-6 cursor-pointer opacity-70 hover:opacity-100 bg-transparent border-none p-0">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="18" cy="5" r="3"></circle>
@@ -259,7 +355,7 @@
                                     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
                                     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                                 </svg>
-                            </div>
+                            </button>
 
                             <p id="product-short-desc-desktop" class="text-[#5C5C5C] text-[15px] font-['Roboto'] leading-[18px] mb-4">
                                 Rectangular Wire Die Spring as per ISO 10243, Dia 10 Length 44, Red (R) Heavy Duty Load
@@ -1494,7 +1590,7 @@
 
                 <div class="flex flex-col gap-4">
                     <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
-                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="sell-on-springwala.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
                     <a href="careers.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
                 </div>
 
@@ -1577,7 +1673,7 @@
 
                 <div class="flex gap-6 text-[#525252] mt-4 flex-wrap justify-center">
                     <a href="#">Knowledge Section</a>
-                    <a href="#">Sell on Springwala</a>
+                    <a href="sell-on-springwala.html">Sell on Springwala</a>
                     <a href="careers.html">Career</a>
                 </div>
 
@@ -2201,6 +2297,147 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+</script>
+
+<!-- ══ Share Panel ══════════════════════════════════════════════════════ -->
+<div id="sw-share-overlay"></div>
+<div id="sw-share-panel" role="dialog" aria-label="Share this product">
+    <h4>Share this product</h4>
+    <div class="sw-share-options">
+        <button class="sw-share-btn whatsapp" onclick="swShareTo('whatsapp')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+        </button>
+        <button class="sw-share-btn facebook" onclick="swShareTo('facebook')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+        </button>
+        <button class="sw-share-btn twitter" onclick="swShareTo('twitter')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.736-8.857-8.16-10.643H8.08l4.26 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X (Twitter)
+        </button>
+        <button class="sw-share-btn email" onclick="swShareTo('email')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+        </button>
+    </div>
+    <div class="sw-copy-row">
+        <span class="sw-copy-url" id="sw-share-url-display"></span>
+        <button class="sw-copy-btn" id="sw-copy-link-btn" onclick="swCopyLink()">Copy</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    const panel  = document.getElementById('sw-share-panel');
+    const overlay = document.getElementById('sw-share-overlay');
+
+    // ── Open panel positioned near the clicked button ────────────────────
+    window.openSharePanel = function(e) {
+        e.stopPropagation();
+
+        // Try native Web Share API first (works great on Android/iOS)
+        const url   = window.location.href;
+        const title = document.getElementById('product-title-desktop')?.innerText
+                   || document.getElementById('product-title-mobile')?.innerText
+                   || document.title;
+
+        if (navigator.share) {
+            navigator.share({ title, url }).catch(() => {});
+            return;
+        }
+
+        // Fallback: custom dropdown panel
+        document.getElementById('sw-share-url-display').textContent = url;
+
+        // Position relative to the clicked button
+        const btn  = e.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        const panelW = 260;
+        let left = rect.left + window.scrollX;
+        let top  = rect.bottom + window.scrollY + 8;
+
+        // Keep inside viewport horizontally
+        if (left + panelW > window.innerWidth - 12) {
+            left = window.innerWidth - panelW - 12;
+        }
+        if (left < 8) left = 8;
+
+        // Flip above if too close to bottom
+        if (rect.bottom + 280 > window.innerHeight) {
+            top = rect.top + window.scrollY - 280;
+        }
+
+        panel.style.left = left + 'px';
+        panel.style.top  = top  + 'px';
+        panel.classList.add('active');
+        overlay.classList.add('active');
+
+        // Reset copy button
+        const copyBtn = document.getElementById('sw-copy-link-btn');
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+    };
+
+    // ── Close on overlay click ───────────────────────────────────────────
+    overlay.addEventListener('click', closeSharePanel);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSharePanel(); });
+
+    function closeSharePanel() {
+        panel.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+
+    // ── Share to platform ────────────────────────────────────────────────
+    window.swShareTo = function(platform) {
+        const url   = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(
+            document.getElementById('product-title-desktop')?.innerText
+         || document.getElementById('product-title-mobile')?.innerText
+         || document.title
+        );
+        const text  = encodeURIComponent('Check out this product on Springwala: ' + decodeURIComponent(title));
+
+        const links = {
+            whatsapp: `https://wa.me/?text=${text}%20${url}`,
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+            twitter:  `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+            email:    `mailto:?subject=${title}&body=${text}%20${url}`,
+        };
+
+        if (platform === 'email') {
+            window.location.href = links.email;
+        } else {
+            window.open(links[platform], '_blank', 'noopener,width=600,height=500');
+        }
+        closeSharePanel();
+    };
+
+    // ── Copy link ────────────────────────────────────────────────────────
+    window.swCopyLink = async function() {
+        const url = window.location.href;
+        try {
+            await navigator.clipboard.writeText(url);
+        } catch {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed';
+            ta.style.opacity  = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        const btn = document.getElementById('sw-copy-link-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+        }, 2500);
+    };
+})();
 </script>
 </body>
 </html>

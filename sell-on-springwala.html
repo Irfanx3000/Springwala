@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell on Springwala | Become a Spring & Hardware Merchant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/site-settings.js"></script>
+
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Global Stylesheet (includes header/footer/dropdown styles) -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        /* Dropdown menu: hidden by default, visible on hover */
+        .dropdown-menu {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .group:hover .dropdown-menu {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Color System & Design Tokens */
+        :root {
+            --primary: #BE2229;
+            /* Mockup Brand Crimson Red */
+            --primary-hover: #9c1b1f;
+            --primary-light: #fbf3f3;
+            --bg-light: #f8f9fa;
+            /* Mockup grey background */
+            --white: #ffffff;
+            --charcoal: #1a1a1a;
+            /* Mockup heading charcoal */
+            --text-muted: #718096;
+            /* Mockup description grey */
+            --border: #e2e8f0;
+            --border-hover: #cbd5e0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Base Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--charcoal);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Simple Header Breadcrumb & Hamburger Bar */
+        .header {
+            width: 100%;
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .breadcrumb {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb .separator {
+            font-size: 0.75rem;
+            color: var(--border-hover);
+        }
+
+        .breadcrumb .active {
+            color: var(--primary);
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .hamburger .bar {
+            width: 100%;
+            height: 2.5px;
+            background-color: var(--charcoal);
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        /* Main Grid Workspace Layout */
+        .workspace {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 80px 20px;
+            display: grid;
+            grid-template-columns: 1.85fr 1.15fr;
+            gap: 40px;
+            grid-template-areas:
+                "hero form"
+                "props form"
+                "timeline form"
+                "ribbon form"
+                "help form";
+        }
+
+        /* Sections base */
+        .hero-block {
+            grid-area: hero;
+        }
+
+        .props-block {
+            grid-area: props;
+        }
+
+        .timeline-block {
+            grid-area: timeline;
+        }
+
+        .form-card-wrapper {
+            grid-area: form;
+        }
+
+        .ribbon-block {
+            grid-area: ribbon;
+        }
+
+        .help-block {
+            grid-area: help;
+        }
+
+        /* 1. Hero Block */
+        .hero-block {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 30px;
+            align-items: center;
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--charcoal);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+        }
+
+        .hero-desc {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(190, 34, 41, 0.2);
+            text-align: center;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(190, 34, 41, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 12.5px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .hero-graphics {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hero-svg {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+        }
+
+        /* 2. Value Props Block */
+        .props-block {
+            margin-top: 10px;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .props-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .prop-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .prop-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .prop-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .prop-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+        }
+
+        .prop-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* 3. Timeline Block */
+        .timeline-block {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-top: 10px;
+        }
+
+        .timeline-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            margin-top: 35px;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            z-index: 2;
+            position: relative;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(190, 34, 41, 0.2);
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            max-width: 140px;
+        }
+
+        /* Connecting dotted lines on desktop */
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            border-top: 2px dashed #cbd5e0;
+            z-index: 1;
+        }
+
+        /* 4. Conversion Ribbon */
+        .conversion-ribbon {
+            background-color: var(--primary-light);
+            border-radius: 12px;
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(190, 34, 41, 0.1);
+            margin-top: 10px;
+        }
+
+        .ribbon-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ribbon-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            background-color: var(--white);
+            color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .ribbon-text {
+            font-weight: 700;
+            color: var(--charcoal);
+            font-size: 0.95rem;
+        }
+
+        .btn-ribbon-action {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(190, 34, 41, 0.2);
+            white-space: nowrap;
+        }
+
+        .btn-ribbon-action:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* 5. Help Strip */
+        .help-strip {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 24px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-top: 10px;
+        }
+
+        .help-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .help-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .help-text h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 4px;
+        }
+
+        .help-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn-help-action {
+            background-color: var(--white);
+            color: var(--charcoal);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-help-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* 6. Form Card Wrapper & Form */
+        .form-card-wrapper {
+            position: sticky;
+            top: 90px;
+            align-self: start;
+        }
+
+        .form-card {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-card-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .form-card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            background-color: #fafbfc;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(190, 34, 41, 0.1);
+            background-color: var(--white);
+        }
+
+        /* Fixed prefix phone input */
+        .phone-input-container {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fafbfc;
+            transition: var(--transition);
+        }
+
+        .phone-input-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(190, 34, 41, 0.1);
+            background-color: var(--white);
+        }
+
+        .phone-prefix {
+            background-color: #f1f5f9;
+            color: var(--charcoal);
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 14px;
+            border-right: 1px solid var(--border);
+            user-select: none;
+        }
+
+        .phone-input-container .form-input {
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+            height: 42px;
+        }
+
+        /* Checkbox styling */
+        .checkbox-group {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 3px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(190, 34, 41, 0.2);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 6px 16px rgba(190, 34, 41, 0.3);
+        }
+
+        .form-footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 16px;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Custom Select dropdown styling */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .select-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            background-color: #fafbfc;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            height: 44px;
+        }
+
+        .select-trigger:hover {
+            border-color: var(--primary);
+        }
+
+        .custom-select.active .select-trigger {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(190, 34, 41, 0.1);
+            background-color: var(--white);
+        }
+
+        .select-trigger span {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .select-trigger i {
+            font-size: 0.8rem;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .custom-select.active .select-trigger i {
+            transform: rotate(180deg);
+        }
+
+        .custom-options {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+            max-height: 220px;
+            overflow-y: auto;
+            animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-select.active .custom-options {
+            display: block;
+        }
+
+        .custom-option {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .custom-option:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .custom-option.selected {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .custom-option.placeholder {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 992px) {
+            .workspace {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                padding: 20px 16px 60px 16px;
+            }
+
+            .form-card-wrapper {
+                position: static;
+                width: 100%;
+            }
+
+            .conversion-ribbon {
+                display: none;
+                /* Hide on mobile to match layout */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-block {
+                grid-template-columns: 1fr;
+                padding: 30px 20px;
+                text-align: center;
+            }
+
+            .hero-content {
+                align-items: center;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-actions {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .hero-actions .btn-primary,
+            .hero-actions .btn-outline {
+                width: 100%;
+            }
+
+            .props-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .prop-card {
+                flex-direction: row;
+                align-items: flex-start;
+                text-align: left;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .prop-icon-wrapper {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .prop-info {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .timeline-block {
+                padding: 30px 20px;
+            }
+
+            .timeline-container {
+                flex-direction: column;
+                gap: 28px;
+                align-items: flex-start;
+            }
+
+            .timeline-container::before {
+                display: none;
+            }
+
+            .timeline-step {
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .step-number {
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .step-desc {
+                max-width: 100%;
+            }
+
+            .help-strip {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 20px;
+                padding: 24px 20px;
+            }
+
+            .help-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .btn-help-action {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .form-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#f8f9fa] text-gray-900 font-['Roboto'] flex flex-col min-h-screen" data-page="sell-on-springwala">
+
+    <div id="sw-header"></div>
+    <script src="assets/js/dynamic-header.js"></script>
+
+    <!-- Workspace Main Layout -->
+    <main class="workspace">
+
+        <!-- 1. Hero Block -->
+        <section class="hero-block">
+            <div class="hero-content">
+                <h1 class="hero-title">Sell on <span>Springwala</span></h1>
+                <p class="hero-desc">
+                    Grow your business by selling to thousands of customers across India on Springwala.
+                </p>
+                <div class="hero-actions">
+                    <a href="#become-seller" class="btn-primary">Join Waitlist</a>
+                </div>
+            </div>
+            <div class="hero-graphics">
+                <img src="assets\images\Charachter Seller.png" alt="Sell on Springwala" class="hero-svg">
+            </div>
+        </section>
+
+        <!-- 2. Value Props Block -->
+        <section class="props-block">
+            <h2 class="section-title">Why Sell on Springwala?</h2>
+            <div class="props-grid">
+                <!-- Prop 1 -->
+                <div class="prop-card">
+                    <div class="prop-icon-wrapper">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="prop-info">
+                        <h3>Large Customer Base</h3>
+                        <p>Reach thousands of active buyers across India.</p>
+                    </div>
+                </div>
+                <!-- Prop 2 -->
+                <div class="prop-card">
+                    <div class="prop-icon-wrapper">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="prop-info">
+                        <h3>Grow Your Business</h3>
+                        <p>Increase sales and grow your brand with us.</p>
+                    </div>
+                </div>
+                <!-- Prop 3 -->
+                <div class="prop-card">
+                    <div class="prop-icon-wrapper">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="prop-info">
+                        <h3>Secure Payments</h3>
+                        <p>Get secure and timely payments for every order.</p>
+                    </div>
+                </div>
+                <!-- Prop 4 -->
+                <div class="prop-card">
+                    <div class="prop-icon-wrapper">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="prop-info">
+                        <h3>Seller Support</h3>
+                        <p>Dedicated support to help you every step of the way.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Timeline Block -->
+        <section class="timeline-block" id="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            <div class="timeline-container">
+                <!-- Step 1 -->
+                <div class="timeline-step">
+                    <div class="step-number">1</div>
+                    <h4 class="step-title">Register</h4>
+                    <p class="step-desc">Create your seller account in minutes.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="timeline-step">
+                    <div class="step-number">2</div>
+                    <h4 class="step-title">List Products</h4>
+                    <p class="step-desc">Add your products and set your prices.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="timeline-step">
+                    <div class="step-number">3</div>
+                    <h4 class="step-title">Receive Orders</h4>
+                    <p class="step-desc">Orders are placed by customers.</p>
+                </div>
+                <!-- Step 4 -->
+                <div class="timeline-step">
+                    <div class="step-number">4</div>
+                    <h4 class="step-title">Ship & Earn</h4>
+                    <p class="step-desc">Ship the order and earn with us.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Form Card Wrapper (Sticky on Desktop) -->
+        <div class="form-card-wrapper" id="become-seller">
+            <section class="form-card">
+                <h2 class="form-card-title">Join the Waitlist</h2>
+                <p class="form-card-subtitle">Fill in the details below to secure early access.</p>
+
+                <form id="sellerForm" novalidate>
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="fullName" class="form-label">Full Name *</label>
+                        <input type="text" id="fullName" class="form-input" placeholder="Enter your full name" required>
+                        <div class="error-msg" id="name-error"></div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="form-group">
+                        <label for="emailAddr" class="form-label">Email Address *</label>
+                        <input type="email" id="emailAddr" class="form-input" placeholder="Enter your email address"
+                            required>
+                        <div class="error-msg" id="email-error"></div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phoneNum" class="form-label">Phone Number *</label>
+                        <div class="phone-input-container">
+                            <div class="phone-prefix">+91</div>
+                            <input type="tel" id="phoneNum" class="form-input" placeholder="Enter 10 digit number"
+                                required>
+                        </div>
+                        <div class="error-msg" id="phone-error"></div>
+                    </div>
+
+                    <!-- Business Name -->
+                    <div class="form-group">
+                        <label for="businessName" class="form-label">Business Name *</label>
+                        <input type="text" id="businessName" class="form-input" placeholder="Enter your business name"
+                            required>
+                        <div class="error-msg" id="business-error"></div>
+                    </div>
+
+                    <!-- GST Number -->
+                    <div class="form-group">
+                        <label for="gstNum" class="form-label">GST Number (Optional)</label>
+                        <input type="text" id="gstNum" class="form-input" placeholder="Enter GST number">
+                    </div>
+
+                    <!-- Product Category Custom Dropdown -->
+                    <div class="form-group">
+                        <label class="form-label">Product Category *</label>
+                        <div class="custom-select" id="category-custom-select">
+                            <div class="select-trigger"><span>Select category</span><i
+                                    class="fa-solid fa-chevron-down"></i></div>
+                            <div class="custom-options">
+                                <div class="custom-option selected placeholder" data-value="">Select category</div>
+                                <div class="custom-option" data-value="extension-springs">Extension Springs</div>
+                                <div class="custom-option" data-value="compression-springs">Compression Springs</div>
+                                <div class="custom-option" data-value="torsion-springs">Torsion Springs</div>
+                                <div class="custom-option" data-value="fasteners-bolts">Fasteners & Bolts</div>
+                                <div class="custom-option" data-value="hand-tools">Industrial Hand Tools</div>
+                                <div class="custom-option" data-value="washers-rings">Metal Washers & Rings</div>
+                                <div class="custom-option" data-value="spring-wire">Custom Spring Wire</div>
+                                <div class="custom-option" data-value="other-hardware">Other Hardware Parts</div>
+                            </div>
+                            <input type="hidden" id="category" name="category" required>
+                        </div>
+                        <div class="error-msg" id="category-error"></div>
+                    </div>
+
+                    <!-- Legal Agreement Agreement -->
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="termsAgreement" required>
+                        <label for="termsAgreement" class="checkbox-label">
+                            I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="error-msg" id="terms-error" style="margin-top: -15px; margin-bottom: 15px;"></div>
+
+                    <button type="submit" class="btn-submit">Join the Waitlist</button>
+
+                    <div class="form-footer">
+                        Already have an account? <a href="#">Login</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <!-- 5. Conversion Ribbon (Hidden on Mobile) -->
+        <section class="ribbon-block">
+            <div class="conversion-ribbon">
+                <div class="ribbon-info">
+                    <div class="ribbon-icon-wrapper">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <div class="ribbon-text">
+                        Join the exclusive seller waitlist to launch your business on Springwala.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Help Strip -->
+        <section class="help-block">
+            <div class="help-strip">
+                <div class="help-info">
+                    <div class="help-icon-wrapper">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div class="help-text">
+                        <h4>Need Help?</h4>
+                        <p>Our seller support team is here to help you.</p>
+                    </div>
+                </div>
+                <a href="#" class="btn-help-action">
+                    Contact Support <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- New Responsive Footer -->
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 relative">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex flex-row justify-between items-start gap-8 mb-10">
+                <!-- Col 1: Brand & Contact -->
+                <div class="flex flex-col gap-4 w-[253px]">
+                    <img src="assets/images/header.png" alt="Springwala" class="w-[200px]">
+                    <div class="w-full h-[1px] bg-[#525252] my-2"></div>
+                    <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                        <p>Mumbai, Maharashtra (India)</p>
+                        <p>Phone: +91 8879 241085</p>
+                        <p>Email: <a href="mailto:support@springwala.in" data-site-setting="contactEmail">support@springwala.in</a></p>
+                    </div>
+                </div>
+
+                <!-- Links Cols -->
+                <div class="flex flex-col gap-4">
+                    <a href="index.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
+                    <a href="contact-us.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="login.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Account</a>
+                    <a href="orders.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Orders</a>
+                    <a href="cart.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Cart</a>
+                    <a href="wishlist.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Saved Items</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
+                    <a href="sell-on-springwala.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="careers.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col gap-4 w-[300px]">
+                    <h3 class="font-['Poppins'] font-semibold text-[18px]">Stay Updated with Springwala</h3>
+                    <p class="text-[14px]">Get E-mail updates about latest shop and special offers</p>
+                    <div class="flex h-[35px] w-full">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 border border-[#BE2229] rounded-l-[5px] px-3 outline-none text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-4 rounded-r-[5px] font-medium text-[14px]">Subscribe</button>
+                    </div>
+                    <!-- Social Icons -->
+                    <div class="flex gap-4 mt-2">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6 cursor-pointer"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden flex flex-col items-center text-center gap-6 pb-20 relative">
+                <img src="assets/images/header.png" alt="Springwala" class="w-[200px] mb-2">
+
+                <!-- Line 14 -->
+                <div class="w-[90%] h-[1px] bg-[#525252]"></div>
+
+                <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                    <p data-site-setting="address">Mumbai, Maharashtra (India)</p>
+                    <p>Phone: <a href="tel:+918879241085" data-site-setting="contactNumber">+91 8879 241085</a></p>
+                    <p>Email: <a href="mailto:support@springwala.in" data-site-setting="contactEmail">support@springwala.in</a></p>
+                </div>
+
+                <!-- Line 18 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col items-center gap-3 w-full px-2">
+                    <h3 class="font-['Poppins'] font-semibold text-[16px] sm:text-[18px] text-center">Join Our
+                        Newsletter Now</h3>
+                    <p class="text-[12px] sm:text-[14px] text-center">Get E-mail updates about latest shop and special
+                        offers</p>
+                    <div class="flex h-[35px] w-full max-w-[350px]">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 min-w-0 border border-[#BE2229] rounded-l-[5px] px-2 sm:px-3 outline-none text-[13px] sm:text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-3 sm:px-4 rounded-r-[5px] font-medium text-[13px] sm:text-[14px] whitespace-nowrap">Subscribe</button>
+                    </div>
+                    <div class="flex gap-4 mt-2 justify-center">
+                        <a href="#" data-site-setting-href="facebook"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="pinterest"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="linkedin"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="instagram"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                    </div>
+                </div>
+
+                <!-- Line 19 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Links Groups -->
+                <div
+                    class="flex flex-row justify-between w-full px-2 sm:px-8 mt-4 text-[13px] sm:text-[15px] text-[#525252]">
+                    <div class="flex flex-col gap-4 text-left">
+                        <a href="index.html">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="contact-us.html">Contact Us</a>
+                        <a href="#">Delivery & Shipping</a>
+                    </div>
+
+                    <div class="flex flex-col gap-4 text-right">
+                        <a href="login.html">My Account</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="cart.html">My Cart</a>
+                        <a href="wishlist.html">Saved Items</a>
+                    </div>
+                </div>
+
+                <div class="flex gap-6 text-[#525252] mt-4 flex-wrap justify-center">
+                    <a href="#">Knowledge Section</a>
+                    <a href="sell-on-springwala.html">Sell on Springwala</a>
+                    <a href="careers.html">Career</a>
+                </div>
+
+                <!-- Bottom Links -->
+                <div class="w-full h-[1px] bg-[#525252] mt-4 opacity-50"></div>
+
+                <div class="flex flex-wrap gap-x-6 gap-y-3 justify-center text-[15px] text-[#525252] max-w-[350px]">
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-conditions.html">Terms & Conditions</a>
+                    <a href="return-policy.html">Return Policy</a>
+                    <a href="vendor-agreement.html">Vendor Agreement</a>
+                    <a href="gst-compliance.html">GST Compliance</a>
+                    <a href="data-protection.html">Data Protection</a>
+                </div>
+
+                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</p>
+            </div>
+
+            <!-- Desktop Bottom Divider & Links -->
+            <div class="hidden md:block w-full h-[1px] bg-[#525252] my-6"></div>
+            <div class="hidden md:flex justify-center gap-8 text-[14px] text-[#666] mb-2">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-conditions.html">Terms & Conditions</a>
+                <a href="return-policy.html">Return Policy</a>
+                <a href="vendor-agreement.html">Vendor Agreement</a>
+                <a href="gst-compliance.html">GST Compliance</a>
+                <a href="data-protection.html">Data Protection</a>
+            </div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</div>
+
+        </div>
+    </footer>
+
+    <!-- Mobile Navigation Bar -->
+    <nav class="mobile-navbar">
+        <div class="nav-item" data-page="home" onclick="window.location.href='index.html'">
+            <img src="assets/icons/mobile/home.svg" alt="Home">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="categories" onclick="window.location.href='categories.html'">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart" onclick="window.location.href='cart.html'">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist" onclick="window.location.href='wishlist.html'">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile" onclick="window.location.href='login.html'">
+            <img src="assets/icons/mobile/profile.svg" alt="Profile">
+            <div class="active-indicator"></div>
+        </div>
+    </nav>
+    <script src="assets/js/app.js"></script>
+
+    <!-- Configuration -->
+    <script src="assets/js/config.js"></script>
+
+    <!-- Native JavaScript Selects & Onboarding validations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Custom dropdown toggle & selection script
+            const customSelect = document.getElementById('category-custom-select');
+            const trigger = customSelect.querySelector('.select-trigger');
+            const triggerText = trigger.querySelector('span');
+            const options = customSelect.querySelectorAll('.custom-option');
+            const hiddenInput = document.getElementById('category');
+            const errorMsg = document.getElementById('category-error');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customSelect.classList.toggle('active');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+ 
+                    // Clear active flags
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+
+                    const val = option.getAttribute('data-value');
+                    hiddenInput.value = val;
+                    triggerText.textContent = option.textContent;
+
+                    if (val) {
+                        triggerText.style.color = 'var(--charcoal)';
+                        if (errorMsg) errorMsg.textContent = '';
+                    } else {
+                        triggerText.style.color = 'var(--text-muted)';
+                    }
+
+                    customSelect.classList.remove('active');
+                });
+            });
+
+            // Close select when clicking away
+            document.addEventListener('click', () => {
+                customSelect.classList.remove('active');
+            });
+
+            // Onboarding Form Submissions Intercept
+            const form = document.getElementById('sellerForm');
+            const fields = {
+                name: { el: document.getElementById('fullName'), err: document.getElementById('name-error'), msg: 'Full Name is required.' },
+                email: { el: document.getElementById('emailAddr'), err: document.getElementById('email-error'), msg: 'Please enter a valid email address.' },
+                phone: { el: document.getElementById('phoneNum'), err: document.getElementById('phone-error'), msg: 'Please enter a valid 10-digit phone number.' },
+                businessName: { el: document.getElementById('businessName'), err: document.getElementById('business-error'), msg: 'Business Name is required.' },
+                category: { el: hiddenInput, err: errorMsg, msg: 'Please select a product category.' },
+                terms: { el: document.getElementById('termsAgreement'), err: document.getElementById('terms-error'), msg: 'You must agree to the Terms & Conditions.' }
+            };
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let isFormValid = true;
+
+                // Clear previous alerts
+                Object.values(fields).forEach(f => {
+                    if (f.err) f.err.textContent = '';
+                });
+
+                // Name validation
+                if (!fields.name.el.value.trim()) {
+                    fields.name.err.textContent = fields.name.msg;
+                    isFormValid = false;
+                }
+
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(fields.email.el.value.trim())) {
+                    fields.email.err.textContent = fields.email.msg;
+                    isFormValid = false;
+                }
+
+                // Phone Validation (exactly 10 digits number sequence)
+                const phoneVal = fields.phone.el.value.replace(/\s+/g, '');
+                const phoneRegex = /^[0-9]{10}$/;
+                if (!phoneRegex.test(phoneVal)) {
+                    fields.phone.err.textContent = fields.phone.msg;
+                    isFormValid = false;
+                }
+
+                // Business Name validation
+                if (!fields.businessName.el.value.trim()) {
+                    fields.businessName.err.textContent = fields.businessName.msg;
+                    isFormValid = false;
+                }
+
+                // Category select validation
+                if (!fields.category.el.value) {
+                    fields.category.err.textContent = fields.category.msg;
+                    isFormValid = false;
+                }
+
+                // Legal agreement checkbox validation
+                if (!fields.terms.el.checked) {
+                    fields.terms.err.textContent = fields.terms.msg;
+                    isFormValid = false;
+                }
+
+                if (isFormValid) {
+                    const fullName = fields.name.el.value.trim();
+                    const email = fields.email.el.value.trim();
+                    const phone = phoneVal;
+                    const businessName = fields.businessName.el.value.trim();
+                    const gstNumber = document.getElementById('gstNum').value.trim();
+                    const productCategory = fields.category.el.value.trim();
+
+                    const submitButton = form.querySelector('.btn-submit');
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Submitting...';
+
+                    fetch((typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : 'http://localhost:5000/api') + '/partners', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            fullName,
+                            email,
+                            phone,
+                            businessName,
+                            gstNumber,
+                            productCategory
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Join the Waitlist';
+
+                        if (data.success) {
+                            alert('Success! You have been added to the Springwala seller waitlist. Our onboarding team will contact you shortly.');
+                            form.reset();
+
+                            // Reset dropdown
+                            triggerText.textContent = 'Select category';
+                            triggerText.style.color = 'var(--text-muted)';
+                            hiddenInput.value = '';
+                            options.forEach(opt => opt.classList.remove('selected'));
+                            const placeholderOpt = customSelect.querySelector('.custom-option.placeholder');
+                            if (placeholderOpt) placeholderOpt.classList.add('selected');
+                        } else {
+                            alert(data.message || 'Something went wrong. Please try again.');
+                        }
+                    })
+                    .catch(err => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Join the Waitlist';
+                        console.error('[Waitlist Submit Error]', err);
+                        alert('Unable to connect to the server. Please check your network and try again.');
+                    });
+                }
+            });
+
+            // Handle smooth scroll anchor for Hero CTA buttons
+            document.querySelector('.btn-primary').addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.getElementById('become-seller');
+                if (target) {
+                    const offset = 80;
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const targetRect = target.getBoundingClientRect().top;
+                    const targetPosition = targetRect - bodyRect;
+                    const offsetPosition = targetPosition - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>

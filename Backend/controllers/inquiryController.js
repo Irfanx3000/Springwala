@@ -1,6 +1,7 @@
 const Inquiry = require('../models/Inquiry');
 const Newsletter = require('../models/Newsletter');
 const CareerApplication = require('../models/CareerApplication');
+const PartnerApplication = require('../models/PartnerApplication');
 
 // Helper to sanitize input and prevent basic XSS
 const sanitize = (val) => {
@@ -231,6 +232,7 @@ exports.getInquiryStats = async (req, res) => {
     const unreadMessages = await Inquiry.countDocuments({ status: 'Unread' });
     const newsletterSubs = await Newsletter.countDocuments({ status: 'Subscribed' });
     const careerApps = await CareerApplication.countDocuments();
+    const partnerApps = await PartnerApplication.countDocuments();
 
     // Calculate new subscribers this week (past 7 days)
     const sevenDaysAgo = new Date();
@@ -247,7 +249,8 @@ exports.getInquiryStats = async (req, res) => {
         unreadMessages,
         newsletterSubs,
         newSubsThisWeek,
-        careerApps
+        careerApps,
+        partnerApps
       }
     });
 

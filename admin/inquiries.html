@@ -607,7 +607,7 @@
         </div>
 
         <!-- Statistic Cards Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-[15px] w-full mt-2">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-[15px] w-full mt-2">
           <div
             class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
           >
@@ -660,6 +660,19 @@
               >0</span
             >
           </div>
+          <div
+            class="stat-card-shadow bg-white border border-[#E9E9E9] rounded-[5px] h-[101px] flex flex-col justify-center items-center p-2"
+          >
+            <span
+              class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
+              >Partner Applications</span
+            >
+            <span
+              id="stat-partner-apps"
+              class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
+              >0</span
+            >
+          </div>
         </div>
 
         <!-- Main Table Card -->
@@ -690,6 +703,13 @@
               onclick="switchTab('careers')"
             >
               Careers
+            </button>
+            <button
+              id="tab-partners"
+              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition shrink-0"
+              onclick="switchTab('partners')"
+            >
+              Partners
             </button>
           </div>
 
@@ -823,6 +843,58 @@
             </div>
           </div>
 
+          <!-- Tab 4: Partners Applications -->
+          <div id="content-partners" class="tab-content">
+            <!-- Filter Options Bar -->
+            <div class="flex flex-wrap items-center gap-4 px-6 pb-4 border-b border-gray-100 mb-6 font-['Roboto']">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-medium text-[#656565]">Status:</span>
+                <select id="partner-filter-status" class="border border-[#E9E9E9] bg-white rounded-[5px] px-3 py-1.5 text-[14px] outline-none cursor-pointer">
+                  <option value="">All Status</option>
+                  <option value="New">New</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Under Review">Under Review</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-medium text-[#656565]">Product Category:</span>
+                <select id="partner-filter-category" class="border border-[#E9E9E9] bg-white rounded-[5px] px-3 py-1.5 text-[14px] outline-none cursor-pointer">
+                  <option value="">All Categories</option>
+                  <option value="extension-springs">Extension Springs</option>
+                  <option value="compression-springs">Compression Springs</option>
+                  <option value="torsion-springs">Torsion Springs</option>
+                  <option value="fasteners-bolts">Fasteners & Bolts</option>
+                  <option value="hand-tools">Industrial Hand Tools</option>
+                  <option value="washers-rings">Metal Washers & Rings</option>
+                  <option value="spring-wire">Custom Spring Wire</option>
+                  <option value="other-hardware">Other Hardware Parts</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table Header (Desktop Only) -->
+            <div
+              class="hidden xl:grid grid-cols-[110px_160px_180px_120px_160px_120px_160px_140px_80px] gap-2 w-full px-[28px] pb-4 border-b border-gray-100 font-['Roboto'] font-medium text-[15px] text-[#414141]"
+            >
+              <span>Date</span>
+              <span>Full Name</span>
+              <span>Email ID</span>
+              <span>Phone</span>
+              <span>Business Name</span>
+              <span>GST Number</span>
+              <span>Category</span>
+              <span class="text-center">Status</span>
+              <span class="text-center">Actions</span>
+            </div>
+
+            <!-- Dynamic Table Body -->
+            <div id="partners-tbody" class="w-full flex flex-col gap-0">
+              <!-- Dynamically populated partner applications go here -->
+            </div>
+          </div>
+
           <!-- Pagination Area -->
           <div
             id="inquiries-pagination"
@@ -942,6 +1014,7 @@
 
     <script src="../assets/js/auth.js?v=3.0.0"></script>
     <script src="../assets/js/api.js?v=3.0.0"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="../assets/js/admin-inquiries.js?v=3.0.0"></script>
     <script src="../assets/js/admin-sidebar.js?v=3.0.0"></script>
   </body>

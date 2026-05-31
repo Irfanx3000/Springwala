@@ -636,8 +636,8 @@
         <div class="flex items-center justify-between mt-4 mb-10">
           <div class="flex items-center gap-4">
             <span class="text-[18px]">Download Data As</span>
-            <button class="bg-[#D4D4D4] px-4 py-1 rounded">.csv</button>
-            <button class="bg-[#D4D4D4] px-4 py-1 rounded">.xlsx</button>
+            <button onclick="exportOrders('csv')" class="bg-[#D4D4D4] hover:bg-[#b0b0b0] px-4 py-1 rounded transition font-medium">.csv</button>
+            <button onclick="exportOrders('xlsx')" class="bg-[#D4D4D4] hover:bg-[#b0b0b0] px-4 py-1 rounded transition font-medium">.xlsx</button>
           </div>
           <div id="orders-pagination" class="flex gap-2 items-center">
             <!-- Pagination via JS -->

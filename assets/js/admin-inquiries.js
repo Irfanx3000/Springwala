@@ -3,15 +3,18 @@
  */
 
 // Global State
-let currentTab = 'messages'; // 'messages', 'newsletter', or 'careers'
+let currentTab = 'messages'; // 'messages', 'newsletter', 'careers', or 'partners'
 let messagesPage = 1;
 let newsletterPage = 1;
 let careersPage = 1;
+let partnersPage = 1;
 const recordsPerPage = 10;
 let messagesSearch = '';
 let newsletterSearch = '';
 let careersSearch = '';
+let partnersSearch = '';
 let careersFilters = { status: '', position: '', experience: '' };
+let partnersFilters = { status: '', category: '' };
 
 // Data store for export
 let allInquiriesCached = [];
@@ -37,10 +40,18 @@ window.switchTab = function(tabId) {
   document.getElementById("tab-careers").classList.toggle("active-tab", tabId === 'careers');
   document.getElementById("tab-careers").classList.toggle("text-[#A4A4A4]", tabId !== 'careers');
 
+  if (document.getElementById("tab-partners")) {
+    document.getElementById("tab-partners").classList.toggle("active-tab", tabId === 'partners');
+    document.getElementById("tab-partners").classList.toggle("text-[#A4A4A4]", tabId !== 'partners');
+  }
+
   // Content Visibility toggle
   document.getElementById("content-messages").classList.toggle("active", tabId === 'messages');
   document.getElementById("content-newsletter").classList.toggle("active", tabId === 'newsletter');
   document.getElementById("content-careers").classList.toggle("active", tabId === 'careers');
+  if (document.getElementById("content-partners")) {
+    document.getElementById("content-partners").classList.toggle("active", tabId === 'partners');
+  }
 
   // Rerender pagination & search for active tab
   const activeSearchInput = document.getElementById("desktop-search-input");
@@ -48,6 +59,7 @@ window.switchTab = function(tabId) {
     if (tabId === 'messages') activeSearchInput.value = messagesSearch;
     else if (tabId === 'newsletter') activeSearchInput.value = newsletterSearch;
     else if (tabId === 'careers') activeSearchInput.value = careersSearch;
+    else if (tabId === 'partners') activeSearchInput.value = partnersSearch;
   }
   
   if (tabId === 'messages') {
@@ -56,6 +68,8 @@ window.switchTab = function(tabId) {
     fetchNewsletter(newsletterPage);
   } else if (tabId === 'careers') {
     fetchCareers(careersPage);
+  } else if (tabId === 'partners') {
+    fetchPartners(partnersPage);
   }
 };
 
@@ -94,6 +108,9 @@ async function fetchStats() {
       document.getElementById('stat-newsletter-subs').innerText = data.stats.newsletterSubs.toLocaleString();
       if (document.getElementById('stat-career-apps')) {
         document.getElementById('stat-career-apps').innerText = (data.stats.careerApps || 0).toLocaleString();
+      }
+      if (document.getElementById('stat-partner-apps')) {
+        document.getElementById('stat-partner-apps').innerText = (data.stats.partnerApps || 0).toLocaleString();
       }
     }
   } catch (err) {
@@ -577,6 +594,8 @@ window.changePage = function(newPage) {
     fetchNewsletter(newPage);
   } else if (currentTab === 'careers') {
     fetchCareers(newPage);
+  } else if (currentTab === 'partners') {
+    fetchPartners(newPage);
   }
 };
 
@@ -707,6 +726,9 @@ if (searchInput) {
       } else if (currentTab === 'careers') {
         careersSearch = val;
         fetchCareers(1);
+      } else if (currentTab === 'partners') {
+        partnersSearch = val;
+        fetchPartners(1);
       }
     }, 400); // 400ms debounce
   });
@@ -723,6 +745,14 @@ document.addEventListener('change', (e) => {
   if (e.target && e.target.id === 'career-filter-experience') {
     fetchCareers(1);
   }
+  
+  // Bind Partners Filters
+  if (e.target && e.target.id === 'partner-filter-status') {
+    fetchPartners(1);
+  }
+  if (e.target && e.target.id === 'partner-filter-category') {
+    fetchPartners(1);
+  }
 });
 
 /**
@@ -730,6 +760,8 @@ document.addEventListener('change', (e) => {
  */
 window.downloadInquiriesExport = async function(format) {
   try {
+    showToast(`Preparing ${format.toUpperCase()} export…`, 'info');
+
     let endpoint = '';
     let filenamePrefix = '';
     let headers = [];
@@ -737,7 +769,7 @@ window.downloadInquiriesExport = async function(format) {
 
     if (currentTab === 'messages') {
       endpoint = `${CONFIG.API_BASE_URL}/inquiries?page=1&limit=2000`;
-      filenamePrefix = 'springwala_inquiries_export';
+      filenamePrefix = 'springwala_inquiries';
       headers = ['Date', 'Full Name', 'Email', 'Phone', 'Subject', 'Message', 'Status'];
       mapRowFn = (inq) => [
         formatDate(inq.createdAt),
@@ -750,8 +782,8 @@ window.downloadInquiriesExport = async function(format) {
       ];
     } else if (currentTab === 'newsletter') {
       endpoint = `${CONFIG.API_BASE_URL}/inquiries/newsletter?page=1&limit=2000`;
-      filenamePrefix = 'springwala_newsletter_export';
-      headers = ['Date Subscribed', 'Email ID', 'Status'];
+      filenamePrefix = 'springwala_newsletter';
+      headers = ['Date Subscribed', 'Email', 'Status'];
       mapRowFn = (sub) => [
         formatDate(sub.subscribedAt || sub.createdAt),
         sub.email,
@@ -759,8 +791,8 @@ window.downloadInquiriesExport = async function(format) {
       ];
     } else if (currentTab === 'careers') {
       endpoint = `${CONFIG.API_BASE_URL}/careers?page=1&limit=2000`;
-      filenamePrefix = 'springwala_careers_export';
-      headers = ['Date', 'Full Name', 'Email', 'Phone', 'Position', 'Experience', 'Location', 'Status', 'Resume Link'];
+      filenamePrefix = 'springwala_careers';
+      headers = ['Date', 'Full Name', 'Email', 'Phone', 'Position', 'Experience', 'Location', 'Status', 'Resume URL'];
       mapRowFn = (app) => [
         formatDate(app.createdAt),
         app.fullName,
@@ -772,64 +804,287 @@ window.downloadInquiriesExport = async function(format) {
         app.status,
         `${CONFIG.IMAGE_BASE_URL.replace(/\/$/, '')}/${app.resumeUrl}`
       ];
+    } else if (currentTab === 'partners') {
+      endpoint = `${CONFIG.API_BASE_URL}/admin/partners?page=1&limit=2000`;
+      filenamePrefix = 'springwala_partners';
+      headers = ['Date', 'Full Name', 'Email', 'Phone', 'Business Name', 'GST Number', 'Product Category', 'Status'];
+      mapRowFn = (part) => [
+        formatDate(part.createdAt),
+        part.fullName,
+        part.email,
+        part.phone,
+        part.businessName,
+        part.gstNumber || 'N/A',
+        part.productCategory,
+        part.status
+      ];
     }
 
     if (!endpoint) return;
 
     const res = await fetch(endpoint, {
+      headers: { 'Authorization': `Bearer ${Auth.getToken()}` }
+    });
+    const data = await res.json();
+
+    let items = [];
+    if (currentTab === 'messages')    items = data.inquiries    || [];
+    else if (currentTab === 'newsletter') items = data.subscribers || [];
+    else if (currentTab === 'careers')    items = data.applications || [];
+    else if (currentTab === 'partners')   items = data.applications || [];
+
+    if (!res.ok || !data.success || items.length === 0) {
+      showToast('No records found to export.', 'warning');
+      return;
+    }
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename  = `${filenamePrefix}_${timestamp}.${format}`;
+
+    if (format === 'xlsx') {
+      // ── Real XLSX via SheetJS ──────────────────────────────────────────
+      const sheetData = items.map(item => {
+        const row = mapRowFn(item);
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+        return obj;
+      });
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(sheetData, { header: headers });
+      const colWidths = headers.map(h => ({ wch: Math.max(h.length + 4, 16) }));
+      ws['!cols'] = colWidths;
+      XLSX.utils.book_append_sheet(wb, ws, 'Data');
+      XLSX.writeFile(wb, filename);
+
+    } else {
+      // ── Proper UTF-8 CSV with BOM ──────────────────────────────────────
+      const esc = (val) => {
+        if (val === null || val === undefined) return '';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+      let csv = '\uFEFF'; // BOM for Excel compatibility
+      csv += headers.join(',') + '\r\n';
+      items.forEach(item => {
+        csv += mapRowFn(item).map(esc).join(',') + '\r\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href     = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    showToast(`${items.length} records exported as ${filename}`, 'success');
+
+  } catch (err) {
+    console.error('[Export Error]', err);
+    showToast('Export failed. Please try again.', 'error');
+  }
+};
+
+async function fetchPartners(page = 1) {
+  partnersPage = page;
+  const tbody = document.getElementById('partners-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <div class="p-8 text-center text-[#656565] font-medium">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#BE2229] mb-2"></div>
+      <div>Loading partner applications...</div>
+    </div>
+  `;
+
+  try {
+    const statusVal = document.getElementById('partner-filter-status')?.value || '';
+    const categoryVal = document.getElementById('partner-filter-category')?.value || '';
+
+    const queryParams = new URLSearchParams({
+      page,
+      limit: recordsPerPage,
+      search: partnersSearch,
+      status: statusVal,
+      productCategory: categoryVal
+    });
+
+    const res = await fetch(`${CONFIG.API_BASE_URL}/admin/partners?${queryParams}`, {
       headers: {
         'Authorization': `Bearer ${Auth.getToken()}`
       }
     });
     const data = await res.json();
 
-    let items = [];
-    if (currentTab === 'messages') items = data.inquiries || [];
-    else if (currentTab === 'newsletter') items = data.subscribers || [];
-    else if (currentTab === 'careers') items = data.applications || [];
+    if (res.ok && data.success) {
+      if (!data.applications || data.applications.length === 0) {
+        tbody.innerHTML = `<div class="p-8 text-center text-[#656565] font-medium">No applications found matching your criteria.</div>`;
+        if (currentTab === 'partners') {
+          renderPagination(0, page, recordsPerPage);
+        }
+        return;
+      }
 
-    if (!res.ok || !data.success || items.length === 0) {
-      alert('No records found to export.');
-      return;
+      tbody.innerHTML = '';
+      data.applications.forEach(part => {
+        const formattedDate = formatDate(part.createdAt);
+        
+        // Status dropdown options
+        const statuses = ['New', 'Contacted', 'Under Review', 'Approved', 'Rejected'];
+        const statusOptions = statuses.map(s => `
+          <option value="${s}" ${part.status === s ? 'selected' : ''}>${s}</option>
+        `).join('');
+
+        const escName = part.fullName.replace(/'/g, "\\'");
+        const escEmail = part.email.replace(/'/g, "\\'");
+        const escPhone = part.phone.replace(/'/g, "\\'");
+        const escBusiness = part.businessName.replace(/'/g, "\\'");
+        const escGst = (part.gstNumber || '').replace(/'/g, "\\'");
+        const escCat = part.productCategory.replace(/'/g, "\\'");
+        const escStatus = part.status.replace(/'/g, "\\'");
+
+        const row = document.createElement('div');
+        row.className = `flex flex-col xl:grid xl:grid-cols-[110px_160px_180px_120px_160px_120px_160px_140px_80px] gap-2 xl:items-center p-4 xl:px-[28px] xl:py-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition relative font-['Roboto']`;
+        row.innerHTML = `
+          <span class="text-[#656565] text-[13px] xl:text-[15px] order-1 xl:order-none">${formattedDate}</span>
+          <span class="text-black font-semibold text-[16px] order-2 xl:order-none truncate">${part.fullName}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-3 xl:order-none truncate break-all">${part.email}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-4 xl:order-none">+91 ${part.phone}</span>
+          <span class="text-black font-medium text-[14px] xl:text-[15px] order-5 xl:order-none truncate">${part.businessName}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-6 xl:order-none">${part.gstNumber || 'N/A'}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-7 xl:order-none capitalize">${part.productCategory.replace(/-/g, ' ')}</span>
+          
+          <div class="flex items-center justify-start xl:justify-center order-8 xl:order-none">
+            <select 
+              onchange="updatePartnerStatus('${part._id}', this.value)"
+              class="border rounded px-2 py-1 text-[13px] bg-white outline-none cursor-pointer font-medium w-full"
+              style="color: ${getPartnerStatusColor(part.status)}; border-color: ${getPartnerStatusColor(part.status)}88"
+            >
+              ${statusOptions}
+            </select>
+          </div>
+
+          <div class="absolute right-4 top-4 xl:relative xl:right-auto xl:top-auto flex items-center justify-end xl:justify-center gap-3 order-9 xl:order-none font-medium">
+            <button
+              onclick="viewPartnerDetail('${part._id}', '${escName}', '${escEmail}', '${escPhone}', '${escBusiness}', '${escGst}', '${escCat}', '${formattedDate}', '${escStatus}')"
+              class="text-[#BE2229] hover:underline text-[14px] font-bold bg-red-50 xl:bg-transparent px-3 py-1 xl:px-0 xl:py-0 rounded"
+            >
+              View
+            </button>
+          </div>
+        `;
+        tbody.appendChild(row);
+      });
+
+      if (currentTab === 'partners') {
+        renderPagination(data.total, page, recordsPerPage);
+      }
+    } else {
+      tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Failed to retrieve partner applications.</div>`;
     }
-
-    // Helper to sanitize CSV field
-    const esc = (val) => {
-      if (val === null || val === undefined) return '';
-      let str = String(val);
-      // Double quote escaping for CSV
-      str = str.replace(/"/g, '""');
-      return `"${str}"`;
-    };
-
-    // Convert to CSV string
-    let csvContent = '\uFEFF'; // Add UTF-8 BOM so Excel opens it with correct encoding
-    csvContent += headers.join(',') + '\r\n';
-
-    items.forEach(item => {
-      const row = mapRowFn(item);
-      csvContent += row.map(esc).join(',') + '\r\n';
-    });
-
-    // Create browser download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const ext = format === 'xlsx' ? 'xlsx' : 'csv'; // support both extensions as requested
-    link.setAttribute("download", `${filenamePrefix}_${timestamp}.${ext}`);
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
   } catch (err) {
-    console.error('[Export Error]', err);
-    alert('An error occurred during data export. Please try again.');
+    console.error('[Fetch Partners Error]', err);
+    tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Server connection error.</div>`;
   }
+}
+
+function getPartnerStatusColor(status) {
+  const map = {
+    'New': '#2563eb',
+    'Contacted': '#0284c7',
+    'Under Review': '#d97706',
+    'Approved': '#16a34a',
+    'Rejected': '#BE2229'
+  };
+  return map[status] || '#718096';
+}
+
+window.updatePartnerStatus = async function(id, status) {
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/admin/partners/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${Auth.getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Partner status updated successfully!', 'success');
+      fetchStats();
+      fetchPartners(partnersPage);
+    } else {
+      showToast(data.message || 'Failed to update status.', 'error');
+    }
+  } catch (err) {
+    console.error('[Update Partner Status Error]', err);
+    showToast('Server error updating status.', 'error');
+  }
+};
+
+window.viewPartnerDetail = function(id, name, email, phone, businessName, gstNumber, productCategory, date, status) {
+  // Remove existing modal if any
+  document.getElementById('sw-partner-detail-modal')?.remove();
+
+  if (!document.getElementById('sw-partner-modal-style')) {
+    const s = document.createElement('style');
+    s.id = 'sw-partner-modal-style';
+    s.textContent = `
+      @keyframes swFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    `;
+    document.head.appendChild(s);
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'sw-partner-detail-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);transition:all 0.3s ease';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:28px 24px;max-width:550px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Roboto,sans-serif;max-height:90vh;overflow-y:auto;animation:swFadeIn .25s ease-out" class="no-scrollbar">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+        <h3 style="font-family:Poppins,sans-serif;font-size:20px;font-weight:600;margin:0;color:#1a1a1a">Partner Application Profile</h3>
+        <button id="sw-partner-modal-close" style="background:none;border:none;cursor:pointer;color:#888;font-size:24px;line-height:1;padding:0">&times;</button>
+      </div>
+      
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #f1f1f1">
+        <span style="font-size:20px;font-weight:700;color:#111">${name}</span>
+        <span style="font-size:15px;color:#BE2229;font-weight:600">${businessName}</span>
+        <span style="font-size:13px;color:#888">Submitted on ${date}</span>
+      </div>
+
+      <div style="margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Email Address</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500;word-break:break-all">${email}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Phone Number</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">+91 ${phone}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">GST Number</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">${gstNumber || 'N/A'}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Product Category</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500;text-transform:capitalize">${productCategory.replace(/-/g, ' ')}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Current Status</span>
+          <p style="font-size:15px;margin:4px 0 0;font-weight:600;color:${getPartnerStatusColor(status)}">${status}</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px">
+        <button id="sw-partner-modal-ok" style="padding:10px 24px;border:none;border-radius:7px;background:#BE2229;color:#fff;cursor:pointer;font-size:14px;font-weight:600">Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('sw-partner-modal-close').onclick = () => overlay.remove();
+  document.getElementById('sw-partner-modal-ok').onclick = () => overlay.remove();
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 };
 
 // Initialize

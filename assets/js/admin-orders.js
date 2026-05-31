@@ -135,3 +135,20 @@ function bindOrderEvents() {
     loadOrders(1);
   });
 }
+
+/**
+ * Export orders as CSV or XLSX.
+ * Calls the backend /api/orders/export/{format} endpoint.
+ * @param {'csv'|'xlsx'} format
+ */
+async function exportOrders(format) {
+  try {
+    showToast(`Preparing ${format.toUpperCase()} export…`, 'info');
+    const filename = `orders-${new Date().toISOString().slice(0, 10)}.${format}`;
+    await api.download(`/orders/export/${format}`, filename);
+    showToast(`Orders exported as ${filename}`, 'success');
+  } catch (err) {
+    console.error('[Export Orders Error]', err);
+    showToast(`Export failed: ${err.message}`, 'error');
+  }
+}

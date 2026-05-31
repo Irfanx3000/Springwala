@@ -103,6 +103,8 @@ app.use("/api/admin", require("./routes/adminManageRoutes"));
 app.use("/api/shipping", require("./routes/shippingRoutes"));
 app.use("/api/inquiries", require("./routes/inquiryRoutes"));
 app.use("/api/careers", require("./routes/careerRoutes"));
+app.use("/api/partners", require("./routes/partnerRoutes"));
+app.use("/api/admin/partners", require("./routes/adminPartnerRoutes"));
 
 
 // ══════════════════════════════════════════════════════════════════════════════
