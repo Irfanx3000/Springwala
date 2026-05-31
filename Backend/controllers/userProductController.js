@@ -275,6 +275,8 @@ exports.getRelatedProducts = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getCategories = async (req, res) => {
   try {
+    const includeEmpty = req.query.includeEmpty === 'true';
+
     // Get unique category and subcategory IDs from active products
     const [activeCategoryIds, activeSubcategoryIds] = await Promise.all([
       Product.distinct('category', { isActive: true }),
@@ -296,13 +298,16 @@ exports.getCategories = async (req, res) => {
       const plainCat = cat.toObject ? cat.toObject({ virtuals: true }) : cat;
       
       if (plainCat.subcategories && Array.isArray(plainCat.subcategories)) {
-        plainCat.subcategories = plainCat.subcategories.filter(sub => activeSubcatSet.has(sub._id.toString()));
+        plainCat.subcategories = includeEmpty
+          ? plainCat.subcategories
+          : plainCat.subcategories.filter(sub => activeSubcatSet.has(sub._id.toString()));
       } else {
         plainCat.subcategories = [];
       }
 
       return plainCat;
     }).filter(cat => {
+      if (includeEmpty) return true;
       const hasDirectProducts = activeCatSet.has(cat._id.toString());
       const hasActiveSubcategories = cat.subcategories && cat.subcategories.length > 0;
       return hasDirectProducts || hasActiveSubcategories;

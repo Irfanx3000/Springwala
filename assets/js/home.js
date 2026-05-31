@@ -200,7 +200,7 @@ function renderCategories() {
 
     const items = state.categories.items;
     grid.innerHTML = items.slice(0, 8).map(c => `
-        <div class="ec-card" onclick="window.location.href='allproducts.html?category=${c.slug}'">
+        <div class="ec-card" onclick="window.location.href='category.html?slug=${c.slug}'">
             <div class="ec-img-box">
                 <img src="${c.banner ? imageUrl(c.banner) : 'assets/images/deafult.png'}" alt="${c.name}">
             </div>

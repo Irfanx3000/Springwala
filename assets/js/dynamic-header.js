@@ -319,13 +319,13 @@
             } else {
                 megaMenu.innerHTML = categories.map(cat => {
                     const sublinks = (cat.subcategories || []).map(sub => `
-                        <a href="allproducts.html?subcategory=${sub.slug}" class="font-['Roboto'] font-normal text-[16px] text-[#000000] hover:text-[#BE2229] transition">${sub.name}</a>
+                        <a href="category.html?slug=${cat.slug}&subcategory=${sub.slug}" class="font-['Roboto'] font-normal text-[16px] text-[#000000] hover:text-[#BE2229] transition">${sub.name}</a>
                     `).join('');
                     
                     return `
                         <div class="flex flex-col gap-[9px] w-[190px]">
                             <h3 class="font-['Roboto'] font-medium text-[18px] text-[#000000] whitespace-nowrap hover:text-[#BE2229] transition">
-                                <a href="allproducts.html?category=${cat.slug}">${cat.name}</a>
+                                <a href="category.html?slug=${cat.slug}">${cat.name}</a>
                             </h3>
                             <div class="w-full h-[0.5px] bg-[#000000] my-[2px]"></div>
                             ${sublinks || '<span class="text-gray-400 text-xs italic">No subcategories</span>'}
@@ -337,7 +337,7 @@
 
         // Persist/Sync category selection from URL
         const params = new URLSearchParams(window.location.search);
-        const urlCat = params.get('category') || '';
+        const urlCat = params.get('category') || params.get('slug') || '';
         const label = document.getElementById('selected-category-text');
         if (label) {
             if (urlCat) {
@@ -448,9 +448,21 @@
             saveRecentSearch(query);
         }
 
+        const currentPage = window.location.pathname.split('/').pop();
+        const currentParams = new URLSearchParams(window.location.search);
+        const currentCategorySlug = currentPage === 'category.html' ? (currentParams.get('slug') || '') : '';
         const params = [];
         if (query) params.push(`search=${encodeURIComponent(query)}`);
-        if (catSlug) params.push(`category=${encodeURIComponent(catSlug)}`);
+        if (currentCategorySlug) {
+            params.unshift(`slug=${encodeURIComponent(currentCategorySlug)}`);
+            window.location.href = 'category.html' + (params.length ? '?' + params.join('&') : '');
+            return;
+        }
+        if (catSlug) {
+            params.push(`slug=${encodeURIComponent(catSlug)}`);
+            window.location.href = 'category.html' + (params.length ? '?' + params.join('&') : '');
+            return;
+        }
 
         window.location.href = 'allproducts.html' + (params.length ? '?' + params.join('&') : '');
     }
@@ -467,9 +479,9 @@
                 label.textContent = name;
                 label.setAttribute('data-slug', slug);
             }
-            // Navigate to allproducts.html with selected category slug
+            // Navigate to the dedicated category page with selected category slug
             if (slug) {
-                window.location.href = `allproducts.html?category=${encodeURIComponent(slug)}`;
+                window.location.href = `category.html?slug=${encodeURIComponent(slug)}`;
             } else {
                 window.location.href = 'allproducts.html';
             }
@@ -770,7 +782,7 @@
                         dd.classList.add('hidden');
                         handleSearchSubmit(isMobile);
                     } else if (selected.type === 'category') {
-                        window.location.href = `allproducts.html?category=${encodeURIComponent(selected.value)}`;
+                        window.location.href = `category.html?slug=${encodeURIComponent(selected.value)}`;
                     } else if (selected.type === 'product') {
                         window.location.href = `product.html?id=${encodeURIComponent(selected.value)}`;
                     }
@@ -830,7 +842,7 @@
                         handleSearchSubmit(false);
                     }
                 } else if (type === 'category') {
-                    window.location.href = `allproducts.html?category=${encodeURIComponent(val)}`;
+                    window.location.href = `category.html?slug=${encodeURIComponent(val)}`;
                 } else if (type === 'product') {
                     window.location.href = `product.html?id=${encodeURIComponent(val)}`;
                 }

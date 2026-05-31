@@ -1,7 +1,7 @@
 /**
  * banners.js
- * Works for ALL banner pages: homepage, category, promotional,
- * features, advertisement, section, informational
+ * Works for ALL banner pages: homepage, category, sub-category,
+ * promotional, features, advertisement, section, informational
  *
  * Set banner type on <body data-banner-type="homepage">
  */

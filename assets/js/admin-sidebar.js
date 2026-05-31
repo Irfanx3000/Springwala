@@ -5,6 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     injectInquiriesMenuItem();
+    injectSubCategoryBannerMenuItem();
     initSidebar();
     initDropdowns();
     initActiveLink();
@@ -63,6 +64,35 @@ function injectInquiriesMenuItem() {
     } else {
         usersLink.after(inqLink);
         inqLink.after(divider);
+    }
+}
+
+/**
+ * Add the Sub-category banner section to every admin sidebar that has the
+ * banner submenu. Older pages keep static markup, so this keeps the menu in
+ * sync without editing each admin file by hand.
+ */
+function injectSubCategoryBannerMenuItem() {
+    const submenu = document.getElementById('banners-submenu');
+    if (!submenu || submenu.querySelector('a[href*="sub-category.html"]')) return;
+
+    const categoryLink = Array.from(submenu.querySelectorAll('a')).find(link => {
+        const href = link.getAttribute('href') || '';
+        return href.includes('category.html');
+    });
+
+    const link = document.createElement('a');
+    const categoryHref = categoryLink?.getAttribute('href') || 'sub-category.html';
+    link.href = categoryHref.includes('category.html')
+        ? categoryHref.replace('category.html', 'sub-category.html')
+        : 'sub-category.html';
+    link.className = "font-['Poppins'] text-[18px] text-black leading-[27px] hover:text-[#BE2229]";
+    link.textContent = 'Sub-category';
+
+    if (categoryLink) {
+        categoryLink.after(link);
+    } else {
+        submenu.appendChild(link);
     }
 }
 

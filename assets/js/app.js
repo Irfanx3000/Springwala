@@ -720,6 +720,10 @@ const BannerEngine = {
     // Safety: Link handling
     const link = container.tagName === 'A' ? container : container.querySelector('a');
     if (link && banner.link) link.href = banner.link;
+    if (link && (banner.image || banner.mobileImage)) {
+      link.classList.remove('border-dashed', 'border-[#D1D5DB]');
+      link.classList.add('border-[#E8E8E8]');
+    }
 
     // Feature: Text-based banners
     if (!banner.image && banner.title) {
@@ -781,15 +785,17 @@ const BannerEngine = {
     img.dataset.bannerId = banner._id;
 
     // Styling
-    img.className = 'w-full h-full object-cover transition-opacity duration-1000';
+    const fit = container.dataset.bannerFit === 'contain' ? 'contain' : 'cover';
+    container.classList.remove('hidden');
+    img.className = `w-full h-full object-${fit} transition-opacity duration-1000`;
     img.style.display = 'block';
     img.style.width = '100%';
     img.style.height = '100%';
-    img.style.objectFit = 'cover';
+    img.style.objectFit = fit;
     img.style.opacity = '1';
 
     // Cleanup legacy classes
-    img.classList.remove('hidden', 'md:block', 'block', 'md:hidden', 'opacity-[0.65]', 'mix-blend-multiply', 'object-contain');
+    img.classList.remove('hidden', 'md:block', 'block', 'md:hidden', 'opacity-[0.65]', 'mix-blend-multiply');
   },
 
   // 4. Carousel Renderer: Using native picture implementation
@@ -799,6 +805,8 @@ const BannerEngine = {
     if (container.dataset.carouselActive === 'true') return;
     container.dataset.carouselActive = 'true';
 
+    const fit = container.dataset.bannerFit === 'contain' ? 'contain' : 'cover';
+    container.classList.remove('hidden');
     container.innerHTML = `
       <div class="sw-slider h-full w-full relative overflow-hidden">
         ${banners.map((b, i) => `
@@ -806,7 +814,7 @@ const BannerEngine = {
             <a href="${b.link || '#'}" class="block h-full w-full">
               <picture>
                 ${b.mobileImage ? `<source media="(max-width: 768px)" srcset="${BannerEngine.resolveUrl(b, true)}">` : ''}
-                <img src="${BannerEngine.resolveUrl(b, false)}" alt="${b.altText || b.title}" class="w-full h-full object-cover">
+                <img src="${BannerEngine.resolveUrl(b, false)}" alt="${b.altText || b.title}" class="w-full h-full object-${fit}" style="object-fit:${fit}">
               </picture>
             </a>
           </div>
@@ -2100,7 +2108,7 @@ async function loadCategoriesSection() {
       const slice = cats.slice(start, start + perPage);
       grid.innerHTML = slice.map(c => {
         const img = c.banner ? (c.banner.startsWith('http') ? c.banner : `${API_BASE.replace('/api', '')}/uploads/${c.banner}`) : 'assets/images/deafult.png';
-        return `<div class="ec-card" style="cursor:pointer" onclick="window.location.href='allproducts.html?category=${c.slug}'">
+        return `<div class="ec-card" style="cursor:pointer" onclick="window.location.href='category.html?slug=${c.slug}'">
           <div class="ec-img-box"><img src="${img}" alt="${c.name}" onerror="this.src='assets/images/deafult.png'"></div>
           <p class="ec-name">${c.name}</p>
         </div>`;
@@ -2145,6 +2153,8 @@ async function loadCategoriesSection() {
 async function initAllProductsPage() {
   const params = new URLSearchParams(window.location.search);
   const SLIDER_LIMIT = 100000;
+  const isCategoryPage = document.body?.dataset?.page === 'category';
+  const lockedCategorySlug = isCategoryPage ? (params.get('slug') || params.get('category') || '') : '';
 
   // 1. STATE MANAGEMENT
   const state = {
@@ -2155,7 +2165,7 @@ async function initAllProductsPage() {
     totalProducts: 0,
     filters: {
       search: params.get('search') || '',
-      category: params.get('category') || '',
+      category: lockedCategorySlug || params.get('category') || '',
       subcategory: params.get('subcategory') || '',
       priceMin: Number(params.get('priceMin')) || 0,
       priceMax: Number(params.get('priceMax')) || SLIDER_LIMIT,
@@ -2204,18 +2214,27 @@ async function initAllProductsPage() {
       console.log("[AllProducts] Initializing dynamic sorting & filtering...");
       if (grid) grid.innerHTML = '<div class="col-span-2 lg:col-span-5 flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#BE2229]"></div></div>';
 
-      const catData = await apiCall('/user/categories').catch(() => ({ categories: [] }));
+      const catData = await apiCall(`/user/categories${isCategoryPage ? '?includeEmpty=true' : ''}`).catch(() => ({ categories: [] }));
       state.allCategories = catData.categories || [];
 
+      const activeCategory = getActiveCategory();
+      if (isCategoryPage && !lockedCategorySlug) {
+        window.location.href = 'error.html?type=category-not-found';
+        return;
+      }
+
       if (state.filters.category) {
-        const catMatch = state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category);
+        const catMatch = activeCategory || state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category);
         if (!catMatch) {
           window.location.href = 'error.html?type=category-not-found';
           return;
         }
       }
       if (state.filters.subcategory) {
-        const subMatch = state.allCategories.flatMap(c => c.subcategories || []).find(s => s._id === state.filters.subcategory || s.slug === state.filters.subcategory);
+        const subcategoryPool = isCategoryPage
+          ? (getActiveCategory()?.subcategories || [])
+          : state.allCategories.flatMap(c => c.subcategories || []);
+        const subMatch = subcategoryPool.find(s => s._id === state.filters.subcategory || s.slug === state.filters.subcategory);
         if (!subMatch) {
           window.location.href = 'error.html?type=category-not-found';
           return;
@@ -2278,8 +2297,9 @@ async function initAllProductsPage() {
 
   function updateURL() {
     const q = new URLSearchParams();
+    if (isCategoryPage && lockedCategorySlug) q.set('slug', lockedCategorySlug);
     if (state.filters.search) q.set('search', state.filters.search);
-    if (state.filters.category) q.set('category', state.filters.category);
+    if (!isCategoryPage && state.filters.category) q.set('category', state.filters.category);
     if (state.filters.subcategory) q.set('subcategory', state.filters.subcategory);
     if (state.filters.sortBy) q.set('sortBy', state.filters.sortBy);
     if (state.currentPage > 1) q.set('page', state.currentPage);
@@ -2301,7 +2321,13 @@ async function initAllProductsPage() {
   function renderProducts() {
     if (!grid) return;
     if (state.products.length === 0) {
-      grid.innerHTML = '<div class="col-span-2 lg:col-span-5 text-center py-12 text-gray-500">No products found matching filters.</div>';
+      grid.innerHTML = isCategoryPage
+        ? `<div class="col-span-2 lg:col-span-5 text-center py-14 bg-white rounded-[8px] border border-[#E8E8E8]">
+            <h2 class="font-['Poppins'] text-[20px] font-semibold text-[#1F1F1F] mb-2">No products found in this category</h2>
+            <p class="text-[#656565] text-[14px] mb-5">Try clearing filters or continue browsing Springwala products.</p>
+            <a href="allproducts.html" class="inline-flex items-center justify-center bg-[#BE2229] text-white px-5 py-2.5 rounded-[6px] font-medium hover:bg-red-800 transition">Continue Shopping</a>
+          </div>`
+        : '<div class="col-span-2 lg:col-span-5 text-center py-12 text-gray-500">No products found matching filters.</div>';
       return;
     }
     grid.innerHTML = state.products.map(p => buildProductCard(p, 'product-card')).join('');
@@ -2330,17 +2356,37 @@ async function initAllProductsPage() {
 
   function renderCategories() {
     if (catSidebar) {
-      catSidebar.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="all" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${!state.filters.category ? 'checked' : ''}><span class="text-[13px] font-medium">All</span></label>`;
-      state.allCategories.forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'mt-2';
-        const isSel = state.filters.category === c._id || state.filters.category === c.slug;
-        div.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="${c.slug}" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${isSel ? 'checked' : ''}><span class="text-[13px] font-medium">${c.name}</span></label>`;
-        catSidebar.appendChild(div);
-      });
+      if (isCategoryPage) {
+        const activeCategory = getActiveCategory();
+        const subcategories = activeCategory?.subcategories || [];
+        catSidebar.innerHTML = subcategories.length
+          ? `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="all" class="filter-subcategory-cb w-4 h-4 accent-[#BE2229] rounded" ${!state.filters.subcategory ? 'checked' : ''}><span class="text-[13px] font-medium">All ${activeCategory.name}</span></label>`
+          : '<span class="text-[13px] text-[#656565]">No subcategories available</span>';
+
+        subcategories.forEach(sub => {
+          const div = document.createElement('div');
+          div.className = 'mt-2';
+          const isSel = state.filters.subcategory === sub._id || state.filters.subcategory === sub.slug;
+          div.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="${sub.slug}" class="filter-subcategory-cb w-4 h-4 accent-[#BE2229] rounded" ${isSel ? 'checked' : ''}><span class="text-[13px] font-medium">${sub.name}</span></label>`;
+          catSidebar.appendChild(div);
+        });
+      } else {
+        catSidebar.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="all" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${!state.filters.category ? 'checked' : ''}><span class="text-[13px] font-medium">All</span></label>`;
+        state.allCategories.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'mt-2';
+          const isSel = state.filters.category === c._id || state.filters.category === c.slug;
+          div.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" value="${c.slug}" class="filter-category-cb w-4 h-4 accent-[#BE2229] rounded" ${isSel ? 'checked' : ''}><span class="text-[13px] font-medium">${c.name}</span></label>`;
+          catSidebar.appendChild(div);
+        });
+      }
     }
 
     if (catCarousel) {
+      if (isCategoryPage) {
+        catCarousel.closest('.category-carousel-section')?.classList.add('hidden');
+        return;
+      }
       const allChip = `
         <div class="cat-chip snap-start flex-shrink-0 w-[90px] h-[80px] lg:w-[230px] lg:h-[145px] bg-white rounded-[6px] lg:rounded-[8px] flex flex-col cursor-pointer border ${!state.filters.category ? 'border-[#BE2229] shadow-md' : 'border-[rgba(234,234,234,0.63)]'}" data-cat-id="">
           <div class="flex-1 flex items-center justify-center p-2 min-h-0"><img src="assets/images/deafult.png" class="max-h-full object-contain"></div>
@@ -2359,12 +2405,18 @@ async function initAllProductsPage() {
 
       catCarousel.querySelectorAll('.cat-chip').forEach(chip => {
         chip.addEventListener('click', () => {
-          state.filters.category = chip.dataset.catId;
-          renderCategories();
-          applyFilters();
+          if (chip.dataset.catId) {
+            window.location.href = `category.html?slug=${encodeURIComponent(chip.dataset.catId)}`;
+          } else {
+            window.location.href = 'allproducts.html';
+          }
         });
       });
     }
+  }
+
+  function getActiveCategory() {
+    return state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category || c.slug === lockedCategorySlug);
   }
 
   function updateBreadcrumb() {
@@ -2373,10 +2425,10 @@ async function initAllProductsPage() {
     let headingText = "All Products";
 
     if (state.filters.category) {
-      const cat = state.allCategories.find(c => c._id === state.filters.category || c.slug === state.filters.category);
+      const cat = getActiveCategory();
       if (cat) {
         html += ` &gt; <span class="font-medium">${cat.name}</span>`;
-        headingText = `Showing Products for ${cat.name}`;
+        headingText = isCategoryPage ? cat.name : `Showing Products for ${cat.name}`;
       }
     } else if (state.filters.subcategory) {
       // Traverse subcategories to find dynamic match
@@ -2394,6 +2446,9 @@ async function initAllProductsPage() {
     if (h1) {
       h1.textContent = headingText;
     }
+    document.title = isCategoryPage && headingText !== 'All Products'
+      ? `${headingText} | Springwala`
+      : document.title;
   }
 
   function initSortUI() {
@@ -2562,7 +2617,13 @@ async function initAllProductsPage() {
   function setupEventListeners() {
     document.addEventListener('change', e => {
       if (e.target.classList.contains('filter-category-cb')) {
+        if (isCategoryPage) return;
         state.filters.category = (e.target.value === 'all') ? '' : e.target.value;
+        renderCategories();
+        applyFilters();
+      }
+      if (e.target.classList.contains('filter-subcategory-cb')) {
+        state.filters.subcategory = (e.target.value === 'all') ? '' : e.target.value;
         renderCategories();
         applyFilters();
       }
@@ -2599,7 +2660,7 @@ async function initAllProductsPage() {
     window.addEventListener('touchend', () => { isDraggingMin = false; isDraggingMax = false; });
 
     window.performReset = () => {
-      state.filters = { search: '', category: '', subcategory: '', priceMin: 0, priceMax: SLIDER_LIMIT, inStockOnly: false, sortBy: 'newest' };
+      state.filters = { search: '', category: lockedCategorySlug || '', subcategory: '', priceMin: 0, priceMax: SLIDER_LIMIT, inStockOnly: false, sortBy: 'newest' };
       updatePriceUI();
       renderCategories();
       initSortUI();
@@ -2756,11 +2817,15 @@ async function initProductPage() {
       let html = `<a href="allproducts.html" class="hover:text-[#BE2229]">All Categories</a>`;
 
       if (product.category) {
-        html += ` &gt; <a href="allproducts.html?category=${product.category.slug}" class="hover:text-[#BE2229]">${product.category.name}</a>`;
+        html += ` &gt; <a href="category.html?slug=${product.category.slug}" class="hover:text-[#BE2229]">${product.category.name}</a>`;
       }
 
       if (product.subcategory) {
-        html += ` &gt; <a href="allproducts.html?subcategory=${product.subcategory.slug}" class="hover:text-[#BE2229]">${product.subcategory.name}</a>`;
+        const categorySlug = product.category?.slug || '';
+        const subcategoryHref = categorySlug
+          ? `category.html?slug=${categorySlug}&subcategory=${product.subcategory.slug}`
+          : `allproducts.html?subcategory=${product.subcategory.slug}`;
+        html += ` &gt; <a href="${subcategoryHref}" class="hover:text-[#BE2229]">${product.subcategory.name}</a>`;
       }
 
       html += ` &gt; <span class="text-black font-medium">${product.name}</span>`;
@@ -4638,7 +4703,7 @@ async function initCategoriesPage() {
     grid.innerHTML = cats.map(c => {
       const img = c.banner ? (c.banner.startsWith('http') ? c.banner : `${IMAGE_BASE}/uploads/${c.banner}`) : 'assets/images/deafult.png';
       return `
-        <a href="allproducts.html?category=${c.slug}" class="bg-white border border-[rgba(234,234,234,0.63)] rounded-[8px] shadow-[0px_2px_4px_rgba(0,0,0,0.25)] flex flex-col items-center justify-end h-[119px] relative hover:shadow-md transition">
+        <a href="category.html?slug=${c.slug}" class="bg-white border border-[rgba(234,234,234,0.63)] rounded-[8px] shadow-[0px_2px_4px_rgba(0,0,0,0.25)] flex flex-col items-center justify-end h-[119px] relative hover:shadow-md transition">
           <div class="w-full h-[78px] flex items-center justify-center absolute top-2">
             <img src="${img}" alt="${c.name}" class="max-w-[147px] max-h-full object-contain" onerror="this.src='assets/images/deafult.png'">
           </div>
@@ -4832,7 +4897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initHomePage();
     initKnowledgePagination();
   }
-  if (bodyPage === 'allproducts') initAllProductsPage();
+  if (bodyPage === 'allproducts' || bodyPage === 'category') initAllProductsPage();
   if (bodyPage === 'product') initProductPage();
   if (bodyPage === 'cart') initCartPage();
   if (bodyPage === 'orders' && typeof initOrdersPage === 'function') initOrdersPage();

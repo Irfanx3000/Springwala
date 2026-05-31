@@ -7,7 +7,7 @@ const BannerSchema = new mongoose.Schema({
   position: { type: Number, default: 0 },
   type: {
     type: String,
-    enum: ['homepage', 'category', 'promotional', 'features', 'advertisement', 'section', 'informational'],
+    enum: ['homepage', 'category', 'sub-category', 'promotional', 'features', 'advertisement', 'section', 'informational'],
     required: true,
   },
   link: { type: String, default: '' },
