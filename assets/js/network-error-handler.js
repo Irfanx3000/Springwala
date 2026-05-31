@@ -68,9 +68,14 @@
         if (typeof window.fetch !== 'function') return;
         const originalFetch = window.fetch.bind(window);
         window.fetch = async function (...args) {
+            const opts = args[1] || {};
+            const skipRedirect = opts.skipRedirect || (opts.headers && (opts.headers['X-Skip-Redirect'] || (typeof opts.headers.get === 'function' && opts.headers.get('X-Skip-Redirect'))));
             try {
                 const res = await originalFetch(...args);
                 if (window.location.pathname.endsWith('/error.html') || window.location.pathname === '/error.html') {
+                    return res;
+                }
+                if (skipRedirect) {
                     return res;
                 }
                 if (res.status === 401) {
@@ -87,7 +92,7 @@
                 }
                 return res;
             } catch (err) {
-                if (!window.location.pathname.endsWith('/error.html') && isNetworkError(err)) {
+                if (window.location.protocol !== 'file:' && !skipRedirect && !window.location.pathname.endsWith('/error.html') && isNetworkError(err)) {
                     redirectToErrorPage('network', window.location.href);
                 }
                 throw err;

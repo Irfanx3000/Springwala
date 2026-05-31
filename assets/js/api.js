@@ -28,7 +28,7 @@ async function apiFetch(endpoint, opts = {}) {
     res = await fetch(url, { ...opts, headers });
   } catch (e) {
     console.error(`[API-ERROR] Fetch failed for ${url}:`, e);
-    if (window.__networkErrorHandler?.isNetworkError?.(e) && typeof redirectToErrorPage === 'function') {
+    if (window.location.protocol !== 'file:' && window.__networkErrorHandler?.isNetworkError?.(e) && typeof redirectToErrorPage === 'function') {
       redirectToErrorPage('network', window.location.href);
       return null;
     }

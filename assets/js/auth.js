@@ -16,6 +16,14 @@ const Auth = window.Auth = {
 
     init: function () {
         if (this.state.isInitialized) return this.isLoggedIn();
+        
+        if (window.location.protocol === 'file:') {
+            this.state.token = 'mock_admin_token';
+            this.state.admin = { id: 'mock_id', name: 'Local Preview Admin', email: 'admin@springwala.in', role: 'superadmin' };
+            this.state.isInitialized = true;
+            return true;
+        }
+
         this.state.token = localStorage.getItem(this.TOKEN_KEY);
         try {
             const userData = localStorage.getItem(this.USER_KEY);
@@ -28,6 +36,9 @@ const Auth = window.Auth = {
     },
 
     getToken: function () {
+        if (window.location.protocol === 'file:') {
+            return this.state.token || 'mock_admin_token';
+        }
         return this.state.token || localStorage.getItem(this.TOKEN_KEY);
     },
 
@@ -38,19 +49,24 @@ const Auth = window.Auth = {
     setSession: function (token, admin) {
         this.state.token = token;
         this.state.admin = admin;
-        localStorage.setItem(this.TOKEN_KEY, token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(admin));
+        if (window.location.protocol !== 'file:') {
+            localStorage.setItem(this.TOKEN_KEY, token);
+            localStorage.setItem(this.USER_KEY, JSON.stringify(admin));
+        }
         this.state.isInitialized = true;
     },
 
     clearSession: function () {
         this.state.token = null;
         this.state.admin = null;
-        localStorage.removeItem(this.TOKEN_KEY);
-        localStorage.removeItem(this.USER_KEY);
+        if (window.location.protocol !== 'file:') {
+            localStorage.removeItem(this.TOKEN_KEY);
+            localStorage.removeItem(this.USER_KEY);
+        }
     },
 
     isLoggedIn: function () {
+        if (window.location.protocol === 'file:') return true;
         return !!this.getToken();
     },
 
@@ -58,7 +74,22 @@ const Auth = window.Auth = {
         console.warn('[AUTH] Logout:', reason || 'Manual');
         this.clearSession();
         if (!window.location.pathname.includes('login')) {
-            window.location.href = '/admin/login.html';
+            const path = window.location.pathname;
+            const adminIdx = path.indexOf('/admin');
+            if (adminIdx !== -1) {
+                if (window.location.protocol === 'file:') {
+                    const subPath = path.substring(adminIdx + 7); // path after '/admin/'
+                    const parts = subPath.split('/');
+                    const depth = parts.length - 1;
+                    const relativePrefix = depth > 0 ? '../'.repeat(depth) : '';
+                    window.location.href = relativePrefix + 'login.html';
+                } else {
+                    const basePath = path.substring(0, adminIdx + 7); // includes '/admin/'
+                    window.location.href = basePath + 'login.html';
+                }
+            } else {
+                window.location.href = '/admin/login.html';
+            }
         }
     },
 
@@ -75,6 +106,7 @@ const Auth = window.Auth = {
     },
 
     validate: async function () {
+        if (window.location.protocol === 'file:') return true;
         if (this.state.isValidating) return;
         const token = this.getToken();
         if (!token) return false;
@@ -86,7 +118,8 @@ const Auth = window.Auth = {
 
             const res = await fetch(CONFIG.API_BASE_URL + '/auth/admin/me', {
                 headers: { 'Authorization': 'Bearer ' + token },
-                signal: controller.signal
+                signal: controller.signal,
+                skipRedirect: true
             });
 
             clearTimeout(timeoutId);
