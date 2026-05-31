@@ -374,6 +374,43 @@
         document.head.appendChild(s);
     }
 
+    // 3.5 Sticky Header Custom Styles Injection
+    if (!document.getElementById('sw-storefront-header-sticky-style')) {
+        const s = document.createElement('style');
+        s.id = 'sw-storefront-header-sticky-style';
+        s.textContent = `
+            @media (min-width: 1024px) {
+                .sw-header-fixed {
+                    position: fixed !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    width: 100% !important;
+                    z-index: 9999 !important;
+                    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+                }
+                .sw-header-spacer {
+                    display: block !important;
+                    height: 129px !important;
+                    background-color: transparent !important;
+                    pointer-events: none !important;
+                }
+                .sw-header-hidden {
+                    transform: translateY(-100%) !important;
+                }
+                .sw-header-shown {
+                    transform: translateY(0) !important;
+                }
+            }
+            @media (max-width: 1023px) {
+                .sw-header-spacer {
+                    display: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(s);
+    }
+
     // 4. Bind interactions and search submission handlers
     function saveRecentSearch(query) {
         if (!query) return;
@@ -812,6 +849,82 @@
         }
     });
 
+    // 6. Desktop Sticky Header Scroll Controller
+    function initStickyHeader() {
+        const headerPlaceholder = document.getElementById('sw-header');
+        if (!headerPlaceholder) return;
+
+        const header = headerPlaceholder.querySelector('header');
+        if (!header) return;
+
+        // Ensure spacer exists. If not, create and append it.
+        let spacer = headerPlaceholder.querySelector('.sw-header-spacer');
+        if (!spacer) {
+            spacer = document.createElement('div');
+            spacer.className = 'sw-header-spacer';
+            headerPlaceholder.insertBefore(spacer, header.nextSibling);
+        }
+
+        let lastScrollY = window.scrollY;
+        let scrollTimeout = null;
+
+        function handleScroll() {
+            const currentScrollY = window.scrollY;
+            const isDesktop = window.innerWidth >= 1024;
+
+            if (!isDesktop) {
+                // Remove all sticky classes and inline styles if we are on mobile
+                header.classList.remove('sw-header-fixed', 'sw-header-hidden', 'sw-header-shown');
+                header.style.top = '';
+                spacer.style.display = 'none';
+                return;
+            }
+
+            // On desktop, ensure spacer is active
+            spacer.style.display = 'block';
+            header.classList.add('sw-header-fixed');
+
+            // Dynamic top tracking relative to Top Red Banner (24px height)
+            const dynamicTop = Math.max(0, 24 - currentScrollY);
+            header.style.top = dynamicTop + 'px';
+
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+
+            if (currentScrollY <= 24) {
+                // Keep fully visible when at the top
+                header.classList.remove('sw-header-hidden');
+                header.classList.add('sw-header-shown');
+            } else if (currentScrollY > lastScrollY) {
+                // Scrolling down - hide header
+                header.classList.remove('sw-header-shown');
+                header.classList.add('sw-header-hidden');
+
+                // Set 1000ms delay to auto-reappear
+                scrollTimeout = setTimeout(() => {
+                    header.classList.remove('sw-header-hidden');
+                    header.classList.add('sw-header-shown');
+                }, 1000);
+            } else if (currentScrollY < lastScrollY) {
+                // Scrolling up - show header
+                header.classList.remove('sw-header-hidden');
+                header.classList.add('sw-header-shown');
+            }
+
+            lastScrollY = currentScrollY;
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', handleScroll, { passive: true });
+
+        // Run initially to set the correct state
+        handleScroll();
+    }
+
     // Trigger categories loading
     loadCategories();
+
+    // Initialize desktop sticky header behavior
+    initStickyHeader();
 })();

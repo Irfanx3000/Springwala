@@ -6,9 +6,22 @@
 document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
   initAdminHeader();
+
+  const params = new URLSearchParams(window.location.search);
+  const userIdParam = params.get('id');
+  if (userIdParam) {
+    userFilters.search = userIdParam.trim();
+    const searchEl = document.getElementById('user-search');
+    if (searchEl) searchEl.value = userIdParam.trim();
+  }
+
   await loadUserStats();
   await loadUsers(1);
   bindUserEvents();
+
+  if (userIdParam) {
+    viewUserInfo(userIdParam.trim());
+  }
 });
 
 let currentUserPage = 1;
@@ -189,8 +202,95 @@ function formatDateOnly(date) {
     return `${day}/${month}/${year}`;
 }
 
-function viewUserInfo(id) {
-    showToast(`User Details: ${id}`, 'info');
-}
+window.viewUserInfo = async function(id) {
+  try {
+    const data = await api.get(`/users/${id}`);
+    if (!data || !data.success) throw new Error('Failed to load user info');
+
+    const u = data.user;
+    const orders = data.orders || [];
+    const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email;
+    const photo = u.profileImage || `../assets/images/deafult.png`;
+    const statusText = u.isActive ? 'Active' : 'Blocked';
+    const statusColor = u.isActive ? '#16a34a' : '#BE2229';
+
+    // Build recent orders HTML list
+    let ordersHtml = '';
+    if (orders.length === 0) {
+      ordersHtml = `<p style="font-size:14px;color:#888;margin:0;font-family:Roboto,sans-serif">No recent orders found</p>`;
+    } else {
+      ordersHtml = orders.map(o => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f1f1;font-family:Roboto,sans-serif">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-weight:600;font-size:14px;color:#1e1e1e">#${o.orderId || o._id}</span>
+            <span style="font-size:12px;color:#888">${new Date(o.createdAt).toLocaleDateString('en-IN')}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+            <span style="font-size:13px;font-weight:600;color:#1a1a1a">${o.orderStatus}</span>
+            <span style="font-weight:600;font-size:14px;color:#BE2229">₹${o.totalAmount.toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Remove existing modal if any
+    document.getElementById('sw-user-modal')?.remove();
+
+    if (!document.getElementById('sw-user-modal-style')) {
+      const s = document.createElement('style');
+      s.id = 'sw-user-modal-style';
+      s.textContent = `
+        @keyframes swFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+      `;
+      document.head.appendChild(s);
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'sw-user-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);transition:all 0.3s ease';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:28px 24px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Roboto,sans-serif;max-height:90vh;overflow-y:auto;animation:swFadeIn .25s ease-out" class="no-scrollbar">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+          <h3 style="font-family:Poppins,sans-serif;font-size:20px;font-weight:600;margin:0;color:#1a1a1a">User Profile Details</h3>
+          <button id="sw-user-modal-close" style="background:none;border:none;cursor:pointer;color:#888;font-size:24px;line-height:1;padding:0">&times;</button>
+        </div>
+        
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #f1f1f1">
+          <img src="${photo}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #eee" onerror="this.src='../assets/images/deafult.png'">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:18px;font-weight:600;color:#111">${fullName}</span>
+            <span style="font-size:14px;color:#666">${u.email}</span>
+            <span style="font-size:13px;font-weight:600;color:${statusColor};background:${statusColor}15;padding:2px 8px;border-radius:100px;width:fit-content">${statusText}</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Phone Number</span>
+            <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">${u.phoneNumber || '—'}</p>
+          </div>
+          <div>
+            <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Member Since</span>
+            <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">${new Date(u.createdAt).toLocaleDateString('en-IN')}</p>
+          </div>
+        </div>
+
+        <h4 style="font-family:Poppins,sans-serif;font-size:15px;font-weight:600;margin:0 0 12px;color:#1a1a1a;border-bottom:2px solid #BE2229;padding-bottom:4px;width:fit-content">Recent Orders</h4>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:20px;max-height:200px;overflow-y:auto" class="no-scrollbar">
+          ${ordersHtml}
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:24px">
+          <button id="sw-user-modal-ok" style="padding:9px 24px;border:none;border-radius:7px;background:#BE2229;color:#fff;cursor:pointer;font-size:14px;font-weight:600">Close</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('sw-user-modal-close').onclick = () => overlay.remove();
+    document.getElementById('sw-user-modal-ok').onclick = () => overlay.remove();
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
 
 

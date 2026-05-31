@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!Auth.requireAdminAuth()) return;
   initSidebar();
   initAdminHeader();
+
+  const params = new URLSearchParams(window.location.search);
+  const orderIdParam = params.get('id');
+  if (orderIdParam) {
+    orderFilters.search = orderIdParam.trim();
+    const searchEl = document.getElementById('order-search');
+    if (searchEl) searchEl.value = orderIdParam.trim();
+  }
+
   await loadOrderStats();
   await loadOrders(1);
   bindOrderEvents();

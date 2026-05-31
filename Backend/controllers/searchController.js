@@ -2,17 +2,18 @@ const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Category = require('../models/Category');
+const Inquiry = require('../models/Inquiry');
 
 // @desc  Global search across products, orders, customers (for Master Admin)
 // @route GET /api/search/admin
 exports.globalSearch = async (req, res) => {
   try {
     const { q } = req.query;
-    if (!q) return res.json({ success: true, results: { products: [], orders: [], customers: [], categories: [] } });
+    if (!q) return res.json({ success: true, results: { products: [], orders: [], customers: [], categories: [], inquiries: [] } });
 
     const searchRegex = { $regex: q, $options: 'i' };
 
-    const [products, orders, customers, categories] = await Promise.all([
+    const [products, orders, customers, categories, inquiries] = await Promise.all([
       // Search Products: name, sku, brand
       Product.find({
         $or: [
@@ -43,7 +44,17 @@ exports.globalSearch = async (req, res) => {
       // Search Categories: name
       Category.find({
         name: searchRegex
-      }).limit(5).select('name slug banner')
+      }).limit(5).select('name slug banner'),
+
+      // Search Inquiries: fullName, email, subject, message
+      Inquiry.find({
+        $or: [
+          { fullName: searchRegex },
+          { email: searchRegex },
+          { subject: searchRegex },
+          { message: searchRegex }
+        ]
+      }).limit(5).select('fullName email subject status createdAt')
     ]);
 
     res.json({
@@ -52,7 +63,8 @@ exports.globalSearch = async (req, res) => {
         products,
         orders,
         customers,
-        categories
+        categories,
+        inquiries
       }
     });
   } catch (err) {

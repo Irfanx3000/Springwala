@@ -10,10 +10,21 @@ const { uploadBranding } = require('../middleware/upload');
 // ── Site Settings ─────────────────────────────────────────────────────────────
 // PUBLIC: user-facing pages fetch settings for footer/branding (no auth needed)
 router.get('/site', getSiteSettings);
+router.get('/site-configuration', getSiteSettings);
 
 // PROTECTED: only superadmins can update
 router.put(
   '/site',
+  protect,
+  authorize('superadmin'),
+  uploadBranding.fields([
+    { name: 'logo',    maxCount: 1 },
+    { name: 'favicon', maxCount: 1 }
+  ]),
+  updateSiteSettings
+);
+router.put(
+  '/site-configuration',
   protect,
   authorize('superadmin'),
   uploadBranding.fields([

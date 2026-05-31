@@ -11,7 +11,17 @@ exports.getOrders = async (req, res) => {
     const { search, orderStatus, paymentStatus, paymentMethod, startDate, endDate, page = 1, limit = 20, sortBy = 'createdAt', order = 'desc' } = req.query;
     const query = {};
 
-    if (search) query.$or = [{ orderNumber: { $regex: search, $options: 'i' } }, { customerName: { $regex: search, $options: 'i' } }, { 'shippingAddress.fullName': { $regex: search, $options: 'i' } }];
+    if (search) {
+      if (search.match(/^[0-9a-fA-F]{24}$/)) {
+        query.$or = [{ _id: search }];
+      } else {
+        query.$or = [
+          { orderNumber: { $regex: search, $options: 'i' } },
+          { customerName: { $regex: search, $options: 'i' } },
+          { 'shippingAddress.fullName': { $regex: search, $options: 'i' } }
+        ];
+      }
+    }
     if (orderStatus) query.orderStatus = orderStatus;
     if (paymentStatus) query.paymentStatus = paymentStatus;
     if (paymentMethod) query.paymentMethod = paymentMethod;

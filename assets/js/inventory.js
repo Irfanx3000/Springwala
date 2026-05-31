@@ -66,7 +66,7 @@ async function loadInventory(page = 1) {
         
         desktopHTML += `
         <!-- Desktop Row -->
-        <div class="grid grid-cols-[50px_90px_minmax(150px,1fr)_120px_140px_90px_80px_100px_110px] w-full min-w-[1000px] h-[87px] ${colors.bgClass} ${colors.borderClass} rounded-[5px] items-center px-2" style="${colors.style}">
+        <div class="grid grid-cols-[50px_90px_minmax(150px,1fr)_120px_140px_90px_80px_100px_110px] w-full min-w-[1000px] h-[87px] ${colors.bgClass} ${colors.borderClass} rounded-[5px] items-center px-2 cursor-pointer hover:shadow-md transition" onclick="if (!event.target.closest('input')) window.location.href='products/add-product.html?id=${p._id}'" style="${colors.style}">
             <div class="flex items-center justify-center w-full">
                 <input type="checkbox" class="inventory-row-checkbox bulk-cb w-[21px] h-[21px] min-w-[21px] border-[#9A9A9A] rounded-[3px] accent-[#BE2229] cursor-pointer" value="${p._id}" />
             </div>
@@ -90,7 +90,7 @@ async function loadInventory(page = 1) {
 
         mobileHTML += `
         <!-- Mobile Card -->
-        <div class="rounded-[10px] box-shadow-card p-4 flex flex-col gap-4 border ${colors.borderClass} ${colors.bgClass}" style="${colors.style}">
+        <div class="rounded-[10px] box-shadow-card p-4 flex flex-col gap-4 border ${colors.borderClass} ${colors.bgClass} cursor-pointer hover:shadow-md transition" onclick="if (!event.target.closest('input')) window.location.href='products/add-product.html?id=${p._id}'" style="${colors.style}">
             <div class="flex items-center justify-between border-b pb-3 ${colors.mobileBorderOpacity}">
                 <div class="flex items-center gap-3">
                     <input type="checkbox" class="inventory-row-checkbox bulk-cb w-[18px] h-[18px] accent-[#BE2229] cursor-pointer rounded" value="${p._id}">

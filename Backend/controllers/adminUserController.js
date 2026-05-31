@@ -21,12 +21,16 @@ exports.getUsers = async (req, res) => {
 
     const query = {};
     if (search) {
-      query.$or = [
-        { firstName:   { $regex: search, $options: 'i' } },
-        { lastName:    { $regex: search, $options: 'i' } },
-        { email:       { $regex: search, $options: 'i' } },
-        { phoneNumber: { $regex: search, $options: 'i' } },
-      ];
+      if (search.match(/^[0-9a-fA-F]{24}$/)) {
+        query.$or = [{ _id: search }];
+      } else {
+        query.$or = [
+          { firstName:   { $regex: search, $options: 'i' } },
+          { lastName:    { $regex: search, $options: 'i' } },
+          { email:       { $regex: search, $options: 'i' } },
+          { phoneNumber: { $regex: search, $options: 'i' } },
+        ];
+      }
     }
     if (isActive !== undefined) query.isActive = isActive === 'true';
 

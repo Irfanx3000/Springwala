@@ -27,13 +27,20 @@ exports.updateSiteSettings = async (req, res) => {
   try {
     const allowed = [
       'siteName', 'contactEmail', 'contactNumber', 'address',
-      'metaTitle', 'metaDescription', 'metaKeywords',
-      'instagram', 'facebook', 'linkedin', 'twitter', 'whatsapp'
+      'metaTitle', 'metaDescription', 'metaKeywords'
     ];
 
     const updates = {};
     allowed.forEach(key => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
+    });
+
+    // Populate and update nested social links using dot-notation to preserve subdocument integrity
+    const socialFields = ['instagram', 'facebook', 'linkedin', 'twitter', 'whatsapp'];
+    socialFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[`socialLinks.${field}`] = req.body[field];
+      }
     });
 
     // Handle logo upload

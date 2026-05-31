@@ -219,7 +219,7 @@ function deleteAdminById(id, name) {
 
 async function loadSiteSettingsAdmin() {
   try {
-    const data = await api.get('/settings/site');
+    const data = await api.get('/settings/site-configuration');
     if (!data || !data.settings) return;
     const s = data.settings;
 
@@ -233,11 +233,13 @@ async function loadSiteSettingsAdmin() {
     setVal('meta-description-input', s.metaDescription);
     setVal('meta-keywords-input', s.metaKeywords);
 
-    setVal('instagram-input', s.instagram);
-    setVal('twitter-input', s.twitter);
-    setVal('whatsapp-input', s.whatsapp);
-    setVal('facebook-input', s.facebook);
-    setVal('linkedin-input', s.linkedin);
+    // Hydrate social fields from nested object with flat fallback support
+    const socials = s.socialLinks || {};
+    setVal('instagram-input', socials.instagram !== undefined ? socials.instagram : s.instagram);
+    setVal('twitter-input', socials.twitter !== undefined ? socials.twitter : s.twitter);
+    setVal('whatsapp-input', socials.whatsapp !== undefined ? socials.whatsapp : s.whatsapp);
+    setVal('facebook-input', socials.facebook !== undefined ? socials.facebook : s.facebook);
+    setVal('linkedin-input', socials.linkedin !== undefined ? socials.linkedin : s.linkedin);
 
     // Hydrate branding previews
     const apiBase = CONFIG.IMAGE_BASE_URL;
@@ -326,8 +328,11 @@ async function saveSiteSettings() {
     const faviconFile = document.getElementById('favicon-file')?.files[0];
     if (faviconFile) formData.append('favicon', faviconFile);
 
-    const res = await api.put('/settings/site', formData);
+    const res = await api.put('/settings/site-configuration', formData);
     if (res && res.success) {
+      // Invalidate the storefront session settings cache to force refresh
+      sessionStorage.removeItem('sw_site_settings');
+      
       showToast('Settings saved successfully', 'success');
       await loadSiteSettingsAdmin();
       // Update global user settings if the loader is present

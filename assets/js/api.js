@@ -209,13 +209,13 @@ function buildPagination(containerId, currentPage, totalPages, onPage) {
 // ─── Global Search ─────────────────────────────────────────────────────────────
 function resolveAdminPath(target) {
   const path = window.location.pathname;
-  const depth = (path.match(/\//g) || []).length;
-  // If we are at root (depth 1 or 0), just return target
-  // If we are at depth 2 (e.g. /products/add-product.html), we need "../"
-  if (depth <= 1) return target;
-  let prefix = '';
-  for (let i = 0; i < depth - 1; i++) prefix += '../';
-  return prefix + target;
+  const idx = path.indexOf('/admin/');
+  if (idx !== -1) {
+    const adminBase = path.substring(0, idx + 7); // includes '/admin/'
+    const cleanTarget = target.startsWith('/') ? target.substring(1) : target;
+    return adminBase + cleanTarget;
+  }
+  return target;
 }
 
 function initGlobalSearch() {
@@ -292,7 +292,7 @@ function initGlobalSearch() {
       const data = await api.get('/search/admin', { q: query });
       if (!data || !data.success) throw new Error('Search failed');
 
-      const { products, orders, customers, categories } = data.results;
+      const { products, orders, customers, categories, inquiries } = data.results;
       let html = '';
 
       if (categories && categories.length) {
@@ -301,7 +301,7 @@ function initGlobalSearch() {
           <div class="search-item" onclick="window.location.href='${resolveAdminPath('categories.html?search=' + encodeURIComponent(cat.name))}'">
             <img src="${imageUrl(cat.banner)}" alt="">
             <div class="info">
-              <span class="name">${cat.name}</span>
+              <span class="name">[Category] ${cat.name}</span>
               <span class="meta">Category</span>
             </div>
           </div>
@@ -314,7 +314,7 @@ function initGlobalSearch() {
           <div class="search-item" onclick="window.location.href='${resolveAdminPath('products/add-product.html?id=' + p._id)}'">
             <img src="${imageUrl(p.images?.[0])}" alt="">
             <div class="info">
-              <span class="name">${p.name}</span>
+              <span class="name">[Product] ${p.name}</span>
               <span class="meta">${p.sku || 'SKU N/A'} • ₹${p.price.toLocaleString()}</span>
             </div>
           </div>
@@ -329,7 +329,7 @@ function initGlobalSearch() {
                <svg class="w-5 h-5 text-[#BE2229]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             </div>
             <div class="info">
-              <span class="name">#${o.orderID}</span>
+              <span class="name">[Order] ${o.orderID}</span>
               <span class="meta">${o.status} • ₹${o.totalPrice.toLocaleString()}</span>
             </div>
           </div>
@@ -338,14 +338,32 @@ function initGlobalSearch() {
 
       if (customers.length) {
         html += `<div class="search-section-title">Customers</div>`;
-        html += customers.map(c => `
-          <div class="search-item" onclick="window.location.href='${resolveAdminPath('users.html?id=' + c._id)}'">
-            <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-               ${c.avatar ? `<img src="${imageUrl(c.avatar)}" class="w-full h-full object-cover">` : `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>`}
+        html += customers.map(c => {
+          const fullName = [c.firstName, c.lastName].filter(Boolean).join(' ') || c.email;
+          return `
+            <div class="search-item" onclick="window.location.href='${resolveAdminPath('users.html?id=' + c._id)}'">
+              <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center shrink-0 overflow-hidden">
+                 ${c.avatar ? `<img src="${imageUrl(c.avatar)}" class="w-full h-full object-cover">` : `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>`}
+              </div>
+              <div class="info">
+                <span class="name">[User] ${fullName}</span>
+                <span class="meta">${c.email} • ${c.phoneNumber || ''}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (inquiries && inquiries.length) {
+        html += `<div class="search-section-title">Inquiries</div>`;
+        html += inquiries.map(inq => `
+          <div class="search-item" onclick="window.location.href='${resolveAdminPath('inquiries.html?id=' + inq._id)}'">
+            <div class="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
+               <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
             <div class="info">
-              <span class="name">${c.name}</span>
-              <span class="meta">${c.email} • ${c.phone || ''}</span>
+              <span class="name">[Inquiry] ${inq.fullName}</span>
+              <span class="meta">${inq.subject} • ${inq.status}</span>
             </div>
           </div>
         `).join('');

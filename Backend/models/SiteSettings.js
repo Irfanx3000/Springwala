@@ -20,11 +20,13 @@ const SiteSettingsSchema = new mongoose.Schema({
   faviconUrl: { type: String, default: '' },
 
   // Social Links
-  instagram: { type: String, default: '' },
-  facebook:  { type: String, default: '' },
-  linkedin:  { type: String, default: '' },
-  twitter:   { type: String, default: '' },
-  whatsapp:  { type: String, default: '' },
+  socialLinks: {
+    instagram: { type: String, default: '' },
+    facebook:  { type: String, default: '' },
+    linkedin:  { type: String, default: '' },
+    twitter:   { type: String, default: '' },
+    whatsapp:  { type: String, default: '' }
+  },
 
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: false });

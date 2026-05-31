@@ -519,3 +519,42 @@ window.downloadInquiriesExport = async function(format) {
 fetchStats();
 fetchInquiries(1);
 fetchNewsletter(1);
+
+// Auto-open inquiry detail if id param exists
+const urlParams = new URLSearchParams(window.location.search);
+const autoInquiryId = urlParams.get('id');
+if (autoInquiryId) {
+  openInquiryById(autoInquiryId.trim());
+}
+
+async function openInquiryById(id) {
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/inquiries/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${Auth.getToken()}`
+      }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const inq = data.inquiry;
+      const isNew = inq.status === 'Unread';
+      
+      const escName = inq.fullName.replace(/'/g, "\\'");
+      const escEmail = inq.email.replace(/'/g, "\\'");
+      const escPhone = inq.phoneNumber.replace(/'/g, "\\'");
+      const escSubject = inq.subject.replace(/'/g, "\\'");
+      const escMsg = inq.message.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "");
+      
+      // Auto-populate filter search to highlight row
+      messagesSearch = inq.fullName;
+      const searchInput = document.getElementById("desktop-search-input");
+      if (searchInput) searchInput.value = inq.fullName;
+      
+      await fetchInquiries(1);
+      
+      viewInquiryDetail(inq._id, escName, escEmail, escPhone, escSubject, formatDetailedDate(inq.createdAt), escMsg, isNew);
+    }
+  } catch (err) {
+    console.error('[Open Inquiry By ID Error]', err);
+  }
+}
