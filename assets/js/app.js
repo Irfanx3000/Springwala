@@ -541,7 +541,7 @@ const Wishlist = {
     }
     // Handle page re-render if on wishlist page
     if (document.body.dataset.page === 'wishlist') {
-      if (typeof initWishlistPage === 'function') initWishlistPage();
+      document.dispatchEvent(new CustomEvent('wishlist:changed'));
     }
   },
 
@@ -549,6 +549,7 @@ const Wishlist = {
     const count = this.items.length;
     document.querySelectorAll('.wishlist-badge').forEach(el => {
       el.textContent = count;
+      el.classList.toggle('hidden', count <= 0);
       el.style.display = count > 0 ? 'flex' : 'none';
     });
   },
@@ -2772,17 +2773,17 @@ async function initWishlistPage() {
         return;
       }
       grid.innerHTML = products.map(p => buildProductCard(p, 'product-card', true)).join('');
+      Wishlist.updateUI();
+      Wishlist.updateBadge();
     } catch (err) {
       grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Failed to load wishlist.</div>`;
     }
   }
 
-  const originalToggle = Wishlist.toggle;
-  Wishlist.toggle = async function (id, btn) {
-    const p = originalToggle.call(Wishlist, id, btn);
-    if (document.body.dataset.page === 'wishlist') render();
-    await p;
-  };
+  if (!Wishlist._wishlistPageListenerBound) {
+    Wishlist._wishlistPageListenerBound = true;
+    document.addEventListener('wishlist:changed', render);
+  }
   render();
 }
 async function initProductPage() {

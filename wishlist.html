@@ -19,9 +19,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/site-settings.js"></script>
-</head>
-
- <style>
+    <style>
         /* Smooth Animation for dropdowns */
         .dropdown-menu {
             visibility: hidden;
@@ -36,12 +34,12 @@
         }
     </style>
 </head>
-<body class="bg-[#e5e5e5] font-['Roboto'] min-h-[2000px]">
+<body class="bg-[#e5e5e5] font-['Roboto'] min-h-screen flex flex-col" data-page="wishlist">
     <div id="sw-header"></div>
     <script src="assets/js/dynamic-header.js"></script>
 
 
-    <main class="max-w-[1440px] mx-auto px-4 md:px-[80px] py-10 min-h-[600px]">
+    <main class="max-w-[1440px] mx-auto px-4 md:px-[80px] py-10 min-h-[600px] flex-1 w-full">
         <div class="flex flex-col gap-2 mb-8">
             <h1 class="text-2xl md:text-3xl font-bold font-poppins">My Wishlist</h1>
             <p class="text-gray-500 text-sm md:text-base">View and manage the products you've saved for later.</p>
@@ -72,7 +70,7 @@
     <!-- New Responsive Footer -->
     <!-- Mobile Navigation Bar (Fixed Bottom) -->
     <!-- New Responsive Footer -->
-    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 mt-10 relative">
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 relative">
         <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
 
             <!-- Desktop Layout -->
@@ -239,6 +237,7 @@
         </div>
         <div class="nav-item" data-page="wishlist">
             <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <span class="wishlist-badge absolute top-2 right-[calc(50%-18px)] bg-[#BE2229] text-white text-[10px] font-bold rounded-full w-4 h-4 hidden items-center justify-center">0</span>
             <div class="active-indicator"></div>
         </div>
         <div class="nav-item" data-page="profile">
