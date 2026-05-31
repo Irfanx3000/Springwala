@@ -31,4 +31,13 @@ const uploadUser = multer({ storage: createStorage('users'), fileFilter: imageFi
 const uploadBulk = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 const uploadBranding = multer({ storage: createStorage('branding'), fileFilter: imageFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-module.exports = { uploadCategory, uploadProduct, uploadBanner, uploadUser, uploadBulk, uploadBranding };
+const resumeFilter = (req, file, cb) => {
+  const allowed = /pdf|doc|docx/;
+  const extname = allowed.test(path.extname(file.originalname).toLowerCase());
+  if (extname) return cb(null, true);
+  cb(new Error('Only document files are allowed (pdf, doc, docx)'));
+};
+
+const uploadResume = multer({ storage: createStorage('resumes'), fileFilter: resumeFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+
+module.exports = { uploadCategory, uploadProduct, uploadBanner, uploadUser, uploadBulk, uploadBranding, uploadResume };

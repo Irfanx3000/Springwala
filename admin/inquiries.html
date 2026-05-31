@@ -652,10 +652,10 @@
           >
             <span
               class="font-['Roboto'] font-normal text-[14px] sm:text-[16px] leading-[19px] text-black mb-1 text-center"
-              >New Subs (This Week)</span
+              >Career Applications</span
             >
             <span
-              id="stat-new-subs-week"
+              id="stat-career-apps"
               class="font-['Poppins'] font-semibold text-[22px] sm:text-[27px] leading-[30px] sm:leading-[40px] text-black"
               >0</span
             >
@@ -668,21 +668,28 @@
         >
           <!-- Tabs Row -->
           <div
-            class="flex items-center gap-[45px] px-6 pb-2 border-b border-black/10 w-full mb-6"
+            class="flex items-center gap-[45px] px-6 pb-2 border-b border-black/10 w-full mb-6 overflow-x-auto no-scrollbar"
           >
             <button
               id="tab-messages"
-              class="active-tab font-['Poppins'] font-medium text-[20px] leading-[30px]"
+              class="active-tab font-['Poppins'] font-medium text-[20px] leading-[30px] shrink-0"
               onclick="switchTab('messages')"
             >
               Contact Us Messages
             </button>
             <button
               id="tab-newsletter"
-              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition"
+              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition shrink-0"
               onclick="switchTab('newsletter')"
             >
               Newsletter Emails
+            </button>
+            <button
+              id="tab-careers"
+              class="font-['Poppins'] font-medium text-[20px] leading-[30px] text-[#A4A4A4] hover:text-black transition shrink-0"
+              onclick="switchTab('careers')"
+            >
+              Careers
             </button>
           </div>
 
@@ -751,6 +758,68 @@
             <!-- Dynamic Table Body -->
             <div id="newsletter-tbody" class="w-full flex flex-col gap-0">
               <!-- Dynamically populated newsletter subscribers go here -->
+            </div>
+          </div>
+
+          <!-- Tab 3: Careers Applications -->
+          <div id="content-careers" class="tab-content">
+            <!-- Filter Options Bar -->
+            <div class="flex flex-wrap items-center gap-4 px-6 pb-4 border-b border-gray-100 mb-6 font-['Roboto']">
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-medium text-[#656565]">Status:</span>
+                <select id="career-filter-status" class="border border-[#E9E9E9] bg-white rounded-[5px] px-3 py-1.5 text-[14px] outline-none cursor-pointer">
+                  <option value="">All Status</option>
+                  <option value="New">New</option>
+                  <option value="Shortlisted">Shortlisted</option>
+                  <option value="Interview Scheduled">Interview Scheduled</option>
+                  <option value="Selected">Selected</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-medium text-[#656565]">Position:</span>
+                <select id="career-filter-position" class="border border-[#E9E9E9] bg-white rounded-[5px] px-3 py-1.5 text-[14px] outline-none cursor-pointer">
+                  <option value="">All Positions</option>
+                  <option value="spring-design">Spring Design Engineer</option>
+                  <option value="cnc-operator">CNC Spring Machine Operator</option>
+                  <option value="industrial-sales">Industrial Fasteners Sales Executive</option>
+                  <option value="warehouse-logistics">Warehouse & Logistics Manager</option>
+                  <option value="quality-control">Quality Control Inspector (Metalware)</option>
+                  <option value="retail-associate">Retail Hardware Store Associate</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[14px] font-medium text-[#656565]">Experience:</span>
+                <select id="career-filter-experience" class="border border-[#E9E9E9] bg-white rounded-[5px] px-3 py-1.5 text-[14px] outline-none cursor-pointer">
+                  <option value="">All Experience</option>
+                  <option value="intern">Intern</option>
+                  <option value="fresher">Fresher (0-1 Years)</option>
+                  <option value="junior">1-3 Years</option>
+                  <option value="mid">3-5 Years</option>
+                  <option value="senior">5+ Years</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table Header (Desktop Only) -->
+            <div
+              class="hidden xl:grid grid-cols-[110px_160px_180px_120px_160px_100px_110px_100px_140px_80px] gap-2 w-full px-[28px] pb-4 border-b border-gray-100 font-['Roboto'] font-medium text-[15px] text-[#414141]"
+            >
+              <span>Date</span>
+              <span>Applicant Name</span>
+              <span>Email ID</span>
+              <span>Phone</span>
+              <span>Position</span>
+              <span>Experience</span>
+              <span>Location</span>
+              <span class="text-center">Resume</span>
+              <span class="text-center">Status</span>
+              <span class="text-center">Actions</span>
+            </div>
+
+            <!-- Dynamic Table Body -->
+            <div id="careers-tbody" class="w-full flex flex-col gap-0">
+              <!-- Dynamically populated career applications go here -->
             </div>
           </div>
 

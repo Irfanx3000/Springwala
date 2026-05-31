@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers | Springwala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/site-settings.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Global Stylesheet (includes header/footer/dropdown styles) -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        /* Color System & Design Tokens */
+        :root {
+            --primary: #BE2229;
+            /* Mockup Accent Red */
+            --primary-hover: #9c1b1f;
+            --primary-light: #fbf3f3;
+            --bg-light: #f8f9fa;
+            /* Mockup grey background */
+            --white: #ffffff;
+            --charcoal: #1a1a1a;
+            /* Mockup heading charcoal */
+            --text-muted: #718096;
+            /* Mockup description grey */
+            --border: #e2e8f0;
+            --border-hover: #cbd5e0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dropdown menu: hidden by default, visible on hover */
+        .dropdown-menu {
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .group:hover .dropdown-menu {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Base Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--charcoal);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 20px 50px 20px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--charcoal);
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .hero-intro-wrapper {
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+            margin-bottom: 30px;
+        }
+
+        .hero-intro-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .btn-primary-action {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(190, 34, 41, 0.2);
+            display: inline-block;
+        }
+
+        .btn-primary-action:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(190, 34, 41, 0.3);
+        }
+
+        .hero-banner-graphics {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hero-svg {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+        }
+
+        /* Main Workspace Layout */
+        .workspace {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 80px 20px;
+            display: grid;
+            grid-template-columns: 1.9fr 1.1fr;
+            gap: 40px;
+        }
+
+        /* Left Side Card: Application Form */
+        .apply-container {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        .apply-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            text-transform: capitalize;
+            letter-spacing: 0.2px;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+            background-color: #fafbfc;
+            transition: var(--transition);
+            outline: none;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(214, 10, 23, 0.1);
+            background-color: var(--white);
+        }
+
+        /* Phone Prefix Flex Layout */
+        .phone-input-container {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fafbfc;
+            transition: var(--transition);
+        }
+
+        .phone-input-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(214, 10, 23, 0.1);
+            background-color: var(--white);
+        }
+
+        .phone-prefix {
+            background-color: #f1f5f9;
+            color: var(--charcoal);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            border-right: 1px solid var(--border);
+            user-select: none;
+        }
+
+        .phone-input-container .form-input {
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+        }
+
+        /* Dropdown Select custom styling */
+        /* Custom Select dropdown styling */
+        .custom-select {
+            position: relative;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .select-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+            background-color: #fafbfc;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            height: 46px;
+        }
+
+        .select-trigger:hover {
+            border-color: var(--primary);
+        }
+
+        .custom-select.active .select-trigger {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(190, 34, 41, 0.1);
+            background-color: var(--white);
+        }
+
+        .select-trigger span {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .select-trigger i {
+            font-size: 0.8rem;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .custom-select.active .select-trigger i {
+            transform: rotate(180deg);
+        }
+
+        .custom-options {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+            max-height: 250px;
+            overflow-y: auto;
+            animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-select.active .custom-options {
+            display: block;
+        }
+
+        .custom-option {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .custom-option:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .custom-option.selected {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .custom-option.placeholder {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Custom File Upload Box */
+        .file-upload-box {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            background-color: #fafbfc;
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .file-upload-box:hover,
+        .file-upload-box.dragover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .file-upload-box input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-choose {
+            background-color: var(--white);
+            color: var(--charcoal);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            pointer-events: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .file-upload-box:hover .btn-choose {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .file-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .file-limits {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .textarea-input {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        .btn-submit-form {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(190, 34, 41, 0.2);
+        }
+
+        .btn-submit-form:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 6px 16px rgba(190, 34, 41, 0.3);
+        }
+
+        .error-msg {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Right Side Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .sidebar-card {
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .feature-icon-wrapper {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            border: 1px solid rgba(190, 34, 41, 0.1);
+        }
+
+        .feature-info h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 6px;
+        }
+
+        .feature-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Contact Info Panel */
+        .contact-card {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            color: var(--charcoal);
+            transition: var(--transition);
+        }
+
+        .contact-item:hover {
+            color: var(--primary);
+        }
+
+        .contact-icon {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            width: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .contact-item:hover .contact-icon {
+            color: var(--primary);
+        }
+
+        .contact-detail {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+
+        /* Mobile Responsive Configurations */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.6rem;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-nav {
+                padding: 10px 20px;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .hamburger.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active .bar:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+
+            .hamburger.active .bar:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+
+            .nav-menu-wrapper {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                flex-direction: column;
+                background-color: var(--white);
+                width: 80%;
+                max-width: 320px;
+                height: 100vh;
+                transition: left 0.4s ease;
+                box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+                padding: 90px 30px 40px 30px;
+                align-items: flex-start;
+                z-index: 1000;
+                gap: 20px;
+            }
+
+            .nav-menu-wrapper.active {
+                left: 0;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                width: 100%;
+                align-items: flex-start;
+                gap: 0;
+            }
+
+            .nav-item {
+                width: 100%;
+                padding: 15px 0;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            .btn-nav-contact {
+                width: 100%;
+                text-align: center;
+                margin-top: 15px;
+            }
+
+            body.menu-open {
+                overflow: hidden;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding-bottom: 30px;
+            }
+
+            /* Hide SVG Banner Illustration on Mobile */
+            .hero-banner-graphics {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .workspace {
+                padding-bottom: 50px;
+                gap: 30px;
+            }
+
+            .apply-container,
+            .sidebar-card {
+                padding: 30px 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#f8f9fa] text-gray-900 font-['Roboto'] flex flex-col min-h-screen" data-page="careers">
+
+    <div id="sw-header"></div>
+    <script src="assets/js/dynamic-header.js"></script>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Build Your Future With Us</h1>
+            <div class="hero-intro-wrapper">
+                <p class="hero-intro-text">
+                    We're always looking for talented people who want to grow with us and build the future together.
+                </p>
+            </div>
+            <a href="#apply-form" class="btn-primary-action">View Open Positions</a>
+        </div>
+        <div class="hero-banner-graphics">
+            <img src="assets\images\Charachter Career.png" alt="Careers Collaboration" class="hero-svg">
+        </div>
+    </section>
+
+    <!-- Workspace Main Layout -->
+    <main class="workspace" id="apply-form">
+
+        <!-- Application Form container -->
+        <section class="apply-container">
+            <h2 class="apply-title">Apply For A Position</h2>
+            <form id="careersForm" novalidate>
+                <div class="form-grid">
+
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" id="fullName" class="form-input" placeholder="Your Name" required>
+                        <div class="error-msg" id="name-error"></div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="form-group">
+                        <label for="emailAddr" class="form-label">Email Address</label>
+                        <input type="email" id="emailAddr" class="form-input" placeholder="example@gmail.com" required>
+                        <div class="error-msg" id="email-error"></div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phoneNum" class="form-label">Phone Number</label>
+                        <div class="phone-input-container">
+                            <div class="phone-prefix">+91</div>
+                            <input type="tel" id="phoneNum" class="form-input" placeholder="Enter 10 digit number"
+                                required>
+                        </div>
+                        <div class="error-msg" id="phone-error"></div>
+                    </div>
+
+                    <!-- Position Applying For -->
+                    <div class="form-group">
+                        <label for="position" class="form-label">Position Applying For</label>
+                        <div class="custom-select" id="position-custom-select">
+                            <div class="select-trigger"><span>Select Position</span><i
+                                    class="fa-solid fa-chevron-down"></i></div>
+                            <div class="custom-options">
+                                <div class="custom-option selected placeholder" data-value="">Select Position</div>
+                                <div class="custom-option" data-value="spring-design">Spring Design Engineer</div>
+                                <div class="custom-option" data-value="cnc-operator">CNC Spring Machine Operator</div>
+                                <div class="custom-option" data-value="industrial-sales">Industrial Fasteners Sales
+                                    Executive</div>
+                                <div class="custom-option" data-value="warehouse-logistics">Warehouse & Logistics
+                                    Manager</div>
+                                <div class="custom-option" data-value="quality-control">Quality Control Inspector
+                                    (Metalware)</div>
+                                <div class="custom-option" data-value="retail-associate">Retail Hardware Store Associate
+                                </div>
+                            </div>
+                            <input type="hidden" id="position" name="position" required>
+                        </div>
+                        <div class="error-msg" id="position-error"></div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="form-group">
+                        <label for="experience" class="form-label">Experience</label>
+                        <div class="custom-select" id="experience-custom-select">
+                            <div class="select-trigger"><span>Select Experience</span><i
+                                    class="fa-solid fa-chevron-down"></i></div>
+                            <div class="custom-options">
+                                <div class="custom-option selected placeholder" data-value="">Select Experience</div>
+                                <div class="custom-option" data-value="intern">Intern</div>
+                                <div class="custom-option" data-value="fresher">Fresher (0-1 Years)</div>
+                                <div class="custom-option" data-value="junior">1-3 Years</div>
+                                <div class="custom-option" data-value="mid">3-5 Years</div>
+                                <div class="custom-option" data-value="senior">5+ Years</div>
+                            </div>
+                            <input type="hidden" id="experience" name="experience" required>
+                        </div>
+                        <div class="error-msg" id="experience-error"></div>
+                    </div>
+
+                    <!-- Current Location -->
+                    <div class="form-group">
+                        <label for="location" class="form-label">Current Location</label>
+                        <input type="text" id="location" class="form-input" placeholder="Your Location" required>
+                        <div class="error-msg" id="location-error"></div>
+                    </div>
+
+                    <!-- Upload Resume -->
+                    <div class="form-group">
+                        <label class="form-label">Upload Resume</label>
+                        <div class="file-upload-box" id="drop-zone">
+                            <input type="file" id="resume" accept=".pdf,.doc,.docx" required>
+                            <div class="file-upload-info">
+                                <button type="button" class="btn-choose">
+                                    <i class="fas fa-upload" style="margin-right: 6px;"></i> Choose File
+                                </button>
+                                <span class="file-name" id="file-name-display">No file chosen</span>
+                            </div>
+                            <p class="file-limits">(PDF, DOC, DOCX - Max 5MB)</p>
+                        </div>
+                        <div class="error-msg" id="file-error"></div>
+                    </div>
+
+                    <!-- Cover Letter / Message -->
+                    <div class="form-group">
+                        <label for="coverLetter" class="form-label">Cover Letter / Message</label>
+                        <textarea id="coverLetter" class="form-input textarea-input"
+                            placeholder="Tell us about yourself..." required></textarea>
+                        <div class="error-msg" id="cover-error"></div>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn-submit-form">Submit Application</button>
+            </form>
+        </section>
+
+        <!-- Right Side Sidebar: Why Join Us & Contact HR -->
+        <aside class="sidebar">
+
+            <!-- Why Join Us Panel -->
+            <section class="sidebar-card">
+                <h3 class="sidebar-title">Why Join Us?</h3>
+                <div class="feature-list">
+                    <!-- Feature Item 1 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="feature-info">
+                            <h4>Growth Opportunities</h4>
+                            <p>We support your professional and personal growth.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature Item 2 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="feature-info">
+                            <h4>Great Work Culture</h4>
+                            <p>A supportive and friendly environment.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature Item 3 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div class="feature-info">
+                            <h4>Learn & Develop</h4>
+                            <p>Continuous learning and skill development.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact HR Panel -->
+            <section class="sidebar-card">
+                <h3 class="sidebar-title">Contact HR</h3>
+                <div class="contact-card">
+                    <a href="mailto:hr@springwala.in" class="contact-item">
+                        <i class="fa-solid fa-envelope contact-icon"></i>
+                        <span class="contact-detail">hr@springwala.in</span>
+                    </a>
+                    <a href="tel:+918879241085" class="contact-item">
+                        <i class="fa-solid fa-phone contact-icon"></i>
+                        <span class="contact-detail">+91 8879 241085</span>
+                    </a>
+                </div>
+            </section>
+
+        </aside>
+
+    </main>
+
+<!-- New Responsive Footer -->
+    <footer class="bg-white pt-10 pb-5 border-t border-gray-200 relative">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-[80px]">
+
+            <!-- Desktop Layout -->
+            <div class="hidden md:flex flex-row justify-between items-start gap-8 mb-10">
+                <!-- Col 1: Brand & Contact -->
+                <div class="flex flex-col gap-4 w-[253px]">
+                    <img src="assets/images/header.png" alt="Springwala" class="w-[200px]">
+                    <div class="w-full h-[1px] bg-[#525252] my-2"></div>
+                    <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                        <p>Mumbai, Maharashtra (India)</p>
+                        <p>Phone: +91 8879 241085</p>
+                        <p>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="30434540405f424470434042595e5747515c511e595e">[email&#160;protected]</a></p>
+                    </div>
+                </div>
+
+                <!-- Links Cols -->
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Home</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">About Us</a>
+                    <a href="contact-us.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Contact Us</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Delivery & Shipping</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Account</a>
+                    <a href="orders.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Orders</a>
+                    <a href="cart.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">My Cart</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Saved Items</a>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Knowledge Section</a>
+                    <a href="#" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Sell on Springwala</a>
+                    <a href="careers.html" class="text-[#525252] text-[15px] hover:text-[#BE2229]">Career</a>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col gap-4 w-[300px]">
+                    <h3 class="font-['Poppins'] font-semibold text-[18px]">Stay Updated with Springwala</h3>
+                    <p class="text-[14px]">Get E-mail updates about latest shop and special offers</p>
+                    <div class="flex h-[35px] w-full">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 border border-[#BE2229] rounded-l-[5px] px-3 outline-none text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-4 rounded-r-[5px] font-medium text-[14px]">Subscribe</button>
+                    </div>
+                    <!-- Social Icons -->
+                    <div class="flex gap-4 mt-2">
+                        <a href="#"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6 cursor-pointer"></a>
+                        <a href="#"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6 cursor-pointer"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout -->
+            <div class="md:hidden flex flex-col items-center text-center gap-6 pb-20 relative">
+                <img src="assets/images/header.png" alt="Springwala" class="w-[200px] mb-2">
+
+                <!-- Line 14 -->
+                <div class="w-[90%] h-[1px] bg-[#525252]"></div>
+
+                <div class="flex flex-col gap-2 text-[#2B2B2B] text-[16px] font-['Inter']">
+                    <p data-site-setting="address">Mumbai, Maharashtra (India)</p>
+                    <p>Phone: <a href="tel:+918879241085" data-site-setting="contactNumber">+91 8879 241085</a></p>
+                    <p>Email: <a href="mailto:support@springwala.in" data-site-setting="contactEmail">support@springwala.in</a></p>
+                </div>
+
+                <!-- Line 18 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Newsletter -->
+                <div class="flex flex-col items-center gap-3 w-full px-2">
+                    <h3 class="font-['Poppins'] font-semibold text-[16px] sm:text-[18px] text-center">Join Our
+                        Newsletter Now</h3>
+                    <p class="text-[12px] sm:text-[14px] text-center">Get E-mail updates about latest shop and special
+                        offers</p>
+                    <div class="flex h-[35px] w-full max-w-[350px]">
+                        <input type="email" placeholder="Enter your email here..."
+                            class="flex-1 min-w-0 border border-[#BE2229] rounded-l-[5px] px-2 sm:px-3 outline-none text-[13px] sm:text-[14px]">
+                        <button
+                            class="bg-[#BE2229] text-white px-3 sm:px-4 rounded-r-[5px] font-medium text-[13px] sm:text-[14px] whitespace-nowrap">Subscribe</button>
+                    </div>
+                    <div class="flex gap-4 mt-2 justify-center">
+                        <a href="#" data-site-setting-href="facebook"><img src="assets/icons/mobile/facebook.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="pinterest"><img src="assets/icons/mobile/pinterest.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="linkedin"><img src="assets/icons/mobile/linkedin.svg" class="w-6 h-6"></a>
+                        <a href="#" data-site-setting-href="instagram"><img src="assets/icons/mobile/instagram.svg" class="w-6 h-6"></a>
+                    </div>
+                </div>
+
+                <!-- Line 19 -->
+                <div class="w-[90%] h-[1px] bg-[#525252] opacity-30"></div>
+
+                <!-- Links Groups -->
+                <div
+                    class="flex flex-row justify-between w-full px-2 sm:px-8 mt-4 text-[13px] sm:text-[15px] text-[#525252]">
+                    <div class="flex flex-col gap-4 text-left">
+                        <a href="#">Home</a>
+                        <a href="#">About Us</a>
+                        <a href="contact-us.html">Contact Us</a>
+                        <a href="#">Delivery & Shipping</a>
+                    </div>
+
+                    <div class="flex flex-col gap-4 text-right">
+                        <a href="login.html">My Account</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="cart.html">My Cart</a>
+                        <a href="#">Saved Items</a>
+                    </div>
+                </div>
+
+                <div class="flex gap-6 text-[#525252] mt-4 flex-wrap justify-center">
+                    <a href="#">Knowledge Section</a>
+                    <a href="#">Sell on Springwala</a>
+                    <a href="careers.html">Career</a>
+                </div>
+
+                <!-- Bottom Links -->
+                <div class="w-full h-[1px] bg-[#525252] mt-4 opacity-50"></div>
+
+                <div class="flex flex-wrap gap-x-6 gap-y-3 justify-center text-[15px] text-[#525252] max-w-[350px]">
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms-conditions.html">Terms & Conditions</a>
+                    <a href="return-policy.html">Return Policy</a>
+                    <a href="vendor-agreement.html">Vendor Agreement</a>
+                    <a href="gst-compliance.html">GST Compliance</a>
+                    <a href="data-protection.html">Data Protection</a>
+                </div>
+
+                <p class="text-[14px] mt-2 mb-0 md:mb-0">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</p>
+            </div>
+
+            <!-- Desktop Bottom Divider & Links -->
+            <div class="hidden md:block w-full h-[1px] bg-[#525252] my-6"></div>
+            <div class="hidden md:flex justify-center gap-8 text-[14px] text-[#666] mb-2">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-conditions.html">Terms & Conditions</a>
+                <a href="return-policy.html">Return Policy</a>
+                <a href="vendor-agreement.html">Vendor Agreement</a>
+                <a href="gst-compliance.html">GST Compliance</a>
+                <a href="data-protection.html">Data Protection</a>
+            </div>
+            <div class="hidden md:block text-center text-[14px] mb-8">Copyright © 2026 <span data-site-setting="siteName">Springwala</span>. All rights reserved</div>
+
+        </div>
+    </footer>
+
+    <!-- Mobile Navigation Bar -->
+    <nav class="mobile-navbar">
+        <div class="nav-item" data-page="home" onclick="window.location.href='index.html'">
+            <img src="assets/icons/mobile/home.svg" alt="Home">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="categories" onclick="window.location.href='categories.html'">
+            <img src="assets/icons/mobile/categories.svg" alt="Categories">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="cart" onclick="window.location.href='cart.html'">
+            <img src="assets/icons/mobile/cart.svg" alt="Cart">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="wishlist" onclick="window.location.href='wishlist.html'">
+            <img src="assets/icons/mobile/star.svg" alt="Wishlist">
+            <div class="active-indicator"></div>
+        </div>
+        <div class="nav-item" data-page="profile" onclick="window.location.href='login.html'">
+            <img src="assets/icons/mobile/profile.svg" alt="Profile">
+            <div class="active-indicator"></div>
+        </div>
+    </nav>
+    <script src="assets/js/app.js"></script>
+
+    <!-- Native JavaScript UI & Validations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+
+
+            // Custom file upload handling and size restriction (5MB limit)
+            const fileInput = document.getElementById('resume');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileError = document.getElementById('file-error');
+            const dropZone = document.getElementById('drop-zone');
+
+            fileInput.addEventListener('change', (e) => {
+                validateFile(e.target.files[0]);
+            });
+
+            // Drag and drop event listeners
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    validateFile(files[0]);
+                }
+            });
+
+            function validateFile(file) {
+                if (file) {
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    const allowedTypes = ['.pdf', '.doc', '.docx'];
+                    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+                    if (file.size > maxSize) {
+                        fileError.textContent = 'File size exceeds 5MB limit. Please upload a smaller file.';
+                        fileNameDisplay.textContent = 'No file chosen';
+                        fileInput.value = '';
+                    } else if (!allowedTypes.includes(extension)) {
+                        fileError.textContent = 'Invalid file format. Please upload PDF, DOC, or DOCX.';
+                        fileNameDisplay.textContent = 'No file chosen';
+                        fileInput.value = '';
+                    } else {
+                        fileError.textContent = '';
+                        fileNameDisplay.textContent = file.name;
+                    }
+                } else {
+                    fileNameDisplay.textContent = 'No file chosen';
+                    fileError.textContent = '';
+                }
+            }
+
+            // Client side Form validations
+            const form = document.getElementById('careersForm');
+            const fields = {
+                name: { el: document.getElementById('fullName'), err: document.getElementById('name-error'), msg: 'Full Name is required.' },
+                email: { el: document.getElementById('emailAddr'), err: document.getElementById('email-error'), msg: 'Please enter a valid email address.' },
+                phone: { el: document.getElementById('phoneNum'), err: document.getElementById('phone-error'), msg: 'Please enter a valid 10-digit phone number.' },
+                position: { el: document.getElementById('position'), err: document.getElementById('position-error'), msg: 'Please select a position.' },
+                experience: { el: document.getElementById('experience'), err: document.getElementById('experience-error'), msg: 'Please select your experience.' },
+                location: { el: document.getElementById('location'), err: document.getElementById('location-error'), msg: 'Current Location is required.' },
+                resume: { el: fileInput, err: fileError, msg: 'Please upload your resume.' },
+                cover: { el: document.getElementById('coverLetter'), err: document.getElementById('cover-error'), msg: 'Cover letter / message is required.' }
+            };
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let isFormValid = true;
+
+                // Clear prior messages
+                Object.values(fields).forEach(f => f.err.textContent = '');
+
+                // Name Validation
+                if (!fields.name.el.value.trim()) {
+                    fields.name.err.textContent = fields.name.msg;
+                    isFormValid = false;
+                }
+
+                // Email Validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(fields.email.el.value.trim())) {
+                    fields.email.err.textContent = fields.email.msg;
+                    isFormValid = false;
+                }
+
+                // Phone Validation (exactly 10 digits number)
+                const phoneVal = fields.phone.el.value.replace(/\s+/g, '');
+                const phoneRegex = /^[0-9]{10}$/;
+                if (!phoneRegex.test(phoneVal)) {
+                    fields.phone.err.textContent = fields.phone.msg;
+                    isFormValid = false;
+                }
+
+                // Position Validation
+                if (!fields.position.el.value) {
+                    fields.position.err.textContent = fields.position.msg;
+                    isFormValid = false;
+                }
+
+                // Experience Validation
+                if (!fields.experience.el.value) {
+                    fields.experience.err.textContent = fields.experience.msg;
+                    isFormValid = false;
+                }
+
+                // Location Validation
+                if (!fields.location.el.value.trim()) {
+                    fields.location.err.textContent = fields.location.msg;
+                    isFormValid = false;
+                }
+
+                // File Upload Validation
+                if (!fields.resume.el.files.length) {
+                    fields.resume.err.textContent = fields.resume.msg;
+                    isFormValid = false;
+                }
+
+                // Cover Letter Validation
+                if (!fields.cover.el.value.trim()) {
+                    fields.cover.err.textContent = fields.cover.msg;
+                    isFormValid = false;
+                }
+
+                if (isFormValid) {
+                    const submitBtn = document.querySelector('.btn-submit-form');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting Application...';
+
+                    const formData = new FormData();
+                    formData.append('fullName', fields.name.el.value.trim());
+                    formData.append('email', fields.email.el.value.trim());
+                    formData.append('phone', fields.phone.el.value.replace(/\s+/g, ''));
+                    formData.append('position', fields.position.el.value);
+                    formData.append('experience', fields.experience.el.value);
+                    formData.append('location', fields.location.el.value.trim());
+                    formData.append('coverLetter', fields.cover.el.value.trim());
+                    formData.append('resume', fields.resume.el.files[0]);
+
+                    const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : '/api';
+                    
+                    fetch(`${apiBase}/careers`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Application';
+                        
+                        if (data.success) {
+                            alert(data.message || 'Your application has been submitted successfully!');
+                            form.reset();
+                            fileNameDisplay.textContent = 'No file chosen';
+
+                            // Reset custom selects
+                            document.querySelectorAll('.custom-select').forEach(select => {
+                                const triggerText = select.querySelector('.select-trigger span');
+                                const placeholderOpt = select.querySelector('.custom-option.placeholder');
+                                const hiddenInput = select.querySelector('input[type="hidden"]');
+
+                                if (placeholderOpt) {
+                                    triggerText.textContent = placeholderOpt.textContent;
+                                    triggerText.style.color = 'var(--text-muted)';
+                                }
+                                hiddenInput.value = '';
+                                select.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+                                if (placeholderOpt) placeholderOpt.classList.add('selected');
+                            });
+                        } else {
+                            alert(data.message || 'Submission failed. Please try again.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error submitting career form:', err);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Application';
+                        alert('A connection error occurred. Please check your connection and try again.');
+                    });
+                }
+            });
+
+            // Custom Select dropdown logic
+            const customSelects = document.querySelectorAll('.custom-select');
+
+            customSelects.forEach(select => {
+                const trigger = select.querySelector('.select-trigger');
+                const triggerText = trigger.querySelector('span');
+                const optionsContainer = select.querySelector('.custom-options');
+                const options = select.querySelectorAll('.custom-option');
+                const hiddenInput = select.querySelector('input[type="hidden"]');
+                const errorMsg = select.parentElement.querySelector('.error-msg');
+
+                // Toggle dropdown display
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Close all other dropdowns
+                    customSelects.forEach(otherSelect => {
+                        if (otherSelect !== select) {
+                            otherSelect.classList.remove('active');
+                        }
+                    });
+                    select.classList.toggle('active');
+                });
+
+                // Select option
+                options.forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+
+                        // Clear selected state from others
+                        options.forEach(opt => opt.classList.remove('selected'));
+
+                        // Set current option selected
+                        option.classList.add('selected');
+
+                        const val = option.getAttribute('data-value');
+                        hiddenInput.value = val;
+                        triggerText.textContent = option.textContent;
+
+                        if (val) {
+                            triggerText.style.color = 'var(--charcoal)';
+                            if (errorMsg) errorMsg.textContent = '';
+                        } else {
+                            triggerText.style.color = 'var(--text-muted)';
+                        }
+
+                        select.classList.remove('active');
+                    });
+                });
+            });
+
+            // Close dropdowns on clicking outside
+            document.addEventListener('click', () => {
+                customSelects.forEach(select => select.classList.remove('active'));
+            });
+
+            // Smooth scrolling to Form
+            document.querySelector('.btn-primary-action').addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector('#apply-form');
+                if (target) {
+                    const offset = 100;
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const targetRect = target.getBoundingClientRect().top;
+                    const targetPosition = targetRect - bodyRect;
+                    const offsetPosition = targetPosition - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>

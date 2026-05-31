@@ -3,12 +3,15 @@
  */
 
 // Global State
-let currentTab = 'messages'; // 'messages' or 'newsletter'
+let currentTab = 'messages'; // 'messages', 'newsletter', or 'careers'
 let messagesPage = 1;
 let newsletterPage = 1;
+let careersPage = 1;
 const recordsPerPage = 10;
 let messagesSearch = '';
 let newsletterSearch = '';
+let careersSearch = '';
+let careersFilters = { status: '', position: '', experience: '' };
 
 // Data store for export
 let allInquiriesCached = [];
@@ -31,17 +34,29 @@ window.switchTab = function(tabId) {
   document.getElementById("tab-newsletter").classList.toggle("active-tab", tabId === 'newsletter');
   document.getElementById("tab-newsletter").classList.toggle("text-[#A4A4A4]", tabId !== 'newsletter');
 
+  document.getElementById("tab-careers").classList.toggle("active-tab", tabId === 'careers');
+  document.getElementById("tab-careers").classList.toggle("text-[#A4A4A4]", tabId !== 'careers');
+
   // Content Visibility toggle
   document.getElementById("content-messages").classList.toggle("active", tabId === 'messages');
   document.getElementById("content-newsletter").classList.toggle("active", tabId === 'newsletter');
+  document.getElementById("content-careers").classList.toggle("active", tabId === 'careers');
 
   // Rerender pagination & search for active tab
   const activeSearchInput = document.getElementById("desktop-search-input");
   if (activeSearchInput) {
-    activeSearchInput.value = tabId === 'messages' ? messagesSearch : newsletterSearch;
+    if (tabId === 'messages') activeSearchInput.value = messagesSearch;
+    else if (tabId === 'newsletter') activeSearchInput.value = newsletterSearch;
+    else if (tabId === 'careers') activeSearchInput.value = careersSearch;
   }
   
-  renderPagination();
+  if (tabId === 'messages') {
+    fetchInquiries(messagesPage);
+  } else if (tabId === 'newsletter') {
+    fetchNewsletter(newsletterPage);
+  } else if (tabId === 'careers') {
+    fetchCareers(careersPage);
+  }
 };
 
 /**
@@ -77,7 +92,9 @@ async function fetchStats() {
       document.getElementById('stat-total-messages').innerText = data.stats.totalMessages.toLocaleString();
       document.getElementById('stat-unread-messages').innerText = data.stats.unreadMessages.toLocaleString();
       document.getElementById('stat-newsletter-subs').innerText = data.stats.newsletterSubs.toLocaleString();
-      document.getElementById('stat-new-subs-week').innerText = data.stats.newSubsThisWeek.toLocaleString();
+      if (document.getElementById('stat-career-apps')) {
+        document.getElementById('stat-career-apps').innerText = (data.stats.careerApps || 0).toLocaleString();
+      }
     }
   } catch (err) {
     console.error('[Fetch Stats Error]', err);
@@ -230,6 +247,251 @@ async function fetchNewsletter(page = 1) {
   }
 }
 
+async function fetchCareers(page = 1) {
+  careersPage = page;
+  const tbody = document.getElementById('careers-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <div class="p-8 text-center text-[#656565] font-medium">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#BE2229] mb-2"></div>
+      <div>Loading career applications...</div>
+    </div>
+  `;
+
+  try {
+    const statusVal = document.getElementById('career-filter-status')?.value || '';
+    const positionVal = document.getElementById('career-filter-position')?.value || '';
+    const experienceVal = document.getElementById('career-filter-experience')?.value || '';
+
+    const queryParams = new URLSearchParams({
+      page,
+      limit: recordsPerPage,
+      search: careersSearch,
+      status: statusVal,
+      position: positionVal,
+      experience: experienceVal
+    });
+
+    const res = await fetch(`${CONFIG.API_BASE_URL}/careers?${queryParams}`, {
+      headers: {
+        'Authorization': `Bearer ${Auth.getToken()}`
+      }
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (!data.applications || data.applications.length === 0) {
+        tbody.innerHTML = `<div class="p-8 text-center text-[#656565] font-medium">No applications found matching your criteria.</div>`;
+        if (currentTab === 'careers') {
+          renderPagination(0, page, recordsPerPage);
+        }
+        return;
+      }
+
+      tbody.innerHTML = '';
+      data.applications.forEach(app => {
+        const formattedDate = formatDate(app.createdAt);
+        
+        // Status dropdown options
+        const statuses = ['New', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected'];
+        const statusOptions = statuses.map(s => `
+          <option value="${s}" ${app.status === s ? 'selected' : ''}>${s}</option>
+        `).join('');
+
+        const escName = app.fullName.replace(/'/g, "\\'");
+        const escEmail = app.email.replace(/'/g, "\\'");
+        const escPhone = app.phone.replace(/'/g, "\\'");
+        const escPosition = app.position.replace(/'/g, "\\'");
+        const escExperience = app.experience.replace(/'/g, "\\'");
+        const escLocation = app.location.replace(/'/g, "\\'");
+        const escCover = app.coverLetter.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "");
+        const resumeDownloadUrl = `${CONFIG.IMAGE_BASE_URL.replace(/\/$/, '')}/${app.resumeUrl}`;
+
+        const row = document.createElement('div');
+        row.className = `flex flex-col xl:grid xl:grid-cols-[110px_160px_180px_120px_160px_100px_110px_100px_140px_80px] gap-2 xl:items-center p-4 xl:px-[28px] xl:py-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition relative font-['Roboto']`;
+        row.innerHTML = `
+          <span class="text-[#656565] text-[13px] xl:text-[15px] order-1 xl:order-none">${formattedDate}</span>
+          <span class="text-black font-semibold text-[16px] order-2 xl:order-none truncate">${app.fullName}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-3 xl:order-none truncate break-all">${app.email}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-4 xl:order-none">${app.phone}</span>
+          <span class="text-black font-medium text-[14px] xl:text-[15px] order-5 xl:order-none truncate">${app.position}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-6 xl:order-none capitalize">${app.experience}</span>
+          <span class="text-[#656565] text-[14px] xl:text-[15px] order-7 xl:order-none truncate">${app.location}</span>
+          
+          <div class="flex items-center justify-start xl:justify-center order-8 xl:order-none gap-2">
+            <a href="${resumeDownloadUrl}" target="_blank" class="text-blue-500 hover:text-blue-700 transition" title="View Resume">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </a>
+            <button onclick="downloadResume('${resumeDownloadUrl}', '${escName.replace(/'/g, '').replace(/ /g, '_')}_resume')" class="text-green-500 hover:text-green-700 transition cursor-pointer bg-transparent border-none p-0" title="Download Resume">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-start xl:justify-center order-9 xl:order-none">
+            <select 
+              onchange="updateCareerStatus('${app._id}', this.value)"
+              class="border rounded px-2 py-1 text-[13px] bg-white outline-none cursor-pointer font-medium w-full"
+              style="color: ${getStatusColor(app.status)}; border-color: ${getStatusColor(app.status)}88"
+            >
+              ${statusOptions}
+            </select>
+          </div>
+
+          <div class="absolute right-4 top-4 xl:relative xl:right-auto xl:top-auto flex items-center justify-end xl:justify-center gap-3 order-10 xl:order-none font-medium">
+            <button
+              onclick="viewCareerDetail('${app._id}', '${escName}', '${escEmail}', '${escPhone}', '${escPosition}', '${escExperience}', '${escLocation}', '${resumeDownloadUrl}', '${formattedDate}', '${escCover}')"
+              class="text-[#BE2229] hover:underline text-[14px] font-bold bg-red-50 xl:bg-transparent px-3 py-1 xl:px-0 xl:py-0 rounded"
+            >
+              View
+            </button>
+          </div>
+        `;
+        tbody.appendChild(row);
+      });
+
+      if (currentTab === 'careers') {
+        renderPagination(data.total, page, recordsPerPage);
+      }
+    } else {
+      tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Failed to retrieve applications.</div>`;
+    }
+  } catch (err) {
+    console.error('[Fetch Careers Error]', err);
+    tbody.innerHTML = `<div class="p-8 text-center text-[#BE2229] font-medium">Server connection error.</div>`;
+  }
+}
+
+function getStatusColor(status) {
+  const map = {
+    'New': '#2563eb',
+    'Shortlisted': '#d97706',
+    'Interview Scheduled': '#a78bfa',
+    'Selected': '#16a34a',
+    'Rejected': '#BE2229'
+  };
+  return map[status] || '#718096';
+}
+
+// Force-download a resume file via fetch+blob (works cross-origin)
+window.downloadResume = async function(url, filename) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename || 'resume';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch (err) {
+    console.error('[Download Resume Error]', err);
+    // Fallback: open in new tab
+    window.open(url, '_blank');
+  }
+};
+
+window.updateCareerStatus = async function(id, status) {
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/careers/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${Auth.getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Status updated successfully!', 'success');
+      fetchStats();
+      fetchCareers(careersPage);
+    } else {
+      showToast(data.message || 'Failed to update status.', 'error');
+    }
+  } catch (err) {
+    console.error('[Update Career Status Error]', err);
+    showToast('Server error updating status.', 'error');
+  }
+};
+
+window.viewCareerDetail = function(id, name, email, phone, position, experience, location, resumeUrl, date, coverLetter) {
+  // Remove existing modal if any
+  document.getElementById('sw-career-detail-modal')?.remove();
+
+  if (!document.getElementById('sw-career-modal-style')) {
+    const s = document.createElement('style');
+    s.id = 'sw-career-modal-style';
+    s.textContent = `
+      @keyframes swFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    `;
+    document.head.appendChild(s);
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'sw-career-detail-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);transition:all 0.3s ease';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:28px 24px;max-width:550px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);font-family:Roboto,sans-serif;max-height:90vh;overflow-y:auto;animation:swFadeIn .25s ease-out" class="no-scrollbar">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+        <h3 style="font-family:Poppins,sans-serif;font-size:20px;font-weight:600;margin:0;color:#1a1a1a">Job Applicant Profile</h3>
+        <button id="sw-career-modal-close" style="background:none;border:none;cursor:pointer;color:#888;font-size:24px;line-height:1;padding:0">&times;</button>
+      </div>
+      
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #f1f1f1">
+        <span style="font-size:20px;font-weight:700;color:#111">${name}</span>
+        <span style="font-size:15px;color:#BE2229;font-weight:600">${position}</span>
+        <span style="font-size:13px;color:#888">Submitted on ${date}</span>
+      </div>
+
+      <div style="margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Email Address</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500;word-break:break-all">${email}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Phone Number</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">${phone}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Experience Level</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500;text-transform:capitalize">${experience}</p>
+        </div>
+        <div>
+          <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600">Current Location</span>
+          <p style="font-size:15px;color:#1a1a1a;margin:4px 0 0;font-weight:500">${location}</p>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;background:#f9f9f9;border:1px solid #e9e9e9;border-radius:8px;padding:16px">
+        <span style="font-size:12px;color:#888;text-transform:uppercase;font-weight:600;display:block;margin-bottom:8px">Cover Letter / Message</span>
+        <p style="font-size:14px;color:#2b2b2b;margin:0;line-height:1.6;white-space:pre-wrap;font-family:Roboto,sans-serif">${coverLetter}</p>
+      </div>
+
+      <div style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg style="color:#16a34a;width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span style="font-size:14px;font-weight:600;color:#14532d">Resume Attachment</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <a href="${resumeUrl}" target="_blank" style="padding:6px 14px;border:1px solid #16a34a;border-radius:6px;color:#16a34a;text-decoration:none;font-size:13px;font-weight:600;background:#fff">View</a>
+          <button onclick="downloadResume('${resumeUrl}', '${name.replace(/'/g, '').replace(/ /g, '_')}_resume')" style="padding:6px 14px;border:none;border-radius:6px;color:#fff;background:#16a34a;cursor:pointer;font-size:13px;font-weight:600">Download</button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px">
+        <button id="sw-career-modal-ok" style="padding:10px 24px;border:none;border-radius:7px;background:#BE2229;color:#fff;cursor:pointer;font-size:14px;font-weight:600">Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('sw-career-modal-close').onclick = () => overlay.remove();
+  document.getElementById('sw-career-modal-ok').onclick = () => overlay.remove();
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+};
+
 /**
  * Dynamic pagination renderer
  */
@@ -311,8 +573,10 @@ function renderPagination(totalItems = null, currentPage = null, perPage = recor
 window.changePage = function(newPage) {
   if (currentTab === 'messages') {
     fetchInquiries(newPage);
-  } else {
+  } else if (currentTab === 'newsletter') {
     fetchNewsletter(newPage);
+  } else if (currentTab === 'careers') {
+    fetchCareers(newPage);
   }
 };
 
@@ -437,33 +701,97 @@ if (searchInput) {
       if (currentTab === 'messages') {
         messagesSearch = val;
         fetchInquiries(1);
-      } else {
+      } else if (currentTab === 'newsletter') {
         newsletterSearch = val;
         fetchNewsletter(1);
+      } else if (currentTab === 'careers') {
+        careersSearch = val;
+        fetchCareers(1);
       }
     }, 400); // 400ms debounce
   });
 }
+
+// Bind Careers Filters
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'career-filter-status') {
+    fetchCareers(1);
+  }
+  if (e.target && e.target.id === 'career-filter-position') {
+    fetchCareers(1);
+  }
+  if (e.target && e.target.id === 'career-filter-experience') {
+    fetchCareers(1);
+  }
+});
 
 /**
  * CSV / XLSX Dynamic Client-Side Export
  */
 window.downloadInquiriesExport = async function(format) {
   try {
-    // Fetch all records (unfiltered and non-paginated up to a reasonable limit)
-    const res = await fetch(`${CONFIG.API_BASE_URL}/inquiries?page=1&limit=2000`, {
+    let endpoint = '';
+    let filenamePrefix = '';
+    let headers = [];
+    let mapRowFn = null;
+
+    if (currentTab === 'messages') {
+      endpoint = `${CONFIG.API_BASE_URL}/inquiries?page=1&limit=2000`;
+      filenamePrefix = 'springwala_inquiries_export';
+      headers = ['Date', 'Full Name', 'Email', 'Phone', 'Subject', 'Message', 'Status'];
+      mapRowFn = (inq) => [
+        formatDate(inq.createdAt),
+        inq.fullName,
+        inq.email,
+        `+91 ${inq.phoneNumber}`,
+        inq.subject,
+        inq.message,
+        inq.status
+      ];
+    } else if (currentTab === 'newsletter') {
+      endpoint = `${CONFIG.API_BASE_URL}/inquiries/newsletter?page=1&limit=2000`;
+      filenamePrefix = 'springwala_newsletter_export';
+      headers = ['Date Subscribed', 'Email ID', 'Status'];
+      mapRowFn = (sub) => [
+        formatDate(sub.subscribedAt || sub.createdAt),
+        sub.email,
+        sub.status
+      ];
+    } else if (currentTab === 'careers') {
+      endpoint = `${CONFIG.API_BASE_URL}/careers?page=1&limit=2000`;
+      filenamePrefix = 'springwala_careers_export';
+      headers = ['Date', 'Full Name', 'Email', 'Phone', 'Position', 'Experience', 'Location', 'Status', 'Resume Link'];
+      mapRowFn = (app) => [
+        formatDate(app.createdAt),
+        app.fullName,
+        app.email,
+        app.phone,
+        app.position,
+        app.experience,
+        app.location,
+        app.status,
+        `${CONFIG.IMAGE_BASE_URL.replace(/\/$/, '')}/${app.resumeUrl}`
+      ];
+    }
+
+    if (!endpoint) return;
+
+    const res = await fetch(endpoint, {
       headers: {
         'Authorization': `Bearer ${Auth.getToken()}`
       }
     });
     const data = await res.json();
 
-    if (!res.ok || !data.success || !data.inquiries || data.inquiries.length === 0) {
-      alert('No inquiry records found to export.');
+    let items = [];
+    if (currentTab === 'messages') items = data.inquiries || [];
+    else if (currentTab === 'newsletter') items = data.subscribers || [];
+    else if (currentTab === 'careers') items = data.applications || [];
+
+    if (!res.ok || !data.success || items.length === 0) {
+      alert('No records found to export.');
       return;
     }
-
-    const inquiries = data.inquiries;
 
     // Helper to sanitize CSV field
     const esc = (val) => {
@@ -474,23 +802,12 @@ window.downloadInquiriesExport = async function(format) {
       return `"${str}"`;
     };
 
-    // CSV Headers
-    const headers = ['Date', 'Full Name', 'Email', 'Phone', 'Subject', 'Message', 'Status'];
-    
     // Convert to CSV string
     let csvContent = '\uFEFF'; // Add UTF-8 BOM so Excel opens it with correct encoding
     csvContent += headers.join(',') + '\r\n';
 
-    inquiries.forEach(inq => {
-      const row = [
-        formatDate(inq.createdAt),
-        inq.fullName,
-        inq.email,
-        `+91 ${inq.phoneNumber}`,
-        inq.subject,
-        inq.message,
-        inq.status
-      ];
+    items.forEach(item => {
+      const row = mapRowFn(item);
       csvContent += row.map(esc).join(',') + '\r\n';
     });
 
@@ -502,7 +819,7 @@ window.downloadInquiriesExport = async function(format) {
     
     const timestamp = new Date().toISOString().slice(0, 10);
     const ext = format === 'xlsx' ? 'xlsx' : 'csv'; // support both extensions as requested
-    link.setAttribute("download", `springwala_inquiries_export_${timestamp}.${ext}`);
+    link.setAttribute("download", `${filenamePrefix}_${timestamp}.${ext}`);
     
     document.body.appendChild(link);
     link.click();

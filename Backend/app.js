@@ -102,6 +102,7 @@ app.use("/api/search", require("./routes/search"));
 app.use("/api/admin", require("./routes/adminManageRoutes"));
 app.use("/api/shipping", require("./routes/shippingRoutes"));
 app.use("/api/inquiries", require("./routes/inquiryRoutes"));
+app.use("/api/careers", require("./routes/careerRoutes"));
 
 
 // ══════════════════════════════════════════════════════════════════════════════
